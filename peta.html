@@ -204,28 +204,44 @@
       background: #E2E8F0;
     }
     .glass-surface {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(30, 58, 138, 0.12);
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(30, 58, 138, 0.14);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
     }
     .leaflet-control-attribution {
       display: none !important;
     }
 
-    /* Kontrol zoom Leaflet aman dari bottom-nav di HP */
+    /* Posisi & Proporsi Panel Detail */
+    #infoPanel {
+      position: fixed;
+      z-index: 950;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Kontrol zoom Leaflet & panel di HP */
     @media (max-width: 767px) {
       .bottom-nav {
         display: flex !important;
         z-index: 1000 !important;
       }
       .leaflet-bottom.leaflet-right {
-        bottom: 84px !important;
+        bottom: 88px !important;
         right: 12px !important;
         z-index: 800 !important;
       }
+      #infoPanel {
+        left: 12px;
+        right: 12px;
+        bottom: 84px;
+        max-height: 46dvh;
+        overflow-y: auto;
+      }
     }
+
+    /* Kontrol zoom Leaflet & panel di Tablet/Desktop */
     @media (min-width: 768px) {
       .map-stage {
         padding-left: var(--map-left-desktop);
@@ -233,6 +249,12 @@
       .leaflet-bottom.leaflet-right {
         bottom: 20px !important;
         right: 20px !important;
+      }
+      #infoPanel {
+        left: calc(var(--map-left-desktop) + 20px);
+        bottom: 20px;
+        width: 360px;
+        max-width: calc(100vw - var(--map-left-desktop) - 40px);
       }
     }
   </style>
@@ -362,36 +384,36 @@
       </div>
     </div>
 
-    <!-- PANEL DETAIL TITIK LOKASI (POSISI AMAN DI ATAS NAVIGASI) -->
-    <div id="infoPanel" class="hidden fixed sm:absolute bottom-24 sm:bottom-5 left-3 right-3 sm:left-5 sm:right-auto sm:w-[350px] z-[950] glass-surface p-4 rounded-3xl">
+    <!-- PANEL DETAIL TITIK LOKASI (PROPORSIONAL & ANTI TUMPANG TINDIH) -->
+    <div id="infoPanel" class="hidden glass-surface p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl">
       <div class="flex justify-between items-start gap-2 mb-2.5">
         <div class="min-w-0">
-          <span id="infoStatusBadge" class="inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700">MENUNGGU</span>
-          <h2 id="infoTitle" class="text-sm font-extrabold text-slate-900 leading-tight mt-1 truncate">Nama Saluran</h2>
+          <div class="flex items-center gap-1.5">
+            <span id="infoStatusBadge" class="inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700">MENUNGGU</span>
+            <span id="infoKoordinat" class="font-mono text-[10px] text-slate-500 truncate">-</span>
+          </div>
+          <h2 id="infoTitle" class="text-sm font-extrabold text-slate-900 leading-snug mt-1 line-clamp-2">Nama Saluran</h2>
         </div>
-        <button type="button" onclick="document.getElementById('infoPanel').classList.add('hidden')" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition shrink-0 border-0 cursor-pointer">
+        <button type="button" onclick="document.getElementById('infoPanel').classList.add('hidden')" aria-label="Tutup detail" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition shrink-0 border-0 cursor-pointer">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
       <div class="space-y-2 text-xs">
-        <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200/70 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <div class="w-7 h-7 rounded-full bg-pupr-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0" id="infoInisial">P</div>
-            <div class="min-w-0">
-              <p class="text-[10px] font-bold text-slate-400">Petugas Lapangan</p>
-              <p id="infoPetugas" class="font-bold text-slate-800 truncate">Nama Petugas</p>
-            </div>
+        <div class="p-2 bg-slate-50/90 rounded-xl border border-slate-200/70 flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-full bg-pupr-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0" id="infoInisial">P</div>
+          <div class="min-w-0 flex-1">
+            <p class="text-[10px] font-bold text-slate-400 leading-none">Petugas Lapangan</p>
+            <p id="infoPetugas" class="font-bold text-slate-800 truncate mt-0.5">Nama Petugas</p>
           </div>
-          <span id="infoKoordinat" class="font-mono text-[10px] text-slate-500 shrink-0">-</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-          <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200/70">
+          <div class="p-2 bg-slate-50/90 rounded-xl border border-slate-200/70">
             <p class="text-[10px] font-bold text-slate-400 mb-0.5">Volume / Luas</p>
             <p id="infoLuas" class="text-xs font-extrabold text-pupr-blue truncate">-</p>
           </div>
-          <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200/70">
+          <div class="p-2 bg-slate-50/90 rounded-xl border border-slate-200/70">
             <p class="text-[10px] font-bold text-slate-400 mb-0.5">Daerah Irigasi</p>
             <p id="infoDI" class="text-xs font-extrabold text-slate-800 truncate">-</p>
           </div>
@@ -399,7 +421,7 @@
 
         <div>
           <p class="text-[10px] font-bold text-slate-400 mb-1">Dokumentasi Lapangan</p>
-          <img id="infoFoto" src="https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR" onerror="this.src='https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR'" alt="Foto Lokasi" class="w-full h-24 object-cover rounded-xl border border-slate-200">
+          <img id="infoFoto" src="https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR" onerror="this.src='https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR'" alt="Foto Lokasi" class="w-full h-24 sm:h-28 object-cover rounded-xl border border-slate-200">
         </div>
       </div>
     </div>
