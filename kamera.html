@@ -6,7 +6,7 @@
     <title>Kamera Inspeksi - BBWS Brantas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = {
@@ -52,7 +52,7 @@
             background-size: 33.333% 33.333%;
         }
 
-        /* GPU Hardware Acceleration & Anti-Flicker untuk Watermark & Ikon */
+        /* GPU Hardware Acceleration & Anti-Flicker */
         .orient-icon {
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
             transform: translate3d(0, 0, 0);
@@ -82,7 +82,6 @@
             transform-origin: bottom left;
         }
 
-        /* Media Query Landscape Khusus untuk Watermark */
         @media (orientation: landscape) {
             .watermark {
                 max-width: calc(100vw - 24px) !important;
@@ -98,13 +97,11 @@
             }
         }
 
-        /* Waterpas / Spirit Level */
-        #waterpasTrack {
-            transform: translate3d(0, 0, 0);
-            will-change: transform;
-            backface-visibility: hidden;
+        .wm-text-shadow {
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.85);
         }
-        #waterpasBubble {
+
+        #waterpasTrack, #waterpasBubble {
             transform: translate3d(0, 0, 0);
             will-change: transform;
             backface-visibility: hidden;
@@ -136,13 +133,10 @@
         <!-- WATERPAS DIGITAL (60FPS RENDER LOOP) -->
         <div id="waterpasWrapper" class="absolute inset-0 z-[7] pointer-events-none flex items-center justify-center">
             <div class="relative flex flex-col items-center">
-                <!-- Garis Referensi Horizontal -->
                 <div class="w-44 h-[1.5px] bg-white/30 relative flex items-center justify-center">
                     <div class="w-8 h-3 border-x-2 border-amber-400/80"></div>
-                    <!-- Bar Kemiringan Dinamis -->
                     <div id="waterpasBar" class="absolute w-32 h-[2px] bg-amber-400 rounded-full transition-colors duration-150"></div>
                 </div>
-                <!-- Kapsul Gelembung Waterpas -->
                 <div id="waterpasTrack" class="mt-2.5 w-32 h-3.5 rounded-full bg-black/55 border border-white/25 backdrop-blur-xs relative flex items-center justify-center overflow-hidden">
                     <div class="w-4 h-full border-x border-white/40 z-10"></div>
                     <div id="waterpasBubble" class="w-3.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]"></div>
@@ -167,7 +161,7 @@
 
     <!-- LOGO LIVE OVERLAY -->
     <div id="liveLogoWrapper" class="absolute z-[15] top-20 right-4 pointer-events-none transition-all duration-200" style="transform: translate3d(0,0,0); backface-visibility: hidden;">
-        <img id="liveLogoImg" src="" alt="Logo Instansi" class="orient-icon w-14 h-14 object-contain rounded-xl border-2 border-white shadow-lg bg-white/10">
+        <img id="liveLogoImg" src="assets/img/logo-bbws.svg" alt="Logo Instansi" class="orient-icon w-16 h-16 object-contain rounded-xl border-2 border-white shadow-lg bg-white/10">
     </div>
 
     <!-- 2. UI OVERLAY UTAMA -->
@@ -199,27 +193,29 @@
             </div>
         </header>
 
-        <!-- WATERMARK & TOOLS -->
-        <div class="flex-1 relative flex items-end justify-between px-3 sm:px-6 pb-3 max-w-4xl w-full mx-auto">
-            <div id="watermarkContainer" class="watermark sm:max-w-md pointer-events-none">
-                <div id="watermarkOverlay" class="w-fit max-w-full rounded-2xl transition-all duration-300 font-mono">
-                    <div id="wmHeaderBanner" class="hidden items-center gap-2 bg-pupr-blue text-white px-3 py-1 rounded-t-xl text-[10px] sm:text-xs font-extrabold tracking-wide uppercase">
+        <!-- WATERMARK & TOOLS (PROPORSIONAL TIMEMARK STYLE) -->
+        <div class="flex-1 relative flex items-end justify-between px-3.5 sm:px-6 pb-3 max-w-4xl w-full mx-auto">
+            <div id="watermarkContainer" class="watermark w-[82%] sm:max-w-md pointer-events-none">
+                <div id="watermarkOverlay" class="w-fit max-w-full rounded-2xl transition-all duration-300 font-sans">
+                    <div id="wmHeaderBanner" class="hidden items-center gap-2 bg-pupr-blue text-white px-3.5 py-1.5 rounded-t-xl text-[11px] sm:text-xs font-extrabold tracking-wide uppercase">
                         <span class="w-2 h-2 rounded-full bg-amber-400"></span><span>INSPEKSI LAPANGAN • BBWS BRANTAS</span>
                     </div>
                     <div id="wmInnerWrap" class="p-0.5 rounded-2xl">
-                        <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
-                            <span id="wmId" class="bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded-md text-xs shadow-sm">MEMUAT...</span>
-                            <span id="wmTime" class="bg-white text-slate-950 font-extrabold px-2 py-0.5 rounded-md text-xs shadow-sm tabular-nums">--:--</span>
-                            <span id="wmProgressBadge" class="bg-pupr-blue text-white font-extrabold px-2 py-0.5 rounded-md text-xs shadow-sm">0%</span>
+                        <!-- Baris Badge ID + Jam + Progres (Proporsional Besar) -->
+                        <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                            <span id="wmId" class="bg-amber-400 text-slate-950 font-black px-2.5 py-1 rounded-md text-sm sm:text-base tracking-tight shadow-md">MEMUAT...</span>
+                            <span id="wmTime" class="bg-white/95 text-slate-950 font-black px-2.5 py-1 rounded-md text-sm sm:text-base shadow-md tabular-nums">--:--</span>
+                            <span id="wmProgressBadge" class="bg-pupr-blue text-white font-extrabold px-2.5 py-1 rounded-md text-xs sm:text-sm shadow-md">0%</span>
                         </div>
-                        <div id="wmDetailBox" class="border-l-[3px] border-amber-400 pl-2.5 py-0.5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-                            <p id="wmDate" class="font-bold text-xs text-white">Memuat tanggal...</p>
-                            <p id="wmAddress" class="text-[11px] text-slate-100 leading-snug mt-0.5 break-words">Mendeteksi lokasi...</p>
-                            <p id="wmCoords" class="text-[11px] font-semibold text-amber-300 mt-0.5 tabular-nums">Menunggu GPS...</p>
-                            <p id="wmNoteDisplay" class="hidden text-[11px] font-semibold text-sky-200 mt-1 bg-black/50 px-2 py-0.5 rounded-md w-fit break-words"></p>
-                            <div class="flex items-center gap-1 mt-1 text-[10px] text-emerald-300 font-sans font-medium">
-                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                <span>Waktu & GPS terkunci</span>
+                        <!-- Detail Lokasi dengan Garis Kuning Kiri -->
+                        <div id="wmDetailBox" class="border-l-[3.5px] border-amber-400 pl-3 py-0.5 wm-text-shadow">
+                            <p id="wmDate" class="font-extrabold text-sm sm:text-base text-white leading-tight">Memuat tanggal...</p>
+                            <p id="wmAddress" class="text-xs sm:text-sm font-medium text-white leading-snug mt-1 break-words">Mendeteksi lokasi...</p>
+                            <p id="wmCoords" class="text-xs sm:text-sm font-bold font-mono text-amber-300 mt-1 tabular-nums">Menunggu GPS...</p>
+                            <p id="wmNoteDisplay" class="hidden text-xs font-semibold text-sky-200 mt-1.5 bg-black/55 px-2.5 py-1 rounded-md w-fit break-words"></p>
+                            <div class="flex items-center gap-1.5 mt-1.5 text-[11px] text-white/90 font-medium">
+                                <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <span>Timemark BBWS menjamin keaslian waktu & GPS</span>
                             </div>
                         </div>
                     </div>
@@ -339,9 +335,9 @@
                 <div class="grid grid-cols-2 gap-3 mb-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
                     <div>
                         <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
-                            <span>Ukuran</span><span id="logoSizeVal" class="text-pupr-blue">56px</span>
+                            <span>Ukuran</span><span id="logoSizeVal" class="text-pupr-blue">64px</span>
                         </div>
-                        <input type="range" id="logoSizeRange" min="36" max="96" value="56" oninput="updateLogoSettings()" class="w-full accent-pupr-blue cursor-pointer">
+                        <input type="range" id="logoSizeRange" min="40" max="110" value="64" oninput="updateLogoSettings()" class="w-full accent-pupr-blue cursor-pointer">
                     </div>
                     <div>
                         <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
@@ -372,10 +368,10 @@
             <div class="mt-4">
                 <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5">Pilih Gaya Templat Watermark</p>
                 <div class="grid grid-cols-2 gap-2.5">
-                    <button type="button" onclick="selectTemplate(1)" id="tplCard1" class="text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition"><div class="flex items-center gap-1 mb-1.5"><span class="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">ID</span><span class="bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">11:48</span></div><p class="text-xs font-bold text-slate-900">Timemark PUPR</p><p class="text-[10px] text-slate-500">Standar verifikasi lapangan</p></button>
-                    <button type="button" onclick="selectTemplate(2)" id="tplCard2" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-pupr-blue text-white text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">INSPEKSI BBWS</div><p class="text-xs font-bold text-slate-900">Kartu Inspeksi</p><p class="text-[10px] text-slate-500">Header biru instansi</p></button>
+                    <button type="button" onclick="selectTemplate(1)" id="tplCard1" class="text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition"><div class="flex items-center gap-1 mb-1.5"><span class="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">ID</span><span class="bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">11:48</span></div><p class="text-xs font-bold text-slate-900">Timemark PUPR</p><p class="text-[10px] text-slate-500">Bersih khas Timemark</p></button>
+                    <button type="button" onclick="selectTemplate(2)" id="tplCard2" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-pupr-blue text-white text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">INSPEKSI BBWS</div><p class="text-xs font-bold text-slate-900">Kartu Inspeksi</p><p class="text-[10px] text-slate-500">Header biru + kotak gelap</p></button>
                     <button type="button" onclick="selectTemplate(3)" id="tplCard3" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-slate-900 text-sky-300 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">DARK GLASS</div><p class="text-xs font-bold text-slate-900">Gelap Elegan</p><p class="text-[10px] text-slate-500">Kontras tinggi transparan</p></button>
-                    <button type="button" onclick="selectTemplate(4)" id="tplCard4" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">MINIMALIS</div><p class="text-xs font-bold text-slate-900">Minimalis Bersih</p><p class="text-[10px] text-slate-500">Ringkas tanpa latar kotak</p></button>
+                    <button type="button" onclick="selectTemplate(4)" id="tplCard4" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">MINIMALIS</div><p class="text-xs font-bold text-slate-900">Minimalis Ringkas</p><p class="text-[10px] text-slate-500">Teks putih berbayang</p></button>
                 </div>
             </div>
 
@@ -481,7 +477,6 @@
     <canvas id="photoCanvas" class="hidden"></canvas>
 
     <script>
-        // Inisialisasi Supabase (Aman jika offline/testing)
         if (typeof initSupabase === 'function') initSupabase();
 
         // 1. Safe Storage Helpers
@@ -526,18 +521,11 @@
         let photoMetaByMode = { '0': null, '50': null, '100': null };
         const SESSION_PHOTO_KEY = 'bbws_session_photos_v2';
 
-        // Embedded Vector Logo PUPR (Anti-Error Canvas Tainted / Missing File)
-        const DEFAULT_PU_LOGO_SVG = "data:image/svg+xml;utf8," + encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-                <rect width="120" height="120" rx="18" fill="#1E3A8A"/>
-                <path d="M22 24h34v44H38V40H22V24zm42 0h34v52c0 12-10 20-22 20H46V80h30c4 0 6-2 6-6V40H64V24z" fill="#FBBF24"/>
-                <path d="M22 76h16v20H22V76z" fill="#FBBF24"/>
-            </svg>
-        `);
+        // Menggunakan file logo resmi dari folder proyek assets/img/logo-bbws.svg
+        const DEFAULT_PU_LOGO_SVG = "assets/img/logo-bbws.svg";
 
-        const logoState = { visible: true, src: DEFAULT_PU_LOGO_SVG, position: 'top-right', size: 56, opacity: 100, stroke: true, rounded: true };
+        const logoState = { visible: true, src: DEFAULT_PU_LOGO_SVG, position: 'top-right', size: 64, opacity: 100, stroke: true, rounded: true };
         const logoImageObj = new Image();
-        logoImageObj.crossOrigin = 'anonymous';
         logoImageObj.src = logoState.src;
 
         // 4. Inisialisasi Awal
@@ -565,10 +553,7 @@
             populateRoleTasks();
             loadSessionData();
 
-            // Bind Orientation Fix (Debounced Resize 200ms & OrientationChange 300ms)
             bindOrientationFix();
-
-            // Jalankan Sensor & Render Loop Waterpas 60fps
             startSensor();
 
             const formInputs = document.querySelectorAll('#dailyOpReportForm input, #dailyOpReportForm textarea, #customNoteInput');
@@ -646,7 +631,6 @@
         }
 
         function loop() {
-            // Low-Pass Filter: filtered = alpha * raw + (1 - alpha) * prev
             sensorState.filteredGx = LPF_ALPHA * sensorState.rawGx + (1 - LPF_ALPHA) * sensorState.filteredGx;
             sensorState.filteredGy = LPF_ALPHA * sensorState.rawGy + (1 - LPF_ALPHA) * sensorState.filteredGy;
             sensorState.filteredGamma = LPF_ALPHA * sensorState.rawGamma + (1 - LPF_ALPHA) * sensorState.filteredGamma;
@@ -655,7 +639,6 @@
             const gx = sensorState.filteredGx;
             const gy = sensorState.filteredGy;
 
-            // Evaluasi Auto-Orientation berbasis nilai yang sudah difilter (anti-jitter)
             if (orientationMode === 'auto') {
                 if (Math.abs(gx) > Math.abs(gy) * 1.35 && Math.abs(gx) > 4.5) {
                     const targetOrient = gx > 0 ? 'landscape-right' : 'landscape-left';
@@ -665,12 +648,10 @@
                 }
             }
 
-            // Render Waterpas 60fps menggunakan GPU translate3d
             if (waterpasEnabled) {
                 let angleRad = Math.atan2(gx, gy);
                 let deg = (angleRad * 180) / Math.PI;
 
-                // Normalisasi sudut relatif terhadap posisi pegang (Potret / Lanskap)
                 if (Math.abs(gx) > Math.abs(gy)) {
                     deg = gx > 0 ? deg - 90 : deg + 90;
                 }
@@ -737,7 +718,7 @@
             }
             const isViewportLandscape = window.innerWidth > window.innerHeight;
             if (isViewportLandscape) {
-                applyPhysicalOrientation('portrait'); // Browser sudah merotasi viewport ke lanskap
+                applyPhysicalOrientation('portrait');
             } else {
                 applyPhysicalOrientation(physicalOrientation);
             }
@@ -837,9 +818,15 @@
                         if (res.ok) {
                             const geo = await res.json();
                             const addr = geo.address || {};
-                            const parts = [addr.village || addr.suburb || addr.hamlet, addr.city_district || addr.county, addr.state].filter(Boolean);
+                            const parts = [
+                                addr.road,
+                                addr.village || addr.suburb || addr.hamlet,
+                                addr.city_district || addr.county,
+                                addr.state,
+                                addr.postcode
+                            ].filter(Boolean);
                             let finalAddr = parts.length ? parts.join(', ') : (geo.display_name || 'Titik Terverifikasi');
-                            if (finalAddr.length > 46) finalAddr = finalAddr.substring(0, 43) + '...';
+                            if (finalAddr.length > 95) finalAddr = finalAddr.substring(0, 92) + '...';
                             addressEl.innerText = finalAddr;
                         } else {
                             addressEl.innerText = (user.daerah_irigasi || 'Wilayah Kerja') + ' • GPS Terkunci';
@@ -850,7 +837,7 @@
                 },
                 () => {
                     coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°S, ${Math.abs(currentLng).toFixed(6)}°E`;
-                    addressEl.innerText = 'Sembulung, Banyuwangi, East Java (Simulasi GPS)';
+                    addressEl.innerText = 'Sembulung, Kec. Cluring, Kabupaten Banyuwangi, Jawa Timur';
                 },
                 { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
             );
@@ -881,7 +868,7 @@
             document.getElementById('formJabatanPetugas').innerText = user.jabatan || '-';
         }
 
-        // 9. Pengaturan Logo Lengkap (Posisi, Ukuran, Transparansi, Goresan, Sudut Bulat, Hapus Latar)
+        // 9. Pengaturan Logo Lengkap
         function setLogoPosition(pos) {
             logoState.position = pos;
             ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach(p => {
@@ -931,7 +918,7 @@
             logoState.src = DEFAULT_PU_LOGO_SVG;
             logoImageObj.src = logoState.src;
             document.getElementById('liveLogoImg').src = logoState.src;
-            showToast('Logo dikembalikan ke default PUPR');
+            showToast('Logo dikembalikan ke default BBWS');
         }
 
         function removeLogoBackground() {
@@ -949,7 +936,6 @@
             try {
                 const imgData = ctx.getImageData(0, 0, w, h);
                 const d = imgData.data;
-                // Ambil warna sampel piksel pojok kiri atas sebagai warna latar
                 const bgR = d[0], bgG = d[1], bgB = d[2];
                 const tolerance = 48;
 
@@ -958,7 +944,7 @@
                     const diffBg = Math.abs(r - bgR) + Math.abs(g - bgG) + Math.abs(b - bgB);
                     const isNearWhite = (r > 235 && g > 235 && b > 235);
                     if (diffBg < tolerance || isNearWhite) {
-                        d[i + 3] = 0; // Set transparan
+                        d[i + 3] = 0;
                     }
                 }
                 ctx.putImageData(imgData, 0, 0);
@@ -982,7 +968,7 @@
             const opacityRange = document.getElementById('logoOpacityRange');
 
             logoState.visible = chkShow ? chkShow.checked : true;
-            logoState.size = sizeRange ? parseInt(sizeRange.value, 10) : 56;
+            logoState.size = sizeRange ? parseInt(sizeRange.value, 10) : 64;
             logoState.opacity = opacityRange ? parseInt(opacityRange.value, 10) : 100;
 
             if (document.getElementById('logoSizeVal')) document.getElementById('logoSizeVal').innerText = logoState.size + 'px';
@@ -1025,7 +1011,26 @@
             else { el.innerText = ''; el.classList.add('hidden'); }
         }
 
-        // 11. Capture & Render Canvas
+        // Helper Word-Wrap Teks di Canvas
+        function wrapCanvasText(ctx, text, maxWidth) {
+            const words = String(text || '').split(/\s+/);
+            const lines = [];
+            let currentLine = '';
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
+                if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+            return lines.slice(0, 3); // Maksimal 3 baris agar tetap rapi
+        }
+
+        // 11. Capture & Render Canvas (Proporsional Timemark)
         function triggerCapture() {
             if (countdownTimer) return;
             if (timerSeconds === 0) return captureFromVideo();
@@ -1063,18 +1068,18 @@
 
         function simulateCameraCapture() {
             const off = document.createElement('canvas');
-            off.width = 1280;
-            off.height = 720;
+            off.width = 1080;
+            off.height = 1920;
             const octx = off.getContext('2d');
-            const grad = octx.createLinearGradient(0, 0, 1280, 720);
+            const grad = octx.createLinearGradient(0, 0, 1080, 1920);
             grad.addColorStop(0, '#0F172A');
             grad.addColorStop(0.5, '#1E3A8A');
             grad.addColorStop(1, '#0B1120');
             octx.fillStyle = grad;
-            octx.fillRect(0, 0, 1280, 720);
+            octx.fillRect(0, 0, 1080, 1920);
             octx.fillStyle = 'rgba(255,255,255,0.08)';
             octx.font = 'bold 34px Inter, sans-serif';
-            octx.fillText('PRATINJAU KAMERA LAPANGAN • BBWS BRANTAS', 80, 340);
+            octx.fillText('PRATINJAU KAMERA LAPANGAN • BBWS BRANTAS', 80, 640);
             const flash = document.getElementById('flashEffect');
             flash.classList.remove('flash-animate');
             void flash.offsetWidth;
@@ -1092,6 +1097,7 @@
             canvas.width = w;
             canvas.height = h;
 
+            // Gambar frame video / foto
             ctx.save();
             if (needRotateForLandscape) {
                 if (physicalOrientation === 'landscape-left') {
@@ -1115,113 +1121,215 @@
             }
             ctx.restore();
 
-            const base = Math.max(18, Math.floor(Math.min(w, h) * 0.026));
-            const pad = Math.floor(base * 1.1);
+            // SKALA PROPORSIONAL (Mengikuti Referensi Timemark: Besar, Jelas, Tidak Kekecilan di Potret)
+            const shortSide = Math.min(w, h);
+            const base = Math.max(24, Math.round(shortSide * 0.042)); // ~30px pada 720p, ~45px pada 1080p
+            const pad = Math.round(shortSide * 0.036); // Margin tepi foto proporsional
 
-            if (logoState.visible && logoImageObj.complete) {
-                const sz = Math.floor(base * (logoState.size / 18));
-                let lx = w - sz - pad, ly = pad;
+            // 1. RENDER LOGO INSTANSI
+            if (logoState.visible && logoImageObj.complete && logoImageObj.naturalWidth > 0) {
+                const logoScale = logoState.size / 64; // Normalisasi dari slider default 64px
+                const sz = Math.round(shortSide * 0.135 * logoScale);
+                let lx = w - sz - pad;
+                let ly = pad;
                 if (logoState.position === 'top-left') { lx = pad; ly = pad; }
-                else if (logoState.position === 'bottom-left') { lx = pad; ly = h - sz - (base * 8.5); }
-                else if (logoState.position === 'bottom-right') { lx = w - sz - pad; ly = h - sz - (base * 8.5); }
+                else if (logoState.position === 'bottom-left') { lx = pad; ly = h - sz - pad; }
+                else if (logoState.position === 'bottom-right') { lx = w - sz - pad; ly = h - sz - pad; }
+
                 ctx.save();
                 ctx.globalAlpha = logoState.opacity / 100;
                 ctx.beginPath();
-                ctx.roundRect(lx, ly, sz, sz, logoState.rounded ? sz * 0.18 : 0);
+                ctx.roundRect(lx, ly, sz, sz, logoState.rounded ? Math.round(sz * 0.16) : 0);
                 ctx.save();
                 ctx.clip();
                 ctx.drawImage(logoImageObj, lx, ly, sz, sz);
                 ctx.restore();
                 if (logoState.stroke) {
-                    ctx.lineWidth = Math.max(2, base * 0.15);
+                    ctx.lineWidth = Math.max(2, Math.round(sz * 0.032));
                     ctx.strokeStyle = '#FFFFFF';
                     ctx.stroke();
                 }
                 ctx.restore();
             }
 
-            const wmH = base * 7.6;
-            const wmY = h - wmH - pad;
-            const wmW = Math.min(w - (pad * 2), base * 26);
+            // 2. HITUNG UKURAN DINAMIS WATERMARK (Lebar hingga 82% foto di Potret, 55% di Lanskap)
+            const isLandscapePhoto = w > h;
+            const maxWmWidth = isLandscapePhoto ? Math.round(w * 0.56) : Math.round(w * 0.84);
+            const innerPad = (currentTheme === 2 || currentTheme === 3) ? Math.round(base * 0.55) : 0;
+            const textAreaWidth = maxWmWidth - (innerPad * 2) - Math.round(base * 0.65);
 
-            if (currentTheme !== 4) {
-                ctx.fillStyle = currentTheme === 3 ? 'rgba(15, 23, 42, 0.78)' : 'rgba(15, 23, 42, 0.86)';
+            const idStr = user.id_pegawai || 'OPI-SP-1';
+            const timeStr = document.getElementById('wmTime').innerText;
+            const progStr = currentMode + '%';
+            const dateStr = document.getElementById('wmDate').innerText;
+            const addrStr = document.getElementById('wmAddress').innerText;
+            const coordsStr = document.getElementById('wmCoords').innerText;
+            const noteStr = document.getElementById('customNoteInput').value.trim();
+
+            // Siapkan font ukuran Timemark
+            const fontBadge = `800 ${Math.round(base * 0.72)}px Inter, sans-serif`;
+            const fontProg = `800 ${Math.round(base * 0.62)}px Inter, sans-serif`;
+            const fontDate = `700 ${Math.round(base * 0.66)}px Inter, sans-serif`;
+            const fontAddr = `500 ${Math.round(base * 0.58)}px Inter, sans-serif`;
+            const fontCoords = `700 ${Math.round(base * 0.58)}px "JetBrains Mono", monospace`;
+            const fontNote = `600 ${Math.round(base * 0.54)}px Inter, sans-serif`;
+            const fontFooter = `500 ${Math.round(base * 0.48)}px Inter, sans-serif`;
+
+            // Hitung multi-baris alamat & catatan
+            ctx.font = fontAddr;
+            const addrLines = wrapCanvasText(ctx, addrStr, textAreaWidth);
+            ctx.font = fontNote;
+            const noteLines = noteStr ? wrapCanvasText(ctx, 'Ket: ' + noteStr, textAreaWidth) : [];
+
+            // Hitung tinggi total setiap bagian
+            const headerBannerH = (currentTheme === 2) ? Math.round(base * 1.15) : 0;
+            const badgeRowH = Math.round(base * 1.32);
+            const dateLineH = Math.round(base * 0.92);
+            const addrLineH = Math.round(base * 0.76);
+            const coordsLineH = Math.round(base * 0.84);
+            const noteLineH = Math.round(base * 0.72);
+            const footerLineH = Math.round(base * 0.74);
+
+            const detailBlockH = dateLineH
+                + (addrLines.length * addrLineH)
+                + coordsLineH
+                + (noteLines.length * noteLineH)
+                + Math.round(base * 0.15);
+
+            const totalContentH = badgeRowH + Math.round(base * 0.35) + detailBlockH + Math.round(base * 0.25) + footerLineH;
+            const wmTotalH = headerBannerH + (innerPad * 2) + totalContentH;
+            const wmY = h - wmTotalH - pad;
+            const wmX = pad;
+
+            // 3. GAMBAR BACKGROUND WATERMARK (Jika Templat 2 atau 3)
+            if (currentTheme === 2 || currentTheme === 3) {
+                ctx.save();
+                ctx.fillStyle = currentTheme === 3 ? 'rgba(15, 23, 42, 0.76)' : 'rgba(15, 23, 42, 0.84)';
                 ctx.beginPath();
-                ctx.roundRect(pad, wmY, wmW, wmH, 16);
+                ctx.roundRect(wmX, wmY, maxWmWidth, wmTotalH, Math.round(base * 0.45));
                 ctx.fill();
+                ctx.restore();
             }
 
-            if (currentTheme === 1 || currentTheme === 2) {
+            if (currentTheme === 2) {
+                ctx.save();
                 ctx.fillStyle = '#1D4ED8';
                 ctx.beginPath();
-                ctx.roundRect(pad, wmY, wmW, base * 1.2, [16, 16, 0, 0]);
+                ctx.roundRect(wmX, wmY, maxWmWidth, headerBannerH, [Math.round(base * 0.45), Math.round(base * 0.45), 0, 0]);
                 ctx.fill();
                 ctx.fillStyle = '#FFFFFF';
-                ctx.font = `bold ${base * 0.5}px Inter, sans-serif`;
+                ctx.font = `800 ${Math.round(base * 0.48)}px Inter, sans-serif`;
                 ctx.textBaseline = 'middle';
-                ctx.fillText('INSPEKSI LAPANGAN • BBWS BRANTAS', pad + base * 0.8, wmY + base * 0.6);
+                ctx.fillText('INSPEKSI LAPANGAN • BBWS BRANTAS', wmX + innerPad, wmY + headerBannerH / 2);
+                ctx.restore();
             }
 
-            const contentY = (currentTheme === 1 || currentTheme === 2) ? wmY + base * 1.7 : wmY + base * 0.8;
+            let curX = wmX + innerPad;
+            let curY = wmY + headerBannerH + innerPad;
 
+            // 4. GAMBAR BARIS BADGE (ID Kuning + Jam Putih + Progres Biru) - Dinamis sesuai lebar teks!
+            ctx.save();
+            ctx.textBaseline = 'middle';
+            const badgePadX = Math.round(base * 0.42);
+            const badgeGap = Math.round(base * 0.24);
+            const badgeRadius = Math.round(base * 0.22);
+
+            // Badge ID Petugas
+            ctx.font = fontBadge;
+            const idTextW = ctx.measureText(idStr).width;
+            const idBoxW = idTextW + (badgePadX * 2);
             ctx.fillStyle = '#F59E0B';
             ctx.beginPath();
-            ctx.roundRect(pad + base * 0.8, contentY, base * 3.4, base * 1.2, 6);
+            ctx.roundRect(curX, curY, idBoxW, badgeRowH, badgeRadius);
             ctx.fill();
             ctx.fillStyle = '#0F172A';
-            ctx.font = `bold ${base * 0.58}px Inter, sans-serif`;
-            ctx.textBaseline = 'middle';
-            ctx.fillText(user.id_pegawai || 'OPI-SP-1', pad + base * 1.15, contentY + base * 0.6);
+            ctx.fillText(idStr, curX + badgePadX, curY + badgeRowH / 2 + 1);
 
-            ctx.fillStyle = '#FFFFFF';
+            // Badge Waktu (Jam)
+            const timeX = curX + idBoxW + badgeGap;
+            const timeTextW = ctx.measureText(timeStr).width;
+            const timeBoxW = timeTextW + (badgePadX * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
             ctx.beginPath();
-            ctx.roundRect(pad + base * 4.5, contentY, base * 2.6, base * 1.2, 6);
+            ctx.roundRect(timeX, curY, timeBoxW, badgeRowH, badgeRadius);
             ctx.fill();
             ctx.fillStyle = '#0F172A';
-            ctx.fillText(document.getElementById('wmTime').innerText, pad + base * 4.95, contentY + base * 0.6);
+            ctx.fillText(timeStr, timeX + badgePadX, curY + badgeRowH / 2 + 1);
 
+            // Badge Progres (0% / 50% / 100%)
+            const progX = timeX + timeBoxW + badgeGap;
+            ctx.font = fontProg;
+            const progTextW = ctx.measureText(progStr).width;
+            const progBoxW = progTextW + Math.round(badgePadX * 1.6);
             ctx.fillStyle = '#1D4ED8';
             ctx.beginPath();
-            ctx.roundRect(pad + base * 7.4, contentY, base * 2.3, base * 1.2, 6);
+            ctx.roundRect(progX, curY, progBoxW, badgeRowH, badgeRadius);
             ctx.fill();
             ctx.fillStyle = '#FFFFFF';
-            ctx.fillText(currentMode + '%', pad + base * 7.9, contentY + base * 0.6);
+            ctx.fillText(progStr, progX + Math.round(badgePadX * 0.8), curY + badgeRowH / 2 + 1);
+            ctx.restore();
 
-            const detailX = pad + base * 0.8;
-            const detailStartY = contentY + base * 1.65;
+            // 5. GARIS VERTIKAL KUNING & TEKS DETAIL (Dengan Drop-Shadow Tajam khas Timemark)
+            curY += badgeRowH + Math.round(base * 0.38);
+            const lineStartY = curY;
+
+            ctx.save();
+            // Drop shadow pekat agar terbaca jelas di latar terang maupun gelap
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.92)';
+            ctx.shadowBlur = Math.max(4, Math.round(base * 0.22));
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2;
+
+            // Garis Kuning Kiri
             ctx.strokeStyle = '#F59E0B';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = Math.max(4, Math.round(base * 0.14));
             ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.moveTo(detailX, detailStartY);
-            ctx.lineTo(detailX, detailStartY + base * 4.4);
+            ctx.moveTo(curX + 2, lineStartY + 2);
+            ctx.lineTo(curX + 2, lineStartY + detailBlockH - 4);
             ctx.stroke();
 
+            const textX = curX + Math.round(base * 0.52);
             ctx.textBaseline = 'top';
+
+            // Tanggal
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = `bold ${base * 0.62}px Inter, sans-serif`;
-            ctx.fillText(document.getElementById('wmDate').innerText, detailX + base * 0.75, detailStartY);
+            ctx.font = fontDate;
+            ctx.fillText(dateStr, textX, curY);
+            curY += dateLineH;
 
-            ctx.fillStyle = '#E2E8F0';
-            ctx.font = `${base * 0.54}px Inter, sans-serif`;
-            ctx.fillText(document.getElementById('wmAddress').innerText, detailX + base * 0.75, detailStartY + base * 1.05);
+            // Alamat (Multi-baris)
+            ctx.fillStyle = '#F8FAFC';
+            ctx.font = fontAddr;
+            addrLines.forEach(line => {
+                ctx.fillText(line, textX, curY);
+                curY += addrLineH;
+            });
 
-            ctx.fillStyle = '#FCD34D';
-            ctx.font = `bold ${base * 0.54}px Inter, sans-serif`;
-            ctx.fillText(document.getElementById('wmCoords').innerText, detailX + base * 0.75, detailStartY + base * 2.1);
+            // Koordinat GPS
+            ctx.fillStyle = '#FDE047';
+            ctx.font = fontCoords;
+            ctx.fillText(coordsStr, textX, curY + 2);
+            curY += coordsLineH;
 
-            const note = document.getElementById('customNoteInput').value.trim();
-            if (note) {
-                ctx.fillStyle = '#E0F2FE';
-                ctx.font = `bold ${base * 0.48}px Inter, sans-serif`;
-                ctx.fillText('Ket: ' + note, detailX + base * 0.75, detailStartY + base * 3.15);
+            // Catatan Tambahan (Jika ada)
+            if (noteLines.length > 0) {
+                ctx.fillStyle = '#BAE6FD';
+                ctx.font = fontNote;
+                noteLines.forEach(line => {
+                    ctx.fillText(line, textX, curY + 2);
+                    curY += noteLineH;
+                });
             }
 
-            ctx.fillStyle = '#6EE7B7';
-            ctx.font = `500 ${base * 0.44}px Inter, sans-serif`;
-            ctx.fillText('Waktu & koordinat GPS terkunci sistem', detailX + base * 0.75, detailStartY + base * 4.15);
+            // Footer Verifikasi Timemark
+            curY += Math.round(base * 0.18);
+            ctx.fillStyle = '#E2E8F0';
+            ctx.font = fontFooter;
+            ctx.fillText('✔ Timemark BBWS menjamin keaslian waktu & GPS', curX, curY);
+            ctx.restore();
 
-            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.82);
+            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.85);
             latestCaptureMeta = {
                 captured_at: new Date().toISOString(),
                 time_label: document.getElementById('wmTime').innerText,
