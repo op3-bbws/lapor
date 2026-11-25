@@ -34,16 +34,87 @@
             margin: 0;
             padding: 0;
         }
-        #cameraStream { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 0.25s ease; }
-        #cameraStream.mirror { transform: scaleX(-1); }
-        .camera-grid { background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 33.333% 33.333%; }
-        .orient-icon { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
-        body[data-phys-orient="landscape-left"] .orient-icon { transform: rotate(90deg); }
-        body[data-phys-orient="landscape-right"] .orient-icon { transform: rotate(-90deg); }
-        #watermarkContainer { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: bottom left; }
-        body[data-phys-orient="landscape-left"] #watermarkContainer { transform: rotate(90deg) translateY(100%); transform-origin: top left; }
-        body[data-phys-orient="landscape-right"] #watermarkContainer { transform: rotate(-90deg) translateX(-100%); transform-origin: bottom left; }
-        @keyframes pulsePop { 0% { transform: scale(0.7); opacity: 0; } 40% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        #cameraStream {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            transition: transform 0.25s ease;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+        }
+        #cameraStream.mirror { transform: translate3d(0, 0, 0) scaleX(-1); }
+        .camera-grid {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+            background-size: 33.333% 33.333%;
+        }
+
+        /* GPU Hardware Acceleration & Anti-Flicker untuk Watermark & Ikon */
+        .orient-icon {
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        body[data-phys-orient="landscape-left"] .orient-icon { transform: translate3d(0, 0, 0) rotate(90deg); }
+        body[data-phys-orient="landscape-right"] .orient-icon { transform: translate3d(0, 0, 0) rotate(-90deg); }
+
+        .watermark {
+            max-width: calc(100vw - 24px);
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: bottom left;
+        }
+        body[data-phys-orient="landscape-left"] .watermark {
+            max-width: calc(100vh - 140px);
+            transform: translate3d(0, 0, 0) rotate(90deg) translateY(100%);
+            transform-origin: top left;
+        }
+        body[data-phys-orient="landscape-right"] .watermark {
+            max-width: calc(100vh - 140px);
+            transform: translate3d(0, 0, 0) rotate(-90deg) translateX(-100%);
+            transform-origin: bottom left;
+        }
+
+        /* Media Query Landscape Khusus untuk Watermark */
+        @media (orientation: landscape) {
+            .watermark {
+                max-width: calc(100vw - 24px) !important;
+                transform: translate3d(0, 0, 0) !important;
+                transform-origin: bottom left !important;
+            }
+            #watermarkOverlay {
+                padding: 4px 8px;
+                font-size: 0.92em;
+            }
+            #liveLogoWrapper {
+                top: 3.75rem !important;
+            }
+        }
+
+        /* Waterpas / Spirit Level */
+        #waterpasTrack {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        #waterpasBubble {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        @keyframes pulsePop {
+            0% { transform: scale(0.7); opacity: 0; }
+            40% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
         .countdown-pop { animation: pulsePop 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
         #flashEffect { position: absolute; inset: 0; background: #FFFFFF; z-index: 45; opacity: 0; pointer-events: none; }
         .flash-animate { animation: flashAnim 0.32s ease-out; }
@@ -61,7 +132,26 @@
     <div id="viewfinderStage" class="absolute inset-0 overflow-hidden bg-slate-950">
         <video id="cameraStream" autoplay playsinline muted></video>
         <div id="gridOverlay" class="camera-grid absolute inset-0 z-[5] pointer-events-none"></div>
-        
+
+        <!-- WATERPAS DIGITAL (60FPS RENDER LOOP) -->
+        <div id="waterpasWrapper" class="absolute inset-0 z-[7] pointer-events-none flex items-center justify-center">
+            <div class="relative flex flex-col items-center">
+                <!-- Garis Referensi Horizontal -->
+                <div class="w-44 h-[1.5px] bg-white/30 relative flex items-center justify-center">
+                    <div class="w-8 h-3 border-x-2 border-amber-400/80"></div>
+                    <!-- Bar Kemiringan Dinamis -->
+                    <div id="waterpasBar" class="absolute w-32 h-[2px] bg-amber-400 rounded-full transition-colors duration-150"></div>
+                </div>
+                <!-- Kapsul Gelembung Waterpas -->
+                <div id="waterpasTrack" class="mt-2.5 w-32 h-3.5 rounded-full bg-black/55 border border-white/25 backdrop-blur-xs relative flex items-center justify-center overflow-hidden">
+                    <div class="w-4 h-full border-x border-white/40 z-10"></div>
+                    <div id="waterpasBubble" class="w-3.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]"></div>
+                </div>
+                <span id="waterpasDegText" class="mt-1 px-1.5 py-0.5 rounded bg-black/50 font-mono text-[10px] font-bold text-amber-300 tabular-nums">0.0°</span>
+            </div>
+        </div>
+
+        <!-- FALLBACK KAMERA -->
         <div id="cameraFallback" class="hidden absolute inset-0 z-[6] bg-gradient-to-b from-slate-900 via-slate-950 to-black flex flex-col items-center justify-center px-6 text-center">
             <div class="w-16 h-16 rounded-3xl bg-amber-500/15 border border-amber-400/30 text-amber-400 flex items-center justify-center mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3l18 18"/></svg>
@@ -75,8 +165,8 @@
         </div>
     </div>
 
-    <!-- Logo Live Overlay -->
-    <div id="liveLogoWrapper" class="absolute z-[15] top-20 right-4 pointer-events-none transition-all duration-200">
+    <!-- LOGO LIVE OVERLAY -->
+    <div id="liveLogoWrapper" class="absolute z-[15] top-20 right-4 pointer-events-none transition-all duration-200" style="transform: translate3d(0,0,0); backface-visibility: hidden;">
         <img id="liveLogoImg" src="" alt="Logo Instansi" class="orient-icon w-14 h-14 object-contain rounded-xl border-2 border-white shadow-lg bg-white/10">
     </div>
 
@@ -90,6 +180,9 @@
                 </button>
                 <button type="button" onclick="toggleGrid()" id="btnQuickGrid" title="Garis Bantu Grid" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-amber-300 transition active:scale-95">
                     <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 9h16M4 15h16M9 4v16M15 4v16"/></svg>
+                </button>
+                <button type="button" onclick="toggleWaterpas()" id="btnQuickWaterpas" title="Waterpas Kemiringan" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-emerald-300 transition active:scale-95">
+                    <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M9 9v6m6-6v6"/></svg>
                 </button>
             </div>
 
@@ -107,8 +200,8 @@
         </header>
 
         <!-- WATERMARK & TOOLS -->
-        <div class="flex-1 relative flex items-end justify-between px-4 sm:px-6 pb-3 max-w-4xl w-full mx-auto">
-            <div id="watermarkContainer" class="max-w-[82%] sm:max-w-md pointer-events-none">
+        <div class="flex-1 relative flex items-end justify-between px-3 sm:px-6 pb-3 max-w-4xl w-full mx-auto">
+            <div id="watermarkContainer" class="watermark sm:max-w-md pointer-events-none">
                 <div id="watermarkOverlay" class="w-fit max-w-full rounded-2xl transition-all duration-300 font-mono">
                     <div id="wmHeaderBanner" class="hidden items-center gap-2 bg-pupr-blue text-white px-3 py-1 rounded-t-xl text-[10px] sm:text-xs font-extrabold tracking-wide uppercase">
                         <span class="w-2 h-2 rounded-full bg-amber-400"></span><span>INSPEKSI LAPANGAN • BBWS BRANTAS</span>
@@ -121,9 +214,9 @@
                         </div>
                         <div id="wmDetailBox" class="border-l-[3px] border-amber-400 pl-2.5 py-0.5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
                             <p id="wmDate" class="font-bold text-xs text-white">Memuat tanggal...</p>
-                            <p id="wmAddress" class="text-[11px] text-slate-100 leading-snug mt-0.5">Mendeteksi lokasi...</p>
+                            <p id="wmAddress" class="text-[11px] text-slate-100 leading-snug mt-0.5 break-words">Mendeteksi lokasi...</p>
                             <p id="wmCoords" class="text-[11px] font-semibold text-amber-300 mt-0.5 tabular-nums">Menunggu GPS...</p>
-                            <p id="wmNoteDisplay" class="hidden text-[11px] font-semibold text-sky-200 mt-1 bg-black/50 px-2 py-0.5 rounded-md w-fit"></p>
+                            <p id="wmNoteDisplay" class="hidden text-[11px] font-semibold text-sky-200 mt-1 bg-black/50 px-2 py-0.5 rounded-md w-fit break-words"></p>
                             <div class="flex items-center gap-1 mt-1 text-[10px] text-emerald-300 font-sans font-medium">
                                 <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                 <span>Waktu & GPS terkunci</span>
@@ -133,7 +226,7 @@
                 </div>
             </div>
 
-            <div class="pointer-events-auto flex flex-col items-center gap-2.5 mb-2">
+            <div class="pointer-events-auto flex flex-col items-center gap-2.5 mb-2 shrink-0">
                 <button type="button" onclick="cycleTimer()" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="timerLabel" class="orient-icon">0s</span></button>
                 <button type="button" onclick="cycleZoom()" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="zoomLabel" class="orient-icon">1.0x</span></button>
                 <button type="button" onclick="openSheet('templateSheet'); setTimeout(() => document.getElementById('customNoteInput').focus(), 200)" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
@@ -160,7 +253,7 @@
 
                     <button type="button" onclick="openSheet('templateSheet')" class="flex flex-col items-center gap-1 group">
                         <div class="w-12 h-12 rounded-2xl bg-white/15 group-hover:bg-white/25 border border-white/25 backdrop-blur-md flex items-center justify-center text-white transition"><svg class="w-5 h-5 text-sky-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg></div>
-                        <span class="text-[10px] font-semibold text-slate-300">Templat</span>
+                        <span class="text-[10px] font-semibold text-slate-300">Templat & Logo</span>
                     </button>
                 </div>
 
@@ -174,16 +267,22 @@
         </footer>
     </div>
 
-    <!-- BOTTOM SHEET: PENGATURAN TERORGANISIR -->
+    <!-- BOTTOM SHEET 1: PENGATURAN SISTEM & SENSOR -->
     <div id="settingsSheet" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('settingsSheet')">
         <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kamera & Sistem</h3><p class="text-[11px] text-slate-500">Kontrol orientasi, keamanan galeri & koneksi Supabase</p></div>
+                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kamera & Sistem</h3><p class="text-[11px] text-slate-500">Kontrol orientasi sensor, keamanan galeri & koneksi</p></div>
                 <button type="button" onclick="closeSheet('settingsSheet')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div class="space-y-4 mt-4 text-xs">
                 <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                    <div class="flex items-center justify-between"><div><p class="font-bold text-slate-900">Orientasi Kamera & Watermark</p><p class="text-[11px] text-slate-500">Otomatis mendeteksi kemiringan HP meski rotasi layar terkunci</p></div><span id="sensorStatusBadge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">Sensor Siap</span></div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-slate-900">Orientasi Kamera & Waterpas (LPF α=0.15)</p>
+                            <p class="text-[11px] text-slate-500">Deteksi kemiringan halus tanpa jitter</p>
+                        </div>
+                        <span id="sensorStatusBadge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">Sensor Siap</span>
+                    </div>
                     <div class="grid grid-cols-3 gap-2">
                         <button type="button" onclick="setOrientationMode('auto')" id="oriMode-auto" class="py-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold">Auto Sensor</button>
                         <button type="button" onclick="setOrientationMode('portrait')" id="oriMode-portrait" class="py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold">Kunci Potret</button>
@@ -203,15 +302,75 @@
         </div>
     </div>
 
-    <!-- BOTTOM SHEET 2: TEMPLAT & KETERANGAN -->
+    <!-- BOTTOM SHEET 2: TEMPLAT, KETERANGAN & PENGATURAN LOGO -->
     <div id="templateSheet" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('templateSheet')">
-        <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[88vh] overflow-y-auto hide-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Templat & Keterangan Lapangan</h3><p class="text-[11px] text-slate-500">Waktu, lokasi & koordinat dikunci sistem</p></div>
+                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Templat, Logo & Catatan</h3><p class="text-[11px] text-slate-500">Kustomisasi tampilan watermark & logo instansi</p></div>
                 <button type="button" onclick="closeSheet('templateSheet')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
+
+            <!-- PENGATURAN LOGO LENGKAP -->
+            <div class="mt-4 pb-4 border-b border-slate-100">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-extrabold text-slate-900">Pengaturan Logo</span>
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer bg-slate-100 px-2 py-0.5 rounded-full">
+                            <input type="checkbox" id="toggleShowLogo" checked onchange="updateLogoSettings()" class="accent-pupr-blue w-3.5 h-3.5">
+                            <span class="text-[10px] font-bold text-slate-700">Tampilkan</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="resetDefaultLogo()" class="text-[11px] font-semibold text-slate-500 hover:text-slate-800">Default</button>
+                        <label for="logoUploadInput" class="text-xs font-extrabold text-pupr-blue hover:text-blue-700 cursor-pointer">Ganti Logo</label>
+                        <input type="file" id="logoUploadInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                    </div>
+                </div>
+
+                <!-- Grid Tombol Posisi -->
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <button type="button" onclick="setLogoPosition('top-left')" id="pos-top-left" class="py-2 px-1.5 rounded-xl border border-slate-200 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Kiri Atas</button>
+                    <button type="button" onclick="setLogoPosition('top-right')" id="pos-top-right" class="py-2 px-1.5 rounded-xl border-2 border-pupr-blue bg-blue-50 text-[11px] font-bold text-pupr-blue">Kanan Atas</button>
+                    <button type="button" onclick="setLogoPosition('bottom-left')" id="pos-bottom-left" class="py-2 px-1.5 rounded-xl border border-slate-200 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Kiri Bawah</button>
+                    <button type="button" onclick="setLogoPosition('bottom-right')" id="pos-bottom-right" class="py-2 px-1.5 rounded-xl border border-slate-200 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Kanan Bawah</button>
+                </div>
+
+                <!-- Slider Ukuran & Transparansi -->
+                <div class="grid grid-cols-2 gap-3 mb-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+                    <div>
+                        <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
+                            <span>Ukuran</span><span id="logoSizeVal" class="text-pupr-blue">56px</span>
+                        </div>
+                        <input type="range" id="logoSizeRange" min="36" max="96" value="56" oninput="updateLogoSettings()" class="w-full accent-pupr-blue cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
+                            <span>Transparansi</span><span id="logoOpacityVal" class="text-pupr-blue">100%</span>
+                        </div>
+                        <input type="range" id="logoOpacityRange" min="20" max="100" value="100" oninput="updateLogoSettings()" class="w-full accent-pupr-blue cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Tombol Efek Logo (Goresan, Sudut Bulat, Hapus Latar Belakang) -->
+                <div class="grid grid-cols-3 gap-2.5">
+                    <button type="button" onclick="toggleLogoOption('stroke')" id="btnLogoStroke" class="flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue transition">
+                        <span class="font-black text-xs tracking-tight px-1.5 py-0.5 rounded border border-current">logo</span>
+                        <span class="text-[11px] font-bold">Goresan</span>
+                    </button>
+                    <button type="button" onclick="toggleLogoOption('rounded')" id="btnLogoRounded" class="flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue transition">
+                        <span class="font-bold text-xs px-2 py-0.5 rounded-lg border-2 border-current">logo</span>
+                        <span class="text-[11px] font-bold">Sudut Bulat</span>
+                    </button>
+                    <button type="button" onclick="removeLogoBackground()" id="btnLogoRemoveBg" class="flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364-6.364l-2.121 2.121M8.757 15.243l-2.121 2.121m12.728 0l-2.121-2.121M8.757 8.757L6.636 6.636"/></svg>
+                        <span class="text-[10px] font-bold leading-tight text-center">Hapus Latar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- GAYA TEMPLAT WATERMARK -->
             <div class="mt-4">
-                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5">Pilih Gaya Templat</p>
+                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5">Pilih Gaya Templat Watermark</p>
                 <div class="grid grid-cols-2 gap-2.5">
                     <button type="button" onclick="selectTemplate(1)" id="tplCard1" class="text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition"><div class="flex items-center gap-1 mb-1.5"><span class="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">ID</span><span class="bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">11:48</span></div><p class="text-xs font-bold text-slate-900">Timemark PUPR</p><p class="text-[10px] text-slate-500">Standar verifikasi lapangan</p></button>
                     <button type="button" onclick="selectTemplate(2)" id="tplCard2" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-pupr-blue text-white text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">INSPEKSI BBWS</div><p class="text-xs font-bold text-slate-900">Kartu Inspeksi</p><p class="text-[10px] text-slate-500">Header biru instansi</p></button>
@@ -219,10 +378,12 @@
                     <button type="button" onclick="selectTemplate(4)" id="tplCard4" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">MINIMALIS</div><p class="text-xs font-bold text-slate-900">Minimalis Bersih</p><p class="text-[10px] text-slate-500">Ringkas tanpa latar kotak</p></button>
                 </div>
             </div>
+
+            <!-- CATATAN PEKERJAAN -->
             <div class="mt-4 pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-between mb-1.5"><label for="customNoteInput" class="text-xs font-extrabold text-slate-800">Keterangan / Catatan Pekerjaan</label><span class="text-[10px] font-semibold text-pupr-blue bg-blue-50 px-2 py-0.5 rounded-md">Opsional</span></div>
                 <textarea id="customNoteInput" rows="2" maxlength="110" oninput="updateCustomNote()" placeholder="Contoh: Babat rumput saluran sekunder HM 10+00 s/d 12+50..." class="w-full p-3 rounded-2xl border border-slate-300 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-pupr-blue focus:ring-2 focus:ring-blue-500/20"></textarea>
-                <button type="button" onclick="closeSheet('templateSheet')" class="mt-3.5 w-full py-3 rounded-2xl bg-pupr-blue hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition shadow-md">Terapkan Templat & Keterangan</button>
+                <button type="button" onclick="closeSheet('templateSheet')" class="mt-3.5 w-full py-3 rounded-2xl bg-pupr-blue hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition shadow-md">Terapkan Pengaturan</button>
             </div>
         </div>
     </div>
@@ -320,16 +481,16 @@
     <canvas id="photoCanvas" class="hidden"></canvas>
 
     <script>
-        // Inisialisasi Supabase
-        initSupabase();
-        
+        // Inisialisasi Supabase (Aman jika offline/testing)
+        if (typeof initSupabase === 'function') initSupabase();
+
         // 1. Safe Storage Helpers
         function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
         function safeSetStorage(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
         function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
-        // 2. User Context (Akan diisi dari Supabase)
-        let user = { id_pegawai: 'MEMUAT...', nama: 'MEMUAT...', jabatan: '...', daerah_irigasi: '...' };
+        // 2. User Context
+        let user = { id_pegawai: 'OPI-SP-1', nama: 'Petugas Lapangan', jabatan: 'PPA / Pekarya', daerah_irigasi: 'D.I Bening' };
 
         // 3. State Aplikasi
         let videoStream = null;
@@ -339,6 +500,7 @@
         let timerSeconds = 0;
         let zoomLevel = 1.0;
         let gridEnabled = true;
+        let waterpasEnabled = true;
         let countdownTimer = null;
         let latestCapturedBase64 = '';
         let latestCaptureMeta = null;
@@ -346,33 +508,54 @@
         let currentLng = 114.194000;
         let isGalleryAllowedByAdmin = false;
 
-        let orientationMode = 'auto'; 
-        let physicalOrientation = 'portrait'; 
+        let orientationMode = 'auto';
+        let physicalOrientation = 'portrait';
+
+        // Low-Pass Filter State (alpha = 0.15)
+        const LPF_ALPHA = 0.15;
+        let sensorState = {
+            rawGx: 0, rawGy: 9.8,
+            filteredGx: 0, filteredGy: 9.8,
+            rawGamma: 0, rawBeta: 90,
+            filteredGamma: 0, filteredBeta: 90,
+            tiltAngleDeg: 0,
+            isLoopRunning: false
+        };
 
         let capturedPhotosByMode = { '0': null, '50': null, '100': null };
         let photoMetaByMode = { '0': null, '50': null, '100': null };
         const SESSION_PHOTO_KEY = 'bbws_session_photos_v2';
 
-        const DEFAULT_PU_LOGO_SVG = "assets/img/logo-bbws.svg";
+        // Embedded Vector Logo PUPR (Anti-Error Canvas Tainted / Missing File)
+        const DEFAULT_PU_LOGO_SVG = "data:image/svg+xml;utf8," + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+                <rect width="120" height="120" rx="18" fill="#1E3A8A"/>
+                <path d="M22 24h34v44H38V40H22V24zm42 0h34v52c0 12-10 20-22 20H46V80h30c4 0 6-2 6-6V40H64V24z" fill="#FBBF24"/>
+                <path d="M22 76h16v20H22V76z" fill="#FBBF24"/>
+            </svg>
+        `);
+
         const logoState = { visible: true, src: DEFAULT_PU_LOGO_SVG, position: 'top-right', size: 56, opacity: 100, stroke: true, rounded: true };
         const logoImageObj = new Image();
+        logoImageObj.crossOrigin = 'anonymous';
         logoImageObj.src = logoState.src;
 
         // 4. Inisialisasi Awal
         document.addEventListener('DOMContentLoaded', async () => {
-            // Ambil Sesi Login
-            const session = await checkSession();
-            if (!session || !session.profile) return;
+            if (typeof checkSession === 'function') {
+                try {
+                    const session = await checkSession();
+                    if (session && session.profile) {
+                        user = {
+                            id_pegawai: session.profile.id_petugas,
+                            nama: session.profile.nama,
+                            jabatan: session.profile.role === 'pekarya' ? 'Pekarya' : (session.profile.role === 'ppa' ? 'PPA' : 'Staf Pengamat'),
+                            daerah_irigasi: session.profile.daerah_irigasi || 'D.I Bening'
+                        };
+                    }
+                } catch (e) {}
+            }
 
-            // Set data user dari Supabase
-            user = {
-                id_pegawai: session.profile.id_petugas,
-                nama: session.profile.nama,
-                jabatan: session.profile.role === 'pekarya' ? 'Pekarya' : (session.profile.role === 'ppa' ? 'PPA' : 'Staf Pengamat'),
-                daerah_irigasi: session.profile.daerah_irigasi || 'D.I Bening'
-            };
-            
-            // Set Input Field D.I
             document.getElementById('inpDI').value = user.daerah_irigasi;
 
             initCamera();
@@ -382,10 +565,11 @@
             populateRoleTasks();
             loadSessionData();
 
-            window.addEventListener('resize', detectWindowOrientationFallback);
-            window.addEventListener('devicemotion', handleDeviceMotion);
-            window.addEventListener('deviceorientation', handleDeviceOrientation);
-            detectWindowOrientationFallback();
+            // Bind Orientation Fix (Debounced Resize 200ms & OrientationChange 300ms)
+            bindOrientationFix();
+
+            // Jalankan Sensor & Render Loop Waterpas 60fps
+            startSensor();
 
             const formInputs = document.querySelectorAll('#dailyOpReportForm input, #dailyOpReportForm textarea, #customNoteInput');
             formInputs.forEach(input => {
@@ -412,18 +596,122 @@
         function closeConfirmResetModal() { closeSheet('confirmResetModal'); }
         function closeAdminGalleryModal() { closeSheet('adminGalleryModal'); }
 
-        // 6. Auto-Orientation Engine
+        // 6. Sensor Low-Pass Filter (alpha=0.15), startSensor() -> loop() & bindOrientationFix()
+        function debounce(fn, delay) {
+            let timer = null;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        function bindOrientationFix() {
+            const handleResizeDebounced = debounce(() => {
+                detectWindowOrientationFallback();
+                updateLogoSettings();
+            }, 200);
+
+            const handleOrientationDebounced = debounce(() => {
+                detectWindowOrientationFallback();
+                updateLogoSettings();
+            }, 300);
+
+            window.addEventListener('resize', handleResizeDebounced);
+            window.addEventListener('orientationchange', handleOrientationDebounced);
+            detectWindowOrientationFallback();
+        }
+
+        function startSensor() {
+            window.removeEventListener('devicemotion', handleDeviceMotion);
+            window.removeEventListener('deviceorientation', handleDeviceOrientation);
+            window.addEventListener('devicemotion', handleDeviceMotion, { passive: true });
+            window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true });
+
+            if (!sensorState.isLoopRunning) {
+                sensorState.isLoopRunning = true;
+                loop();
+            }
+        }
+
+        function handleDeviceMotion(e) {
+            const g = e.accelerationIncludingGravity;
+            if (!g || g.x === null || g.y === null) return;
+            sensorState.rawGx = g.x;
+            sensorState.rawGy = g.y;
+        }
+
+        function handleDeviceOrientation(e) {
+            if (typeof e.gamma === 'number') sensorState.rawGamma = e.gamma;
+            if (typeof e.beta === 'number') sensorState.rawBeta = e.beta;
+        }
+
+        function loop() {
+            // Low-Pass Filter: filtered = alpha * raw + (1 - alpha) * prev
+            sensorState.filteredGx = LPF_ALPHA * sensorState.rawGx + (1 - LPF_ALPHA) * sensorState.filteredGx;
+            sensorState.filteredGy = LPF_ALPHA * sensorState.rawGy + (1 - LPF_ALPHA) * sensorState.filteredGy;
+            sensorState.filteredGamma = LPF_ALPHA * sensorState.rawGamma + (1 - LPF_ALPHA) * sensorState.filteredGamma;
+            sensorState.filteredBeta = LPF_ALPHA * sensorState.rawBeta + (1 - LPF_ALPHA) * sensorState.filteredBeta;
+
+            const gx = sensorState.filteredGx;
+            const gy = sensorState.filteredGy;
+
+            // Evaluasi Auto-Orientation berbasis nilai yang sudah difilter (anti-jitter)
+            if (orientationMode === 'auto') {
+                if (Math.abs(gx) > Math.abs(gy) * 1.35 && Math.abs(gx) > 4.5) {
+                    const targetOrient = gx > 0 ? 'landscape-right' : 'landscape-left';
+                    if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
+                } else if (Math.abs(gy) > Math.abs(gx) * 1.35 && Math.abs(gy) > 4.5) {
+                    if (physicalOrientation !== 'portrait') applyPhysicalOrientation('portrait');
+                }
+            }
+
+            // Render Waterpas 60fps menggunakan GPU translate3d
+            if (waterpasEnabled) {
+                let angleRad = Math.atan2(gx, gy);
+                let deg = (angleRad * 180) / Math.PI;
+
+                // Normalisasi sudut relatif terhadap posisi pegang (Potret / Lanskap)
+                if (Math.abs(gx) > Math.abs(gy)) {
+                    deg = gx > 0 ? deg - 90 : deg + 90;
+                }
+                if (deg > 180) deg -= 360;
+                if (deg < -180) deg += 360;
+
+                const clampedDeg = Math.max(-45, Math.min(45, deg));
+                sensorState.tiltAngleDeg = clampedDeg;
+
+                const bubbleEl = document.getElementById('waterpasBubble');
+                const barEl = document.getElementById('waterpasBar');
+                const degTextEl = document.getElementById('waterpasDegText');
+
+                if (bubbleEl && barEl && degTextEl) {
+                    const offsetPx = (clampedDeg / 45) * 48;
+                    const isLevel = Math.abs(clampedDeg) <= 1.5;
+
+                    bubbleEl.style.transform = `translate3d(${offsetPx.toFixed(1)}px, 0, 0)`;
+                    barEl.style.transform = `translate3d(0, 0, 0) rotate(${(-clampedDeg).toFixed(1)}deg)`;
+
+                    if (isLevel) {
+                        bubbleEl.className = 'w-3.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)]';
+                        barEl.className = 'absolute w-32 h-[2px] bg-emerald-400 rounded-full transition-colors duration-150';
+                        degTextEl.className = 'mt-1 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 font-mono text-[10px] font-bold text-emerald-300 tabular-nums';
+                    } else {
+                        bubbleEl.className = 'w-3.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]';
+                        barEl.className = 'absolute w-32 h-[2px] bg-amber-400 rounded-full transition-colors duration-150';
+                        degTextEl.className = 'mt-1 px-1.5 py-0.5 rounded bg-black/55 font-mono text-[10px] font-bold text-amber-300 tabular-nums';
+                    }
+                    degTextEl.innerText = `${Math.abs(clampedDeg).toFixed(1)}°`;
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+
         function applyPhysicalOrientation(orient) {
             physicalOrientation = orient;
             const viewportIsPortrait = window.innerHeight >= window.innerWidth;
             const cssOrient = viewportIsPortrait ? orient : 'portrait';
             document.body.setAttribute('data-phys-orient', cssOrient);
-            const labelEl = document.getElementById('orientBadgeText');
-            if(labelEl) {
-                const isLandscape = !viewportIsPortrait || orient !== 'portrait';
-                if (orientationMode === 'auto') labelEl.innerText = isLandscape ? 'Auto (L)' : 'Auto (P)';
-                else labelEl.innerText = orientationMode === 'portrait' ? 'Potret' : 'Lanskap';
-            }
         }
 
         function setOrientationMode(mode) {
@@ -431,7 +719,9 @@
             ['auto', 'portrait', 'landscape'].forEach(m => {
                 const btn = document.getElementById('oriMode-' + m);
                 if (btn) {
-                    btn.className = (m === mode) ? 'py-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold' : 'py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold';
+                    btn.className = (m === mode)
+                        ? 'py-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold'
+                        : 'py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold';
                 }
             });
             if (mode === 'portrait') applyPhysicalOrientation('portrait');
@@ -440,38 +730,16 @@
             showToast('Mode orientasi: ' + (mode === 'auto' ? 'Otomatis Sensor' : mode === 'portrait' ? 'Potret' : 'Lanskap'));
         }
 
-        function cycleOrientationMode() {
-            const next = orientationMode === 'auto' ? 'landscape' : (orientationMode === 'landscape' ? 'portrait' : 'auto');
-            setOrientationMode(next);
-        }
-
         function detectWindowOrientationFallback() {
             if (orientationMode !== 'auto') {
                 applyPhysicalOrientation(orientationMode === 'landscape' ? 'landscape-left' : 'portrait');
                 return;
             }
-            applyPhysicalOrientation('portrait');
-        }
-
-        function handleDeviceMotion(e) {
-            if (orientationMode !== 'auto') return;
-            const g = e.accelerationIncludingGravity;
-            if (!g || g.x === null || g.y === null) return;
-            const ax = g.x, ay = g.y;
-            if (Math.abs(ax) > Math.abs(ay) * 1.35 && Math.abs(ax) > 4.5) {
-                applyPhysicalOrientation(ax > 0 ? 'landscape-right' : 'landscape-left');
-            } else if (Math.abs(ay) > Math.abs(ax) * 1.35 && Math.abs(ay) > 4.5) {
-                applyPhysicalOrientation('portrait');
-            }
-        }
-
-        function handleDeviceOrientation(e) {
-            if (orientationMode !== 'auto') return;
-            if (typeof e.gamma !== 'number' || typeof e.beta !== 'number') return;
-            if (Math.abs(e.gamma) > 45 && Math.abs(e.beta) < 45) {
-                applyPhysicalOrientation(e.gamma > 0 ? 'landscape-right' : 'landscape-left');
-            } else if (Math.abs(e.beta) > 45 && Math.abs(e.gamma) < 35) {
-                applyPhysicalOrientation('portrait');
+            const isViewportLandscape = window.innerWidth > window.innerHeight;
+            if (isViewportLandscape) {
+                applyPhysicalOrientation('portrait'); // Browser sudah merotasi viewport ke lanskap
+            } else {
+                applyPhysicalOrientation(physicalOrientation);
             }
         }
 
@@ -484,16 +752,16 @@
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     await DeviceOrientationEvent.requestPermission();
                 }
-                window.addEventListener('devicemotion', handleDeviceMotion);
-                window.addEventListener('deviceorientation', handleDeviceOrientation);
+                startSensor();
                 document.getElementById('sensorStatusBadge').innerText = 'Sensor Aktif';
-                showToast('Sensor auto-orientasi aktif!');
+                showToast('Sensor auto-orientasi & waterpas aktif!');
             } catch (err) {
+                startSensor();
                 showToast('Sensor otomatis aktif di browser ini.');
             }
         }
 
-        // 7. Kamera, Zoom, Grid & GPS
+        // 7. Kamera, Zoom, Grid, Waterpas & GPS
         async function initCamera() {
             const fallbackEl = document.getElementById('cameraFallback');
             const videoEl = document.getElementById('cameraStream');
@@ -527,12 +795,20 @@
             document.getElementById('btnQuickGrid').classList.toggle('text-white/50', !gridEnabled);
         }
 
+        function toggleWaterpas() {
+            waterpasEnabled = !waterpasEnabled;
+            document.getElementById('waterpasWrapper').classList.toggle('hidden', !waterpasEnabled);
+            document.getElementById('btnQuickWaterpas').classList.toggle('text-emerald-300', waterpasEnabled);
+            document.getElementById('btnQuickWaterpas').classList.toggle('text-white/50', !waterpasEnabled);
+            showToast(waterpasEnabled ? 'Waterpas diaktifkan' : 'Waterpas disembunyikan');
+        }
+
         function cycleZoom() {
             zoomLevel = zoomLevel === 1.0 ? 1.5 : (zoomLevel === 1.5 ? 2.0 : 1.0);
             document.getElementById('zoomLabel').innerText = zoomLevel.toFixed(1) + 'x';
             const videoEl = document.getElementById('cameraStream');
             const mirrorPrefix = facingMode === 'user' ? 'scaleX(-1) ' : '';
-            videoEl.style.transform = `${mirrorPrefix}scale(${zoomLevel})`;
+            videoEl.style.transform = `translate3d(0, 0, 0) ${mirrorPrefix}scale(${zoomLevel})`;
         }
 
         function cycleTimer() {
@@ -605,24 +881,38 @@
             document.getElementById('formJabatanPetugas').innerText = user.jabatan || '-';
         }
 
-        // 9. Pengaturan Logo
+        // 9. Pengaturan Logo Lengkap (Posisi, Ukuran, Transparansi, Goresan, Sudut Bulat, Hapus Latar)
         function setLogoPosition(pos) {
             logoState.position = pos;
             ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach(p => {
                 const btn = document.getElementById('pos-' + p);
-                if(btn) btn.className = (p === pos) ? 'py-2 px-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-xs font-bold text-pupr-blue' : 'py-2 px-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50';
+                if (btn) {
+                    btn.className = (p === pos)
+                        ? 'py-2 px-1.5 rounded-xl border-2 border-pupr-blue bg-blue-50 text-[11px] font-bold text-pupr-blue'
+                        : 'py-2 px-1.5 rounded-xl border border-slate-200 text-[11px] font-semibold text-slate-600 hover:bg-slate-50';
+                }
             });
             updateLogoSettings();
         }
+
         function toggleLogoOption(opt) {
             if (opt === 'stroke') logoState.stroke = !logoState.stroke;
             if (opt === 'rounded') logoState.rounded = !logoState.rounded;
             const btnStroke = document.getElementById('btnLogoStroke');
-            if(btnStroke) btnStroke.className = logoState.stroke ? 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue' : 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border border-slate-200 text-slate-500';
+            if (btnStroke) {
+                btnStroke.className = logoState.stroke
+                    ? 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue transition'
+                    : 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border border-slate-200 text-slate-500 transition';
+            }
             const btnRound = document.getElementById('btnLogoRounded');
-            if(btnRound) btnRound.className = logoState.rounded ? 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue' : 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border border-slate-200 text-slate-500';
+            if (btnRound) {
+                btnRound.className = logoState.rounded
+                    ? 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue transition'
+                    : 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border border-slate-200 text-slate-500 transition';
+            }
             updateLogoSettings();
         }
+
         function handleLogoUpload(e) {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
@@ -631,25 +921,72 @@
                 logoState.src = ev.target.result;
                 logoImageObj.src = logoState.src;
                 document.getElementById('liveLogoImg').src = logoState.src;
+                showToast('Logo berhasil diperbarui!');
             };
             reader.readAsDataURL(file);
             e.target.value = '';
         }
+
         function resetDefaultLogo() {
             logoState.src = DEFAULT_PU_LOGO_SVG;
             logoImageObj.src = logoState.src;
             document.getElementById('liveLogoImg').src = logoState.src;
+            showToast('Logo dikembalikan ke default PUPR');
         }
+
+        function removeLogoBackground() {
+            if (!logoImageObj.complete || !logoImageObj.naturalWidth) {
+                return showToast('Logo belum siap diproses.');
+            }
+            const c = document.createElement('canvas');
+            const w = logoImageObj.naturalWidth || 200;
+            const h = logoImageObj.naturalHeight || 200;
+            c.width = w;
+            c.height = h;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(logoImageObj, 0, 0, w, h);
+
+            try {
+                const imgData = ctx.getImageData(0, 0, w, h);
+                const d = imgData.data;
+                // Ambil warna sampel piksel pojok kiri atas sebagai warna latar
+                const bgR = d[0], bgG = d[1], bgB = d[2];
+                const tolerance = 48;
+
+                for (let i = 0; i < d.length; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const diffBg = Math.abs(r - bgR) + Math.abs(g - bgG) + Math.abs(b - bgB);
+                    const isNearWhite = (r > 235 && g > 235 && b > 235);
+                    if (diffBg < tolerance || isNearWhite) {
+                        d[i + 3] = 0; // Set transparan
+                    }
+                }
+                ctx.putImageData(imgData, 0, 0);
+                const transparentDataUrl = c.toDataURL('image/png');
+                logoState.src = transparentDataUrl;
+                logoImageObj.src = transparentDataUrl;
+                document.getElementById('liveLogoImg').src = transparentDataUrl;
+                showToast('Latar belakang logo dihapus!');
+            } catch (err) {
+                showToast('Tidak dapat memproses latar logo ini.');
+            }
+        }
+
         function updateLogoSettings() {
             const wrapper = document.getElementById('liveLogoWrapper');
             const img = document.getElementById('liveLogoImg');
             if (!img.getAttribute('src')) img.src = logoState.src;
-            logoState.visible = document.getElementById('toggleShowLogo') ? document.getElementById('toggleShowLogo').checked : true;
-            logoState.size = document.getElementById('logoSizeRange') ? parseInt(document.getElementById('logoSizeRange').value, 10) : 56;
-            logoState.opacity = document.getElementById('logoOpacityRange') ? parseInt(document.getElementById('logoOpacityRange').value, 10) : 100;
-            
-            if(document.getElementById('logoSizeVal')) document.getElementById('logoSizeVal').innerText = logoState.size + 'px';
-            if(document.getElementById('logoOpacityVal')) document.getElementById('logoOpacityVal').innerText = logoState.opacity + '%';
+
+            const chkShow = document.getElementById('toggleShowLogo');
+            const sizeRange = document.getElementById('logoSizeRange');
+            const opacityRange = document.getElementById('logoOpacityRange');
+
+            logoState.visible = chkShow ? chkShow.checked : true;
+            logoState.size = sizeRange ? parseInt(sizeRange.value, 10) : 56;
+            logoState.opacity = opacityRange ? parseInt(opacityRange.value, 10) : 100;
+
+            if (document.getElementById('logoSizeVal')) document.getElementById('logoSizeVal').innerText = logoState.size + 'px';
+            if (document.getElementById('logoOpacityVal')) document.getElementById('logoOpacityVal').innerText = logoState.opacity + '%';
 
             wrapper.style.display = logoState.visible ? 'block' : 'none';
             wrapper.className = 'absolute z-[15] pointer-events-none transition-all duration-200';
@@ -670,7 +1007,7 @@
             currentTheme = id;
             [1, 2, 3, 4].forEach(t => {
                 const el = document.getElementById('tplCard' + t);
-                if(el) el.className = (t === id) ? 'text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition' : 'text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition';
+                if (el) el.className = (t === id) ? 'text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition' : 'text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition';
             });
             const banner = document.getElementById('wmHeaderBanner');
             const inner = document.getElementById('wmInnerWrap');
@@ -884,7 +1221,7 @@
             ctx.font = `500 ${base * 0.44}px Inter, sans-serif`;
             ctx.fillText('Waktu & koordinat GPS terkunci sistem', detailX + base * 0.75, detailStartY + base * 4.15);
 
-            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.82);
             latestCaptureMeta = {
                 captured_at: new Date().toISOString(),
                 time_label: document.getElementById('wmTime').innerText,
@@ -1005,7 +1342,7 @@
                 if (capturedPhotosByMode[mode]) {
                     slot.innerHTML = `<img src="${capturedPhotosByMode[mode]}" class="w-full h-full object-cover rounded-xl">`;
                     slot.classList.remove('bg-slate-200/70', 'text-slate-400');
-                    if(chk) chk.classList.remove('hidden');
+                    if (chk) chk.classList.remove('hidden');
                     if (photoMetaByMode[mode] && photoMetaByMode[mode].time_label) {
                         metaEl.innerText = 'Jam ' + photoMetaByMode[mode].time_label;
                         metaEl.className = 'text-[9px] font-bold text-emerald-600 mb-1.5';
@@ -1015,7 +1352,7 @@
                 } else {
                     slot.innerHTML = 'Belum';
                     slot.classList.add('bg-slate-200/70', 'text-slate-400');
-                    if(chk) chk.classList.add('hidden');
+                    if (chk) chk.classList.add('hidden');
                     metaEl.innerText = mode === '0' ? 'Absen Masuk' : (mode === '50' ? 'Progres Kerja' : 'Absen Pulang');
                     metaEl.className = 'text-[9px] text-slate-400 mb-1.5';
                 }
@@ -1064,7 +1401,7 @@
             capturedPhotosByMode = { '0': null, '50': null, '100': null };
             photoMetaByMode = { '0': null, '50': null, '100': null };
             document.getElementById('dailyOpReportForm').reset();
-            document.getElementById('inpDI').value = user.daerah_irigasi; // Re-set D.I
+            document.getElementById('inpDI').value = user.daerah_irigasi;
             document.getElementById('customNoteInput').value = '';
             updateCustomNote();
             toggleManualTaskInput(true);
@@ -1094,8 +1431,7 @@
             `).join('');
         }
 
-        // 14. Submit Laporan ke Supabase (Tabel `laporan`)
-                // 14. Submit Laporan ke GAS (GDrive) lalu ke Supabase
+        // 14. Submit Laporan ke GAS (GDrive) lalu ke Supabase
         async function submitDailyReport(e) {
             e.preventDefault();
             if (!capturedPhotosByMode['0'] || !capturedPhotosByMode['50'] || !capturedPhotosByMode['100']) {
@@ -1111,13 +1447,9 @@
             btn.disabled = true;
             btn.innerText = 'Mengunggah Foto ke Drive...';
 
-            // ========================================================
-            // GANTI URL DI BAWAH INI DENGAN URL WEB APP GAS ANDA
-            // ========================================================
             const GAS_URL = "https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec";
-            
+
             try {
-                // 1. Kirim Data & Foto ke Google Apps Script (GDrive)
                 const payloadGAS = {
                     id_petugas: user.id_pegawai,
                     daerah_irigasi: user.daerah_irigasi,
@@ -1130,16 +1462,15 @@
                     method: 'POST',
                     body: JSON.stringify(payloadGAS)
                 });
-                
+
                 const resultGAS = await responseGAS.json();
-                
+
                 if (resultGAS.status !== 'success') {
                     throw new Error(resultGAS.message || 'Gagal upload ke Google Drive');
                 }
 
                 btn.innerText = 'Menyimpan ke Database...';
 
-                // 2. Jika upload ke GDrive sukses, simpan LINK-nya ke Supabase
                 const payloadSupabase = {
                     id_petugas: user.id_pegawai,
                     daerah_irigasi: user.daerah_irigasi,
@@ -1148,34 +1479,29 @@
                     status: 'terkirim',
                     lokasi_lat: photoMetaByMode['0'].lat,
                     lokasi_lng: photoMetaByMode['0'].lng,
-                    
-                    // Link dari GAS (lh3)
                     foto_0_url: resultGAS.data.foto_0_url,
                     foto_50_url: resultGAS.data.foto_50_url,
                     foto_100_url: resultGAS.data.foto_100_url,
-                    
-                    // FileId juga disimpan (untuk jaga-jaga jika folder dipindah)
                     foto_0_fileid: resultGAS.data.foto_0_url.split('/d/')[1],
                     foto_50_fileid: resultGAS.data.foto_50_url.split('/d/')[1],
                     foto_100_fileid: resultGAS.data.foto_100_url.split('/d/')[1],
-
                     waktu_foto_0: photoMetaByMode['0'].captured_at,
                     waktu_foto_50: photoMetaByMode['50'].captured_at,
                     waktu_foto_100: photoMetaByMode['100'].captured_at
                 };
 
-                const { data, error } = await supabaseClient.from('laporan').insert([payloadSupabase]);
+                const { error } = await supabaseClient.from('laporan').insert([payloadSupabase]);
                 if (error) throw error;
 
-                showToast('✅ Laporan berhasil dikirim!');
+                showToast('Laporan berhasil dikirim!');
                 executeResetSessionData();
-                
+
                 setTimeout(() => window.location.href = 'home.html', 1500);
 
             } catch (err) {
                 btn.disabled = false;
                 btn.innerText = 'Kirim Laporan & Reset Form';
-                showToast('❌ Gagal: ' + err.message);
+                showToast('Gagal: ' + err.message);
             }
         }
 
@@ -1189,7 +1515,7 @@
         }
         function verifyAdminGalleryUnlock() {
             const pin = document.getElementById('adminPinInput').value;
-            if (pin === '1234') { // PIN Default
+            if (pin === '1234') {
                 isGalleryAllowedByAdmin = true;
                 closeAdminGalleryModal();
                 showToast('Akses galeri diizinkan sementara (Admin).');
