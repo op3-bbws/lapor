@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk - BBWS Brantas</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="login-body">
+
+  <div class="login-shell">
+    <section class="login-promo" aria-label="Informasi Sistem">
+      <div>
+        <span class="badge badge-yellow" style="display: inline-block; margin-bottom: 18px;">BBWS BRANTAS</span>
+        <h2>Pemantauan & Pelaporan Lapangan Terpadu</h2>
+        <p>
+          Catat kondisi saluran, absensi, dan dokumentasi lapangan dengan waktu serta lokasi presisi dalam satu antarmuka.
+        </p>
+      </div>
+
+      <div style="border-top: 1px solid rgba(255,255,255,0.16); padding-top: 16px; font-size: 12.5px; color: rgba(255,255,255,0.78);">
+        Kementerian Pekerjaan Umum • Sistem Pelaporan Pegawai
+      </div>
+    </section>
+
+    <main class="login-card">
+      <div class="login-logo-wrap">
+        <img src="assets/img/logo.png" alt="Logo BBWS Brantas">
+      </div>
+
+      <h1>Selamat Datang</h1>
+      <p class="login-subtitle">Sistem Pelaporan Pegawai PUPR BBWS Brantas</p>
+
+      <form id="loginForm" class="login-form">
+        <input type="text" id="idPetugas" placeholder="ID Petugas (Cth: OPI-PPA-2)" required autocapitalize="characters" autocomplete="username">
+        <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+        <button type="submit" class="btn-primary" id="btnLogin">Masuk</button>
+      </form>
+
+      <p id="errorMsg" class="login-error"></p>
+    </main>
+  </div>
+
+  <script src="assets/js/supabase.js"></script>
+  <script>
+    initSupabase();
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnLogin');
+      const err = document.getElementById('errorMsg');
+      const id = document.getElementById('idPetugas').value.trim();
+      const pass = document.getElementById('password').value;
+
+      btn.textContent = 'Memuat...';
+      btn.disabled = true;
+      err.style.display = 'none';
+
+      try {
+        await login(id, pass);
+        window.location.href = 'home.html';
+      } catch (error) {
+        err.textContent = "Login gagal: Periksa ID Petugas dan Password.";
+        err.style.display = 'block';
+        btn.textContent = 'Masuk';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

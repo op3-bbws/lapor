@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1E3A8A">
+  <title>Raport Kinerja - BBWS Brantas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            pupr: {
+              navy: '#0F172A',
+              deep: '#1E3A8A',
+              blue: '#1D4ED8',
+              gold: '#F59E0B',
+              amber: '#FBBF24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F8FAFC;
+      background-image:
+        radial-gradient(circle at 88% 4%, rgba(29, 78, 216, 0.06), transparent 42%),
+        radial-gradient(circle at 12% 18%, rgba(245, 158, 11, 0.07), transparent 38%);
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(30, 58, 138, 0.08);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Sidebar & Footer selaras home.html */
+    .sidebar {
+      background: linear-gradient(180deg, #0F235E 0%, #1E3A8A 52%, #172554 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 10px 0 32px rgba(15, 23, 42, 0.12) !important;
+    }
+    .sidebar-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 12px 13px !important;
+      border-radius: 22px !important;
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      margin-bottom: 14px !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-brand-logo {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 11px !important;
+      object-fit: cover !important;
+      border: 1.5px solid rgba(251, 191, 36, 0.65) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      padding: 2px !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22) !important;
+    }
+    .sidebar-brand-title {
+      display: block !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #FFFFFF !important;
+      letter-spacing: -0.01em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-menu {
+      border-radius: 18px !important;
+      transition: all 0.2s ease !important;
+    }
+    .sidebar-menu:hover:not(.active) {
+      background: rgba(11, 19, 46, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .sidebar-menu.active {
+      background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%) !important;
+      color: #0F172A !important;
+      font-weight: 800 !important;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.28) !important;
+    }
+    .sidebar-menu.active svg {
+      fill: #0F172A !important;
+    }
+    .sidebar-footer {
+      padding: 14px 12px 18px 12px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: linear-gradient(180deg, rgba(10, 19, 51, 0.32) 0%, rgba(7, 14, 38, 0.56) 100%) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      border-bottom-left-radius: 26px !important;
+      border-bottom-right-radius: 26px !important;
+    }
+    .sidebar-clock-card {
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 22px !important;
+      padding: 13px 15px !important;
+      text-align: left !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-clock-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 5px !important;
+    }
+    .sidebar-live-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      color: #6EE7B7 !important;
+    }
+    .sidebar-live-dot {
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 9999px !important;
+      background: #10B981 !important;
+      box-shadow: 0 0 8px #10B981 !important;
+    }
+    .sidebar-clock-time {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      color: #FFFFFF !important;
+      letter-spacing: 0.04em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-clock-date {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: rgba(226, 232, 240, 0.82) !important;
+      margin-top: 2px !important;
+    }
+    .sidebar-logout-btn {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      padding: 11px 16px !important;
+      border-radius: 20px !important;
+      background: rgba(15, 23, 42, 0.56) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(248, 113, 113, 0.34) !important;
+      color: #FECACA !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(4, 9, 24, 0.22) !important;
+    }
+    .sidebar-logout-btn:hover {
+      background: rgba(220, 38, 38, 0.88) !important;
+      border-color: rgba(254, 202, 202, 0.45) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.34) !important;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR DESKTOP & TABLET -->
+  <aside class="sidebar" aria-label="Navigasi Utama">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="assets/img/logo.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Logo BBWS" class="sidebar-brand-logo">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-title">BBWS Brantas</span>
+          <span class="sidebar-brand-sub">PUPR • Pelaporan</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="home.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Beranda</span>
+        </a>
+        <a href="peta.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>Peta D.I</span>
+        </a>
+        <a href="kamera.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>Laporan</span>
+        </a>
+        <a href="raport.html" class="sidebar-menu active">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          <span>Raport</span>
+        </a>
+        <a href="profile.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          <span>Profil</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-clock-card" aria-label="Waktu Saat Ini">
+        <div class="sidebar-clock-top">
+          <span class="sidebar-live-badge">
+            <span class="sidebar-live-dot"></span>
+            WIB Aktif
+          </span>
+          <span id="sidebarPetugasCode" class="text-[10px] font-mono font-bold text-amber-300/90">O&P</span>
+        </div>
+        <div class="sidebar-clock-time tabular-nums" id="sidebarClockTime">--:--:--</div>
+        <div class="sidebar-clock-date" id="sidebarClockDate">Memuat tanggal...</div>
+      </div>
+
+      <button type="button" class="sidebar-logout-btn" id="btnLogout" title="Keluar dari akun">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Keluar Sesi</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="container">
+    <!-- HEADER SENADA DASHBOARD -->
+    <header class="header-large flex items-start justify-between gap-3" id="headerTitle">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="px-2 py-0.5 rounded-md bg-blue-100 text-pupr-deep text-[10px] font-extrabold uppercase tracking-wider">BBWS Brantas</span>
+          <span id="raportDataSourcePill" title="Status Koneksi Server BBWS Brantas" class="w-6 h-6 rounded-md bg-slate-200/80 text-slate-600 inline-flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </span>
+        </div>
+        <p>Rekapitulasi &amp; Evaluasi</p>
+        <h1>Raport Kinerja</h1>
+        <p id="raportUserSub" class="text-xs font-medium text-slate-500 mt-1">Memuat identitas petugas...</p>
+      </div>
+
+      <button type="button" onclick="loadRaportData(true)" title="Sinkronkan Data Server BBWS" class="w-11 h-11 rounded-2xl bg-white hover:bg-blue-50 text-pupr-blue flex items-center justify-center shadow-sm border border-slate-200/80 active:scale-95 transition shrink-0 mt-1 cursor-pointer">
+        <svg id="raportRefreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="space-y-6">
+      <!-- RINGKASAN STATISTIK -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div class="card glass-surface flex flex-col justify-between" style="padding: 18px;">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-pupr-blue flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase">Total Laporan</p>
+            <h3 id="statTotal" class="text-2xl font-extrabold text-slate-900 tabular-nums mt-0.5">0</h3>
+          </div>
+        </div>
+
+        <div class="card glass-surface flex flex-col justify-between" style="padding: 18px;">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase">Terverifikasi</p>
+            <h3 id="statVerif" class="text-2xl font-extrabold text-emerald-600 tabular-nums mt-0.5">0</h3>
+          </div>
+        </div>
+
+        <div class="card glass-surface flex flex-col justify-between" style="padding: 18px;">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase">Menunggu</p>
+            <h3 id="statPending" class="text-2xl font-extrabold text-amber-500 tabular-nums mt-0.5">0</h3>
+          </div>
+        </div>
+
+        <div class="card glass-surface flex flex-col justify-between" style="padding: 18px;">
+          <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase">Ditolak</p>
+            <h3 id="statTolak" class="text-2xl font-extrabold text-red-500 tabular-nums mt-0.5">0</h3>
+          </div>
+        </div>
+      </section>
+
+      <div class="bento-grid">
+        <!-- GRAFIK TREN 7 HARI -->
+        <section class="card glass-surface" style="padding: 22px;">
+          <div class="flex justify-between items-center mb-5">
+            <div>
+              <h2 class="section-title" style="margin-bottom: 2px;">Tren Laporan</h2>
+              <p class="text-xs font-medium text-slate-500">Aktivitas pelaporan 7 hari terakhir</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-blue-50 text-pupr-blue text-[11px] font-bold">7 Hari</span>
+          </div>
+          <div class="flex items-end justify-between h-44 gap-2" id="chartContainer"></div>
+        </section>
+
+        <!-- RIWAYAT LAPORAN -->
+        <section>
+          <div class="section-header">
+            <h2 class="section-title">Riwayat Laporan</h2>
+            <a href="kamera.html" class="section-link">+ Buat Laporan</a>
+          </div>
+          <div class="space-y-3" id="riwayatContainer">
+            <div class="card glass-surface text-center py-6 text-slate-400 text-xs font-semibold">
+              Memuat riwayat...
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL DETAIL LAPORAN -->
+  <div id="raportDetailModal" class="hidden fixed inset-0 z-[1100] bg-slate-950/75 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this) closeRaportDetailModal()">
+    <div class="bg-white text-slate-900 rounded-t-[28px] sm:rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto hide-scrollbar">
+      <div class="flex items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
+        <div>
+          <span id="raportModalBadge" class="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700">MENUNGGU</span>
+          <h3 id="raportModalTitle" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Detail Laporan</h3>
+          <p id="raportModalSub" class="text-xs text-slate-500 mt-0.5">-</p>
+        </div>
+        <button type="button" onclick="closeRaportDetailModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 shrink-0 border-0 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs">
+        <div class="grid grid-cols-3 gap-2.5" id="raportModalPhotos"></div>
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Daerah Irigasi</span>
+            <span id="raportModalDI" class="font-bold text-slate-900 text-right">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Waktu Kirim</span>
+            <span id="raportModalWaktu" class="font-bold text-slate-900 tabular-nums">-</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200/70">
+            <span class="text-slate-500 block mb-0.5">Catatan</span>
+            <p id="raportModalCatatan" class="font-medium text-slate-800">-</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="raportToastBox" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[1200] bg-slate-900/95 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 max-w-[90vw]">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="raportToastText">Notifikasi</span>
+  </div>
+
+  <!-- FLOATING NAV MOBILE -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi Mobile">
+    <a href="home.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Beranda</span>
+    </a>
+    <a href="peta.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span>Peta</span>
+    </a>
+    <a href="kamera.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span>Laporan</span>
+    </a>
+    <a href="raport.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      <span>Raport</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <span>Profil</span>
+    </a>
+  </nav>
+
+  <script>
+    let currentUser = null;
+    let raportCache = [];
+    let raportToastTimer = null;
+
+    function showRaportToast(msg) {
+      const box = document.getElementById('raportToastBox');
+      const text = document.getElementById('raportToastText');
+      if (!box || !text) return;
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(raportToastTimer);
+      raportToastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
+    }
+
+    function toLocalIso(d) {
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return '';
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    }
+
+    function getDemoRaport(profile) {
+      const now = Date.now();
+      const day = 86400000;
+      const di = profile?.daerah_irigasi || 'D.I Bening • BBWS Brantas';
+      return [
+        {
+          id: 'r-1',
+          jenis_pekerjaan: 'Pembersihan Saluran Sekunder',
+          daerah_irigasi: di,
+          status: 'diverifikasi',
+          created_at: new Date(now - 3600000 * 3).toISOString(),
+          catatan: 'Saluran bersih dan aliran air lancar.',
+          foto_0_url: 'https://placehold.co/320x240/1E3A8A/FBBF24?text=0%25+Awal',
+          foto_50_url: 'https://placehold.co/320x240/1D4ED8/FFFFFF?text=50%25+Proses',
+          foto_100_url: 'https://placehold.co/320x240/059669/FFFFFF?text=100%25+Selesai'
+        },
+        {
+          id: 'r-2',
+          jenis_pekerjaan: 'Pengerukan Sedimen Pintu Air',
+          daerah_irigasi: di,
+          status: 'terkirim',
+          created_at: new Date(now - day * 1).toISOString(),
+          catatan: 'Menunggu persetujuan pengamat.',
+          foto_0_url: 'https://placehold.co/320x240/1E3A8A/FBBF24?text=0%25+Awal',
+          foto_50_url: 'https://placehold.co/320x240/1D4ED8/FFFFFF?text=50%25+Proses',
+          foto_100_url: 'https://placehold.co/320x240/059669/FFFFFF?text=100%25+Selesai'
+        },
+        {
+          id: 'r-3',
+          jenis_pekerjaan: 'Perbaikan Tanggul Patok 12',
+          daerah_irigasi: di,
+          status: 'ditolak',
+          created_at: new Date(now - day * 2).toISOString(),
+          catatan: 'Mohon perjelas foto progres 50%.',
+          foto_0_url: 'https://placehold.co/320x240/1E3A8A/FBBF24?text=0%25+Awal',
+          foto_50_url: 'https://placehold.co/320x240/1D4ED8/FFFFFF?text=50%25+Proses',
+          foto_100_url: 'https://placehold.co/320x240/059669/FFFFFF?text=100%25+Selesai'
+        }
+      ];
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof initSupabase === 'function') initSupabase();
+
+      let session = null;
+      if (typeof checkSession === 'function') {
+        try { session = await checkSession(); } catch (e) {}
+      }
+
+      if (session && session.profile) {
+        currentUser = session.profile;
+      } else {
+        try {
+          currentUser = JSON.parse(localStorage.getItem('user_bbws') || 'null') || { id_petugas: 'OPI-SP-1', nama: 'Petugas Lapangan', daerah_irigasi: 'BBWS Brantas' };
+        } catch (e) {
+          currentUser = { id_petugas: 'OPI-SP-1', nama: 'Petugas Lapangan' };
+        }
+      }
+
+      const kode = currentUser?.id_petugas || currentUser?.id_pegawai || 'O&P';
+      document.getElementById('sidebarPetugasCode').textContent = kode;
+      document.getElementById('raportUserSub').textContent = `${currentUser?.nama || 'Petugas Lapangan'} • ${currentUser?.daerah_irigasi || 'BBWS Brantas'}`;
+
+      await loadRaportData(false);
+    });
+
+    async function loadRaportData(isManual) {
+      if (isManual) {
+        const icon = document.getElementById('raportRefreshIcon');
+        icon?.classList.remove('animate-spin');
+        void icon?.offsetWidth;
+        icon?.classList.add('animate-spin');
+        setTimeout(() => icon?.classList.remove('animate-spin'), 650);
+      }
+
+      const userId = currentUser?.id_petugas || currentUser?.id_pegawai;
+      const pill = document.getElementById('raportDataSourcePill');
+
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && userId) {
+        try {
+          const { data: laporan, error } = await supabaseClient
+            .from('laporan')
+            .select('*')
+            .eq('id_petugas', userId)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          raportCache = Array.isArray(laporan) ? laporan : [];
+          if (pill) {
+            pill.title = 'Terhubung ke Server BBWS Brantas';
+            pill.className = 'w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 inline-flex items-center justify-center';
+            pill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M5 13l4 4L19 7"/></svg>`;
+          }
+          if (isManual) showRaportToast('Data raport diperbarui dari Server BBWS Brantas.');
+        } catch (err) {
+          raportCache = getDemoRaport(currentUser);
+          if (pill) {
+            pill.title = 'Mode Sinkronisasi Offline BBWS';
+            pill.className = 'w-6 h-6 rounded-md bg-amber-100 text-amber-700 inline-flex items-center justify-center';
+            pill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>`;
+          }
+          if (isManual) showRaportToast('Data disinkronkan dari cache lokal Server BBWS.');
+        }
+      } else {
+        raportCache = getDemoRaport(currentUser);
+        if (isManual) showRaportToast('Data disinkronkan dari cache lokal Server BBWS.');
+      }
+
+      document.getElementById('statTotal').textContent = raportCache.length;
+      document.getElementById('statVerif').textContent = raportCache.filter(l => l.status === 'diverifikasi').length;
+      document.getElementById('statPending').textContent = raportCache.filter(l => l.status === 'terkirim').length;
+      document.getElementById('statTolak').textContent = raportCache.filter(l => l.status === 'ditolak').length;
+
+      const last7Days = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return toLocalIso(d);
+      });
+
+      const chartData = last7Days.map(date => raportCache.filter(l => toLocalIso(l.created_at) === date).length);
+      renderChart(last7Days, chartData);
+      renderRiwayat(raportCache);
+    }
+
+    function renderChart(labels, values) {
+      const container = document.getElementById('chartContainer');
+      const maxVal = Math.max(...values, 1);
+
+      container.innerHTML = labels.map((label, i) => {
+        const heightPercent = Math.round((values[i] / maxVal) * 100);
+        const dayName = new Date(`${label}T00:00:00`).toLocaleDateString('id-ID', { weekday: 'short' });
+
+        return `
+          <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+            <span class="text-xs font-bold text-pupr-blue tabular-nums">${values[i]}</span>
+            <div class="w-full max-w-[30px] bg-blue-100/80 rounded-t-lg relative flex items-end justify-center overflow-hidden" style="height: 100%;">
+              <div class="w-full bg-pupr-blue rounded-t-lg transition-all duration-500" style="height: ${heightPercent}%;"></div>
+            </div>
+            <span class="text-[11px] font-bold text-slate-500">${dayName}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRiwayat(data) {
+      const container = document.getElementById('riwayatContainer');
+      if (!data.length) {
+        container.innerHTML = `<div class="card glass-surface text-center py-6 text-slate-400 text-xs font-semibold">Belum ada riwayat laporan.</div>`;
+        return;
+      }
+
+      container.innerHTML = data.slice(0, 5).map((item, idx) => {
+        let badgeColor = 'bg-amber-100 text-amber-700';
+        let badgeText = 'MENUNGGU';
+        if (item.status === 'diverifikasi') { badgeColor = 'bg-emerald-100 text-emerald-700'; badgeText = 'DISETUJUI'; }
+        if (item.status === 'ditolak') { badgeColor = 'bg-red-100 text-red-700'; badgeText = 'DITOLAK'; }
+
+        const thumb = item.foto_100_url || item.foto_0_url || 'https://placehold.co/120x120/1E3A8A/FBBF24?text=PUPR';
+
+        return `
+          <div onclick="openRaportDetail(${idx})" class="card card-interactive glass-surface cursor-pointer flex items-center justify-between gap-3" style="padding: 14px 16px;">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-12 h-12 rounded-xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200">
+                <img src="${thumb}" onerror="this.src='https://placehold.co/120x120/1E3A8A/FBBF24?text=PUPR'" alt="Foto Laporan" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-sm font-extrabold text-slate-900 truncate">${item.jenis_pekerjaan || 'Laporan Harian'}</h4>
+                <p class="text-[11px] font-semibold text-slate-500 truncate">${item.daerah_irigasi || 'BBWS Brantas'} • ${new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg ${badgeColor} text-[10px] font-extrabold tracking-wider shrink-0">${badgeText}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openRaportDetail(idx) {
+      const item = raportCache[idx];
+      if (!item) return;
+
+      const badge = document.getElementById('raportModalBadge');
+      if (item.status === 'diverifikasi') {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-700';
+        badge.textContent = 'DISETUJUI';
+      } else if (item.status === 'ditolak') {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-red-100 text-red-700';
+        badge.textContent = 'DITOLAK';
+      } else {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700';
+        badge.textContent = 'MENUNGGU';
+      }
+
+      document.getElementById('raportModalTitle').textContent = item.jenis_pekerjaan || 'Laporan Harian';
+      document.getElementById('raportModalSub').textContent = item.daerah_irigasi || 'BBWS Brantas';
+      document.getElementById('raportModalDI').textContent = item.daerah_irigasi || '-';
+      document.getElementById('raportModalWaktu').textContent = new Date(item.created_at).toLocaleString('id-ID');
+      document.getElementById('raportModalCatatan').textContent = item.catatan || item.keterangan || 'Tidak ada catatan.';
+
+      const photos = [
+        { label: '0% Awal', url: item.foto_0_url },
+        { label: '50% Proses', url: item.foto_50_url },
+        { label: '100% Selesai', url: item.foto_100_url }
+      ];
+      document.getElementById('raportModalPhotos').innerHTML = photos.map(p => `
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-1.5 text-center">
+          <img src="${p.url || 'https://placehold.co/240x180/1E3A8A/FBBF24?text=Foto'}" onerror="this.src='https://placehold.co/240x180/1E3A8A/FBBF24?text=Foto'" alt="${p.label}" class="w-full h-20 rounded-lg object-cover">
+          <span class="block text-[10px] font-bold text-slate-700 mt-1">${p.label}</span>
+        </div>
+      `).join('');
+
+      const modal = document.getElementById('raportDetailModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeRaportDetailModal() {
+      const modal = document.getElementById('raportDetailModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Jam Sidebar
+    const clockTimeEl = document.getElementById('sidebarClockTime');
+    const clockDateEl = document.getElementById('sidebarClockDate');
+    function updateSidebarClock() {
+      const now = new Date();
+      if (clockTimeEl) clockTimeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (clockDateEl) clockDateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+
+    // Logout
+    document.getElementById('btnLogout')?.addEventListener('click', async () => {
+      if (typeof logout === 'function') await logout();
+      else {
+        try { localStorage.removeItem('user_bbws'); } catch (e) {}
+        showRaportToast('Sesi diakhiri.');
+      }
+    });
+
+    // Auto-Hide Bottom Nav pada layar mobile
+    let lastScrollY = window.scrollY;
+    const nav = document.getElementById('bottomNav');
+    const header = document.getElementById('headerTitle');
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      if (currentY > lastScrollY && currentY > 56) {
+        nav?.classList.add('hidden');
+        header?.classList.add('collapsed');
+      } else if (currentY < lastScrollY) {
+        nav?.classList.remove('hidden');
+        header?.classList.remove('collapsed');
+      }
+      lastScrollY = Math.max(currentY, 0);
+    }, { passive: true });
+  </script>
+</body>
+</html>

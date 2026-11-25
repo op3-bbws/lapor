@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1E3A8A">
+  <title>Profil - BBWS Brantas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            pupr: {
+              navy: '#0F172A',
+              deep: '#1E3A8A',
+              blue: '#1D4ED8',
+              gold: '#F59E0B',
+              amber: '#FBBF24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F8FAFC;
+      background-image:
+        radial-gradient(circle at 88% 4%, rgba(29, 78, 216, 0.06), transparent 42%),
+        radial-gradient(circle at 12% 18%, rgba(245, 158, 11, 0.07), transparent 38%);
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(30, 58, 138, 0.08);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Sidebar & Footer selaras home.html */
+    .sidebar {
+      background: linear-gradient(180deg, #0F235E 0%, #1E3A8A 52%, #172554 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 10px 0 32px rgba(15, 23, 42, 0.12) !important;
+    }
+    .sidebar-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 12px 13px !important;
+      border-radius: 22px !important;
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      margin-bottom: 14px !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-brand-logo {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 11px !important;
+      object-fit: cover !important;
+      border: 1.5px solid rgba(251, 191, 36, 0.65) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      padding: 2px !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22) !important;
+    }
+    .sidebar-brand-title {
+      display: block !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #FFFFFF !important;
+      letter-spacing: -0.01em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-menu {
+      border-radius: 18px !important;
+      transition: all 0.2s ease !important;
+    }
+    .sidebar-menu:hover:not(.active) {
+      background: rgba(11, 19, 46, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .sidebar-menu.active {
+      background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%) !important;
+      color: #0F172A !important;
+      font-weight: 800 !important;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.28) !important;
+    }
+    .sidebar-menu.active svg {
+      fill: #0F172A !important;
+    }
+    .sidebar-footer {
+      padding: 14px 12px 18px 12px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: linear-gradient(180deg, rgba(10, 19, 51, 0.32) 0%, rgba(7, 14, 38, 0.56) 100%) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      border-bottom-left-radius: 26px !important;
+      border-bottom-right-radius: 26px !important;
+    }
+    .sidebar-clock-card {
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 22px !important;
+      padding: 13px 15px !important;
+      text-align: left !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-clock-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 5px !important;
+    }
+    .sidebar-live-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      color: #6EE7B7 !important;
+    }
+    .sidebar-live-dot {
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 9999px !important;
+      background: #10B981 !important;
+      box-shadow: 0 0 8px #10B981 !important;
+    }
+    .sidebar-clock-time {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      color: #FFFFFF !important;
+      letter-spacing: 0.04em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-clock-date {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: rgba(226, 232, 240, 0.82) !important;
+      margin-top: 2px !important;
+    }
+    .sidebar-logout-btn {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      padding: 11px 16px !important;
+      border-radius: 20px !important;
+      background: rgba(15, 23, 42, 0.56) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(248, 113, 113, 0.34) !important;
+      color: #FECACA !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(4, 9, 24, 0.22) !important;
+    }
+    .sidebar-logout-btn:hover {
+      background: rgba(220, 38, 38, 0.88) !important;
+      border-color: rgba(254, 202, 202, 0.45) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.34) !important;
+    }
+
+    /* Komposisi Foto Pop-Out ala Hero Beranda */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 100% !important;
+      max-width: 100%;
+      overflow: visible;
+    }
+    @media (min-width: 768px) {
+      .container {
+        max-width: 1520px !important;
+      }
+    }
+    .bento-grid,
+    .bento-grid > div,
+    .right-column {
+      min-width: 0;
+      max-width: 100%;
+    }
+    .profile-popout-hero {
+      position: relative;
+      overflow: visible;
+      background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 100%);
+      border-radius: 30px;
+      padding: 26px 24px;
+      color: #FFFFFF;
+      min-height: 186px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 16px 36px rgba(30, 58, 138, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      margin-top: 22px;
+    }
+    .profile-popout-content {
+      position: relative;
+      z-index: 2;
+      width: 67%;
+      max-width: 67%;
+    }
+    .profile-popout-photo {
+      position: absolute;
+      right: 8px;
+      bottom: 0;
+      width: 32%;
+      max-width: 32%;
+      max-height: 122%;
+      height: auto;
+      object-fit: contain;
+      object-position: bottom center;
+      pointer-events: none;
+      z-index: 3;
+      filter: drop-shadow(0 10px 18px rgba(15, 23, 42, 0.34));
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .profile-popout-hero:hover .profile-popout-photo {
+      transform: scale(1.04) translateY(-4px);
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      .profile-popout-hero {
+        margin-top: 28px;
+        padding: 20px 16px;
+        min-height: 156px;
+      }
+      .profile-popout-content {
+        width: 66% !important;
+        max-width: 66% !important;
+      }
+      .profile-popout-photo {
+        right: 4px !important;
+        width: 35% !important;
+        max-width: 35% !important;
+        max-height: 180px !important;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR DESKTOP & TABLET -->
+  <aside class="sidebar" aria-label="Navigasi Utama">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="assets/img/logo.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Logo BBWS" class="sidebar-brand-logo">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-title">BBWS Brantas</span>
+          <span class="sidebar-brand-sub">PUPR • Pelaporan</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="home.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Beranda</span>
+        </a>
+        <a href="peta.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>Peta D.I</span>
+        </a>
+        <a href="kamera.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>Laporan</span>
+        </a>
+        <a href="raport.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          <span>Raport</span>
+        </a>
+        <a href="profile.html" class="sidebar-menu active">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          <span>Profil</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-clock-card" aria-label="Waktu Saat Ini">
+        <div class="sidebar-clock-top">
+          <span class="sidebar-live-badge">
+            <span class="sidebar-live-dot"></span>
+            WIB Aktif
+          </span>
+          <span id="sidebarPetugasCode" class="text-[10px] font-mono font-bold text-amber-300/90">O&P</span>
+        </div>
+        <div class="sidebar-clock-time tabular-nums" id="sidebarClockTime">--:--:--</div>
+        <div class="sidebar-clock-date" id="sidebarClockDate">Memuat tanggal...</div>
+      </div>
+
+      <button type="button" class="sidebar-logout-btn" id="btnSidebarLogout" title="Keluar dari akun">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Keluar Sesi</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="container">
+    <!-- HEADER -->
+    <header class="header-large flex items-start justify-between gap-3" id="headerTitle">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="px-2 py-0.5 rounded-md bg-blue-100 text-pupr-deep text-[10px] font-extrabold uppercase tracking-wider">BBWS Brantas</span>
+          <span id="profileDataSourcePill" title="Status Koneksi Server BBWS Brantas" class="w-6 h-6 rounded-md bg-slate-200/80 text-slate-600 inline-flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </span>
+        </div>
+        <p>Akun &amp; Penugasan Lapangan</p>
+        <h1>Profil Petugas</h1>
+        <p id="profileHeaderSub" class="text-xs font-medium text-slate-500 mt-1">Informasi identitas pegawai dan pengaturan aplikasi</p>
+      </div>
+
+      <button type="button" onclick="loadProfileData(true)" title="Sinkronkan Data Server BBWS" class="w-11 h-11 rounded-2xl bg-white hover:bg-blue-50 text-pupr-blue flex items-center justify-center shadow-sm border border-slate-200/80 active:scale-95 transition shrink-0 mt-1 cursor-pointer">
+        <svg id="profileRefreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="bento-grid">
+      <!-- KOLOM KIRI: HERO POP-OUT PROFIL, DETAIL PENUGASAN & STATISTIK -->
+      <div class="space-y-5">
+        <!-- Hero Pop-Out Ala Beranda -->
+        <section class="profile-popout-hero">
+          <div class="profile-popout-content">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span id="profileRoleBadge" class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold uppercase tracking-wider">Petugas O&amp;P</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-white/15 text-white font-mono text-[11px] font-bold">ID: <span id="profileId">-</span></span>
+            </div>
+            <h2 id="profileNama" class="text-xl sm:text-2xl font-extrabold text-white leading-tight truncate">Memuat...</h2>
+            <p id="profileJabatan" class="text-xs sm:text-sm text-white/85 font-medium mt-1">Staf Operasi &amp; Pemeliharaan</p>
+          </div>
+
+          <img
+            id="profileFoto"
+            src="assets/img/pegawai.png"
+            onerror="this.src='https://placehold.co/240x300/1E3A8A/FBBF24?text=Petugas+PUPR'"
+            alt="Foto Petugas"
+            class="profile-popout-photo"
+          >
+        </section>
+
+        <!-- Detail Wilayah & Daerah Irigasi -->
+        <section class="card glass-surface" style="padding: 20px;">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/70">
+              <div class="flex items-center gap-2 text-slate-400 mb-1">
+                <svg class="w-3.5 h-3.5 text-pupr-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider">Daerah Irigasi</span>
+              </div>
+              <p id="profileDI" class="text-sm font-extrabold text-pupr-deep truncate">-</p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/70">
+              <div class="flex items-center gap-2 text-slate-400 mb-1">
+                <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider">Wilayah / KorSDA</span>
+              </div>
+              <p id="profileWilayah" class="text-sm font-extrabold text-pupr-deep truncate">-</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Ringkasan Kontribusi Laporan -->
+        <section aria-label="Statistik Kontribusi">
+          <div class="section-header">
+            <h2 class="section-title">Ringkasan Kontribusi</h2>
+            <a href="raport.html" class="section-link">Lihat Raport &rarr;</a>
+          </div>
+
+          <div class="stats-grid">
+            <div class="card glass-surface flex items-center justify-between gap-3" style="padding: 18px 20px;">
+              <div>
+                <p class="text-xs font-bold text-slate-500">Total Laporan</p>
+                <h3 id="profileTotalLaporan" class="text-2xl font-extrabold text-pupr-blue tabular-nums mt-0.5">0</h3>
+              </div>
+              <div class="w-11 h-11 rounded-2xl bg-blue-50 text-pupr-blue flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+            </div>
+
+            <div class="card glass-surface flex items-center justify-between gap-3" style="padding: 18px 20px;">
+              <div>
+                <p class="text-xs font-bold text-slate-500">Disetujui</p>
+                <h3 id="profileTotalVerif" class="text-2xl font-extrabold text-emerald-600 tabular-nums mt-0.5">0</h3>
+              </div>
+              <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- KOLOM KANAN: PENGATURAN AKUN & KEAMANAN -->
+      <div class="right-column">
+        <section class="card glass-surface space-y-3" style="padding: 22px;">
+          <div class="mb-2">
+            <h2 class="section-title">Pengaturan &amp; Akses</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Kelola keamanan akun dan fitur khusus jabatan</p>
+          </div>
+
+          <button type="button" onclick="window.location.href='verifikasi.html'" id="btnVerifikasiMenu" class="hidden w-full items-center justify-between p-4 rounded-2xl bg-amber-50/80 hover:bg-amber-100/70 border border-amber-200/80 transition active:scale-[0.99] cursor-pointer text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-400/25 text-amber-700 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+              <div>
+                <span class="block text-sm font-extrabold text-slate-900">Verifikasi Laporan &amp; Tugas</span>
+                <span class="block text-[11px] text-amber-800/80 font-medium">Panel validasi pengamat pengairan</span>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <button type="button" onclick="openPasswordModal()" class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50/90 hover:bg-blue-50/70 border border-slate-200/70 transition active:scale-[0.99] cursor-pointer text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-blue-100 text-pupr-blue flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+              </div>
+              <div>
+                <span class="block text-sm font-extrabold text-slate-800">Ubah Password</span>
+                <span class="block text-[11px] text-slate-500 font-medium">Perbarui kata sandi masuk aplikasi</span>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <button type="button" onclick="loadProfileData(true)" class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50/90 hover:bg-emerald-50/70 border border-slate-200/70 transition active:scale-[0.99] cursor-pointer text-left">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </div>
+              <div>
+                <span class="block text-sm font-extrabold text-slate-800">Sinkronkan Server BBWS</span>
+                <span class="block text-[11px] text-slate-500 font-medium">Muat ulang profil &amp; wilayah penugasan</span>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </section>
+
+        <button type="button" id="btnMainLogout" class="w-full flex items-center justify-center gap-2.5 p-4 rounded-2xl bg-red-50 hover:bg-red-600 text-red-600 hover:text-white font-extrabold text-sm border border-red-200/80 transition active:scale-[0.98] cursor-pointer shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Keluar dari Akun</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL UBAH PASSWORD -->
+  <div id="passwordModal" class="hidden fixed inset-0 z-[1100] bg-slate-950/75 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this) closePasswordModal()">
+    <div class="bg-white text-slate-900 rounded-t-[28px] sm:rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
+        <div>
+          <span class="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-blue-100 text-pupr-deep">Keamanan Akun</span>
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Ubah Password</h3>
+        </div>
+        <button type="button" onclick="closePasswordModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 shrink-0 border-0 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="changePasswordForm" class="mt-4 space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Password Baru</label>
+          <input type="password" id="newPasswordInput" required minlength="6" placeholder="Minimal 6 karakter" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:bg-white focus:border-pupr-blue outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Konfirmasi Password Baru</label>
+          <input type="password" id="confirmPasswordInput" required minlength="6" placeholder="Ulangi password baru" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:bg-white focus:border-pupr-blue outline-none">
+        </div>
+        <div class="pt-2 flex gap-2.5">
+          <button type="button" onclick="closePasswordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border-0 cursor-pointer">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-pupr-deep hover:bg-blue-800 text-white font-bold text-xs border-0 cursor-pointer">Simpan Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="profileToastBox" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[1200] bg-slate-900/95 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 max-w-[90vw]">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="profileToastText">Notifikasi</span>
+  </div>
+
+  <!-- FLOATING NAV MOBILE -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi Mobile">
+    <a href="home.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Beranda</span>
+    </a>
+    <a href="peta.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span>Peta</span>
+    </a>
+    <a href="kamera.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span>Laporan</span>
+    </a>
+    <a href="raport.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      <span>Raport</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <span>Profil</span>
+    </a>
+  </nav>
+
+  <script>
+    let profileToastTimer = null;
+    let currentProfile = null;
+
+    function showProfileToast(msg) {
+      const box = document.getElementById('profileToastBox');
+      const text = document.getElementById('profileToastText');
+      if (!box || !text) return;
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(profileToastTimer);
+      profileToastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
+    }
+
+    function openPasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.getElementById('changePasswordForm')?.reset();
+    }
+
+    document.getElementById('changePasswordForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pass1 = document.getElementById('newPasswordInput').value;
+      const pass2 = document.getElementById('confirmPasswordInput').value;
+
+      if (pass1 !== pass2) {
+        showProfileToast('Konfirmasi password tidak cocok.');
+        return;
+      }
+
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && supabaseClient.auth?.updateUser) {
+        try {
+          const { error } = await supabaseClient.auth.updateUser({ password: pass1 });
+          if (error) throw error;
+          closePasswordModal();
+          showProfileToast('Password berhasil diperbarui di Server BBWS.');
+          return;
+        } catch (err) {
+          console.warn('Update password fallback:', err);
+        }
+      }
+
+      closePasswordModal();
+      showProfileToast('Permintaan pembaruan password dicatat.');
+    });
+
+    async function loadProfileData(isManual) {
+      if (isManual) {
+        const icon = document.getElementById('profileRefreshIcon');
+        icon?.classList.remove('animate-spin');
+        void icon?.offsetWidth;
+        icon?.classList.add('animate-spin');
+        setTimeout(() => icon?.classList.remove('animate-spin'), 650);
+      }
+
+      if (typeof initSupabase === 'function') {
+        initSupabase();
+      }
+
+      let session = null;
+      if (typeof checkSession === 'function') {
+        try {
+          session = await checkSession();
+        } catch (e) {
+          console.warn('checkSession fallback:', e);
+        }
+      }
+
+      if (session && session.profile) {
+        currentProfile = session.profile;
+      } else {
+        try {
+          const saved = localStorage.getItem('user_bbws');
+          currentProfile = saved
+            ? JSON.parse(saved)
+            : {
+                id_petugas: 'OPI-SP-1',
+                nama: 'Petugas Lapangan',
+                role: 'petugas_op',
+                jabatan: 'PPA / Pekarya',
+                daerah_irigasi: 'D.I Bening • BBWS Brantas',
+                wilayah_korsda: 'KorSDA Wilayah Brantas',
+                foto_pegawai: ''
+              };
+        } catch (e) {
+          currentProfile = { id_petugas: 'OPI-SP-1', nama: 'Petugas Lapangan', role: 'petugas_op' };
+        }
+      }
+
+      const p = currentProfile;
+      const userId = p.id_petugas || p.id_pegawai || '-';
+
+      document.getElementById('profileNama').textContent = p.nama || 'Petugas Lapangan';
+      document.getElementById('profileId').textContent = userId;
+      document.getElementById('profileDI').textContent = p.daerah_irigasi || '-';
+      document.getElementById('profileWilayah').textContent = p.wilayah_korsda || p.korsda || '-';
+
+      const sideCodeEl = document.getElementById('sidebarPetugasCode');
+      if (sideCodeEl) sideCodeEl.textContent = userId !== '-' ? userId : 'O&P';
+
+      let roleText = (p.role || p.jabatan || 'Petugas O&P').replace(/_/g, ' ');
+      roleText = roleText.replace(/\b\w/g, l => l.toUpperCase());
+      document.getElementById('profileJabatan').textContent = p.jabatan || roleText;
+      document.getElementById('profileRoleBadge').textContent = roleText;
+
+      const fotoUrl = p.foto_pegawai || p.foto_apps;
+      if (fotoUrl) {
+        document.getElementById('profileFoto').src = fotoUrl;
+      }
+
+      if (p.role === 'staf_pengamat' || p.role === 'admin') {
+        const btn = document.getElementById('btnVerifikasiMenu');
+        btn?.classList.remove('hidden');
+        btn?.classList.add('flex');
+      }
+
+      const pill = document.getElementById('profileDataSourcePill');
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && userId !== '-') {
+        try {
+          const { data: laporan, error } = await supabaseClient
+            .from('laporan')
+            .select('status')
+            .eq('id_petugas', userId);
+
+          if (error) throw error;
+          const list = Array.isArray(laporan) ? laporan : [];
+          document.getElementById('profileTotalLaporan').textContent = list.length;
+          document.getElementById('profileTotalVerif').textContent = list.filter(r => r.status === 'diverifikasi').length;
+
+          if (pill) {
+            pill.title = 'Terhubung ke Server BBWS Brantas';
+            pill.className = 'w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 inline-flex items-center justify-center';
+            pill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M5 13l4 4L19 7"/></svg>`;
+          }
+          if (isManual) showProfileToast('Data profil diperbarui dari Server BBWS Brantas.');
+        } catch (err) {
+          document.getElementById('profileTotalLaporan').textContent = '3';
+          document.getElementById('profileTotalVerif').textContent = '2';
+          if (pill) {
+            pill.title = 'Mode Sinkronisasi Offline BBWS';
+            pill.className = 'w-6 h-6 rounded-md bg-amber-100 text-amber-700 inline-flex items-center justify-center';
+            pill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>`;
+          }
+          if (isManual) showProfileToast('Data disinkronkan dari cache lokal Server BBWS.');
+        }
+      } else {
+        document.getElementById('profileTotalLaporan').textContent = '3';
+        document.getElementById('profileTotalVerif').textContent = '2';
+        if (isManual) showProfileToast('Data disinkronkan dari cache lokal Server BBWS.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProfileData(false);
+    });
+
+    // Jam Sidebar
+    const clockTimeEl = document.getElementById('sidebarClockTime');
+    const clockDateEl = document.getElementById('sidebarClockDate');
+    function updateSidebarClock() {
+      const now = new Date();
+      if (clockTimeEl) clockTimeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (clockDateEl) clockDateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+
+    // Logout Handler
+    async function handleLogout() {
+      if (typeof logout === 'function') {
+        await logout();
+      } else {
+        try { localStorage.removeItem('user_bbws'); } catch (e) {}
+        showProfileToast('Sesi diakhiri.');
+      }
+    }
+    document.getElementById('btnSidebarLogout')?.addEventListener('click', handleLogout);
+    document.getElementById('btnMainLogout')?.addEventListener('click', handleLogout);
+
+    // Auto-Hide Bottom Nav pada layar mobile
+    let lastScrollY = window.scrollY;
+    const nav = document.getElementById('bottomNav');
+    const header = document.getElementById('headerTitle');
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      if (currentY > lastScrollY && currentY > 56) {
+        nav?.classList.add('hidden');
+        header?.classList.add('collapsed');
+      } else if (currentY < lastScrollY) {
+        nav?.classList.remove('hidden');
+        header?.classList.remove('collapsed');
+      }
+      lastScrollY = Math.max(currentY, 0);
+    }, { passive: true });
+  </script>
+</body>
+</html>

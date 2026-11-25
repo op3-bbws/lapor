@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kamera Inspeksi - BBWS Brantas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        pupr: { navy: '#0B1120', deep: '#1E3A8A', blue: '#1D4ED8', gold: '#F59E0B' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            background-color: #070B14;
+            color: #FFFFFF;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+        #cameraStream { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 0.25s ease; }
+        #cameraStream.mirror { transform: scaleX(-1); }
+        .camera-grid { background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 33.333% 33.333%; }
+        .orient-icon { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+        body[data-phys-orient="landscape-left"] .orient-icon { transform: rotate(90deg); }
+        body[data-phys-orient="landscape-right"] .orient-icon { transform: rotate(-90deg); }
+        #watermarkContainer { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: bottom left; }
+        body[data-phys-orient="landscape-left"] #watermarkContainer { transform: rotate(90deg) translateY(100%); transform-origin: top left; }
+        body[data-phys-orient="landscape-right"] #watermarkContainer { transform: rotate(-90deg) translateX(-100%); transform-origin: bottom left; }
+        @keyframes pulsePop { 0% { transform: scale(0.7); opacity: 0; } 40% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        .countdown-pop { animation: pulsePop 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        #flashEffect { position: absolute; inset: 0; background: #FFFFFF; z-index: 45; opacity: 0; pointer-events: none; }
+        .flash-animate { animation: flashAnim 0.32s ease-out; }
+        @keyframes flashAnim { 0% { opacity: 0.92; } 100% { opacity: 0; } }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase.js"></script>
+</head>
+<body class="relative select-none font-sans antialiased" data-phys-orient="portrait">
+
+    <!-- 1. VIEWFINDER KAMERA -->
+    <div id="viewfinderStage" class="absolute inset-0 overflow-hidden bg-slate-950">
+        <video id="cameraStream" autoplay playsinline muted></video>
+        <div id="gridOverlay" class="camera-grid absolute inset-0 z-[5] pointer-events-none"></div>
+        
+        <div id="cameraFallback" class="hidden absolute inset-0 z-[6] bg-gradient-to-b from-slate-900 via-slate-950 to-black flex flex-col items-center justify-center px-6 text-center">
+            <div class="w-16 h-16 rounded-3xl bg-amber-500/15 border border-amber-400/30 text-amber-400 flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3l18 18"/></svg>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-white">Akses Kamera Diperlukan</h2>
+            <p id="cameraErrorMsg" class="text-xs text-slate-400 max-w-xs mt-1.5 leading-relaxed">Izinkan akses kamera pada browser melalui HTTPS atau Localhost untuk mengambil foto verifikasi lapangan.</p>
+            <div class="flex flex-wrap items-center justify-center gap-2.5 mt-5">
+                <button type="button" onclick="initCamera()" class="px-4 py-2.5 rounded-xl bg-pupr-blue hover:bg-blue-600 text-white text-xs font-bold transition shadow-lg">Coba Aktifkan Ulang</button>
+                <button type="button" onclick="simulateCameraCapture()" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 text-xs font-semibold transition">Simulasi Jepret (Demo)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logo Live Overlay -->
+    <div id="liveLogoWrapper" class="absolute z-[15] top-20 right-4 pointer-events-none transition-all duration-200">
+        <img id="liveLogoImg" src="" alt="Logo Instansi" class="orient-icon w-14 h-14 object-contain rounded-xl border-2 border-white shadow-lg bg-white/10">
+    </div>
+
+    <!-- 2. UI OVERLAY UTAMA -->
+    <div class="relative z-20 h-full w-full flex flex-col justify-between pointer-events-none">
+        <!-- HEADER -->
+        <header class="pointer-events-auto flex items-center justify-between gap-2 px-3.5 sm:px-5 pt-3.5 pb-5 bg-gradient-to-b from-black/85 via-black/45 to-transparent">
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="window.location.href='home.html'" title="Kembali ke Beranda" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white transition active:scale-95">
+                    <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                </button>
+                <button type="button" onclick="toggleGrid()" id="btnQuickGrid" title="Garis Bantu Grid" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-amber-300 transition active:scale-95">
+                    <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 9h16M4 15h16M9 4v16M15 4v16"/></svg>
+                </button>
+            </div>
+
+            <button type="button" onclick="openReportFormSheet()" class="flex items-center gap-2 bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-full text-white transition active:scale-95 shadow-lg whitespace-nowrap">
+                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span class="text-xs font-bold tracking-wide">Laporan</span>
+                <span id="photoProgressCountBadge" class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black leading-none">0/3</span>
+            </button>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="switchCamera()" title="Putar Kamera" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white transition active:scale-95">
+                    <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- WATERMARK & TOOLS -->
+        <div class="flex-1 relative flex items-end justify-between px-4 sm:px-6 pb-3 max-w-4xl w-full mx-auto">
+            <div id="watermarkContainer" class="max-w-[82%] sm:max-w-md pointer-events-none">
+                <div id="watermarkOverlay" class="w-fit max-w-full rounded-2xl transition-all duration-300 font-mono">
+                    <div id="wmHeaderBanner" class="hidden items-center gap-2 bg-pupr-blue text-white px-3 py-1 rounded-t-xl text-[10px] sm:text-xs font-extrabold tracking-wide uppercase">
+                        <span class="w-2 h-2 rounded-full bg-amber-400"></span><span>INSPEKSI LAPANGAN • BBWS BRANTAS</span>
+                    </div>
+                    <div id="wmInnerWrap" class="p-0.5 rounded-2xl">
+                        <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+                            <span id="wmId" class="bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded-md text-xs shadow-sm">MEMUAT...</span>
+                            <span id="wmTime" class="bg-white text-slate-950 font-extrabold px-2 py-0.5 rounded-md text-xs shadow-sm tabular-nums">--:--</span>
+                            <span id="wmProgressBadge" class="bg-pupr-blue text-white font-extrabold px-2 py-0.5 rounded-md text-xs shadow-sm">0%</span>
+                        </div>
+                        <div id="wmDetailBox" class="border-l-[3px] border-amber-400 pl-2.5 py-0.5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                            <p id="wmDate" class="font-bold text-xs text-white">Memuat tanggal...</p>
+                            <p id="wmAddress" class="text-[11px] text-slate-100 leading-snug mt-0.5">Mendeteksi lokasi...</p>
+                            <p id="wmCoords" class="text-[11px] font-semibold text-amber-300 mt-0.5 tabular-nums">Menunggu GPS...</p>
+                            <p id="wmNoteDisplay" class="hidden text-[11px] font-semibold text-sky-200 mt-1 bg-black/50 px-2 py-0.5 rounded-md w-fit"></p>
+                            <div class="flex items-center gap-1 mt-1 text-[10px] text-emerald-300 font-sans font-medium">
+                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <span>Waktu & GPS terkunci</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pointer-events-auto flex flex-col items-center gap-2.5 mb-2">
+                <button type="button" onclick="cycleTimer()" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="timerLabel" class="orient-icon">0s</span></button>
+                <button type="button" onclick="cycleZoom()" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="zoomLabel" class="orient-icon">1.0x</span></button>
+                <button type="button" onclick="openSheet('templateSheet'); setTimeout(() => document.getElementById('customNoteInput').focus(), 200)" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                <button type="button" onclick="updateLocationInfo(true)" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-emerald-300 transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="pointer-events-auto pt-3 pb-6 sm:pb-7 px-4 bg-gradient-to-t from-black via-black/85 to-transparent">
+            <div class="max-w-md mx-auto">
+                <div class="flex items-center justify-center gap-2 mb-5">
+                    <button type="button" onclick="setMode('0')" id="btnMode0" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5"><span>0% Awal</span><span id="chkMode0" class="hidden text-emerald-800 font-black">✓</span></button>
+                    <button type="button" onclick="setMode('50')" id="btnMode50" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/10 transition flex items-center gap-1.5"><span>50% Proses</span><span id="chkMode50" class="hidden text-emerald-400 font-black">✓</span></button>
+                    <button type="button" onclick="setMode('100')" id="btnMode100" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/10 transition flex items-center gap-1.5"><span>100% Selesai</span><span id="chkMode100" class="hidden text-emerald-400 font-black">✓</span></button>
+                </div>
+
+                <div class="flex items-center justify-between px-4 sm:px-8">
+                    <button type="button" onclick="openReportFormSheet()" class="flex flex-col items-center gap-1 group">
+                        <div id="sessionThumbBox" class="w-12 h-12 rounded-2xl bg-white/15 group-hover:bg-white/25 border border-white/25 backdrop-blur-md flex items-center justify-center overflow-hidden transition"><svg class="w-5 h-5 text-slate-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+                        <span class="text-[10px] font-semibold text-slate-300">Sesi Foto</span>
+                    </button>
+
+                    <button type="button" onclick="triggerCapture()" aria-label="Ambil Foto" class="w-20 h-20 rounded-full border-4 border-white p-1.5 flex items-center justify-center bg-transparent active:scale-90 transition shadow-[0_0_28px_rgba(255,255,255,0.25)]"><div class="w-full h-full bg-white hover:bg-slate-100 rounded-full transition"></div></button>
+
+                    <button type="button" onclick="openSheet('templateSheet')" class="flex flex-col items-center gap-1 group">
+                        <div class="w-12 h-12 rounded-2xl bg-white/15 group-hover:bg-white/25 border border-white/25 backdrop-blur-md flex items-center justify-center text-white transition"><svg class="w-5 h-5 text-sky-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg></div>
+                        <span class="text-[10px] font-semibold text-slate-300">Templat</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-center gap-6 mt-3.5 text-[11px] font-bold">
+                    <button type="button" onclick="openReportFormSheet()" class="text-slate-400 hover:text-white transition">Laporan</button>
+                    <span class="text-white border-b-2 border-amber-400 pb-0.5">Kamera</span>
+                    <button type="button" onclick="window.location.href='home.html'" class="text-slate-400 hover:text-white transition">Beranda</button>
+                    <button type="button" onclick="openSheet('settingsSheet')" class="text-slate-400 hover:text-white transition">Setelan</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- BOTTOM SHEET: PENGATURAN TERORGANISIR -->
+    <div id="settingsSheet" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('settingsSheet')">
+        <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kamera & Sistem</h3><p class="text-[11px] text-slate-500">Kontrol orientasi, keamanan galeri & koneksi Supabase</p></div>
+                <button type="button" onclick="closeSheet('settingsSheet')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <div class="space-y-4 mt-4 text-xs">
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between"><div><p class="font-bold text-slate-900">Orientasi Kamera & Watermark</p><p class="text-[11px] text-slate-500">Otomatis mendeteksi kemiringan HP meski rotasi layar terkunci</p></div><span id="sensorStatusBadge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">Sensor Siap</span></div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setOrientationMode('auto')" id="oriMode-auto" class="py-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold">Auto Sensor</button>
+                        <button type="button" onclick="setOrientationMode('portrait')" id="oriMode-portrait" class="py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold">Kunci Potret</button>
+                        <button type="button" onclick="setOrientationMode('landscape')" id="oriMode-landscape" class="py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold">Kunci Lanskap</button>
+                    </div>
+                    <button type="button" onclick="requestMotionPermission()" id="btnIosSensor" class="w-full py-2 rounded-xl bg-slate-900 text-white font-bold text-[11px] hover:bg-slate-800 transition">Aktifkan / Kalibrasi Sensor Kemiringan</button>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between gap-3">
+                    <div><p class="font-bold text-slate-900">Kebijakan Anti-Manipulasi Galeri</p><p class="text-[11px] text-slate-600 mt-0.5">Unggah galeri dikunci untuk mencegah foto lama. Hanya Admin yang dapat membuka.</p></div>
+                    <button type="button" onclick="closeSheet('settingsSheet'); handleGalleryButtonClick();" class="shrink-0 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px]">Otorisasi</button>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                    <div class="flex items-center justify-between"><p class="font-bold text-slate-900">Koneksi Backend Supabase</p><span id="supabaseStatusBadge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">Terhubung</span></div>
+                    <p class="text-[10px] text-slate-500">Koneksi dikelola terpusat via sistem autentikasi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET 2: TEMPLAT & KETERANGAN -->
+    <div id="templateSheet" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('templateSheet')">
+        <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Templat & Keterangan Lapangan</h3><p class="text-[11px] text-slate-500">Waktu, lokasi & koordinat dikunci sistem</p></div>
+                <button type="button" onclick="closeSheet('templateSheet')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <div class="mt-4">
+                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5">Pilih Gaya Templat</p>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button type="button" onclick="selectTemplate(1)" id="tplCard1" class="text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition"><div class="flex items-center gap-1 mb-1.5"><span class="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">ID</span><span class="bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">11:48</span></div><p class="text-xs font-bold text-slate-900">Timemark PUPR</p><p class="text-[10px] text-slate-500">Standar verifikasi lapangan</p></button>
+                    <button type="button" onclick="selectTemplate(2)" id="tplCard2" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-pupr-blue text-white text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">INSPEKSI BBWS</div><p class="text-xs font-bold text-slate-900">Kartu Inspeksi</p><p class="text-[10px] text-slate-500">Header biru instansi</p></button>
+                    <button type="button" onclick="selectTemplate(3)" id="tplCard3" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-slate-900 text-sky-300 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">DARK GLASS</div><p class="text-xs font-bold text-slate-900">Gelap Elegan</p><p class="text-[10px] text-slate-500">Kontras tinggi transparan</p></button>
+                    <button type="button" onclick="selectTemplate(4)" id="tplCard4" class="text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition"><div class="bg-slate-200 text-slate-800 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 w-fit">MINIMALIS</div><p class="text-xs font-bold text-slate-900">Minimalis Bersih</p><p class="text-[10px] text-slate-500">Ringkas tanpa latar kotak</p></button>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <div class="flex items-center justify-between mb-1.5"><label for="customNoteInput" class="text-xs font-extrabold text-slate-800">Keterangan / Catatan Pekerjaan</label><span class="text-[10px] font-semibold text-pupr-blue bg-blue-50 px-2 py-0.5 rounded-md">Opsional</span></div>
+                <textarea id="customNoteInput" rows="2" maxlength="110" oninput="updateCustomNote()" placeholder="Contoh: Babat rumput saluran sekunder HM 10+00 s/d 12+50..." class="w-full p-3 rounded-2xl border border-slate-300 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-pupr-blue focus:ring-2 focus:ring-blue-500/20"></textarea>
+                <button type="button" onclick="closeSheet('templateSheet')" class="mt-3.5 w-full py-3 rounded-2xl bg-pupr-blue hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition shadow-md">Terapkan Templat & Keterangan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET 3: FORMULIR LAPORAN -->
+    <div id="reportFormSheet" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex-col justify-end" onclick="if(event.target===this) closeSheet('reportFormSheet')">
+        <div class="bg-white text-slate-900 rounded-t-[28px] max-w-2xl w-full mx-auto shadow-2xl border-t border-slate-200 max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+                <div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span id="formRoleBadge" class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-blue-100 text-pupr-blue">PPA / PEKARYA</span>
+                        <span id="photoLockStatus" class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">Terkunci (Butuh Foto 0%, 50%, 100%)</span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Laporan Kinerja & Absensi Harian</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openConfirmResetModal()" class="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 transition" title="Reset Data Sesi"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    <button type="button" onclick="closeSheet('reportFormSheet')" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                </div>
+            </div>
+
+            <form id="dailyOpReportForm" onsubmit="submitDailyReport(event)" class="p-5 sm:p-6 overflow-y-auto hide-scrollbar space-y-5 text-xs sm:text-sm">
+                <div class="space-y-3 pb-4 border-b border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">1. Dokumentasi Progres & Absensi *</p>
+                        <span id="attendanceSummaryBadge" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">Belum Absen Masuk</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center"><span class="text-[11px] font-extrabold text-slate-800">0% Awal</span><span id="metaTime0" class="text-[9px] text-slate-400 mb-1.5">Absen Masuk</span><div id="slotImg0" onclick="previewSlotPhoto('0')" class="w-full h-24 rounded-xl bg-slate-200/70 flex items-center justify-center overflow-hidden mb-2 text-[10px] text-slate-400 cursor-pointer hover:opacity-85 transition">Belum</div><button type="button" onclick="jumpToCameraMode('0')" class="w-full py-1.5 rounded-lg bg-pupr-blue hover:bg-blue-700 text-white text-[11px] font-bold transition">Ambil 0%</button></div>
+                        <div class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center"><span class="text-[11px] font-extrabold text-slate-800">50% Proses</span><span id="metaTime50" class="text-[9px] text-slate-400 mb-1.5">Progres Kerja</span><div id="slotImg50" onclick="previewSlotPhoto('50')" class="w-full h-24 rounded-xl bg-slate-200/70 flex items-center justify-center overflow-hidden mb-2 text-[10px] text-slate-400 cursor-pointer hover:opacity-85 transition">Belum</div><button type="button" onclick="jumpToCameraMode('50')" class="w-full py-1.5 rounded-lg bg-pupr-blue hover:bg-blue-700 text-white text-[11px] font-bold transition">Ambil 50%</button></div>
+                        <div class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center"><span class="text-[11px] font-extrabold text-slate-800">100% Selesai</span><span id="metaTime100" class="text-[9px] text-slate-400 mb-1.5">Absen Pulang</span><div id="slotImg100" onclick="previewSlotPhoto('100')" class="w-full h-24 rounded-xl bg-slate-200/70 flex items-center justify-center overflow-hidden mb-2 text-[10px] text-slate-400 cursor-pointer hover:opacity-85 transition">Belum</div><button type="button" onclick="jumpToCameraMode('100')" class="w-full py-1.5 rounded-lg bg-pupr-blue hover:bg-blue-700 text-white text-[11px] font-bold transition">Ambil 100%</button></div>
+                    </div>
+                </div>
+
+                <div id="formInputsWrapper" class="space-y-5 opacity-50 pointer-events-none transition-opacity duration-300">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="flex items-center justify-between mb-2"><span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">2. Identitas Petugas</span><span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Terkunci Sistem</span></div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                            <div><p class="text-slate-400">ID Petugas</p><p id="formIdPetugas" class="font-extrabold text-slate-900">-</p></div>
+                            <div><p class="text-slate-400">Nama</p><p id="formNamaPetugas" class="font-bold text-slate-900">-</p></div>
+                            <div><p class="text-slate-400">Jabatan</p><p id="formJabatanPetugas" class="font-bold text-pupr-blue">-</p></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">3. Lokasi Pekerjaan</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div><label class="block text-xs font-bold text-slate-700 mb-1">Daerah Irigasi *</label><input type="text" id="inpDI" readonly required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs bg-slate-100 font-bold text-pupr-blue focus:outline-none"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 mb-1">Nama Saluran *</label><input type="text" id="inpSaluran" required placeholder="Saluran Sekunder..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs focus:border-pupr-blue focus:outline-none"></div>
+                            <div><label class="block text-xs font-bold text-slate-700 mb-1">Bangunan *</label><input type="text" id="inpBangunan" required placeholder="Pintu Air B.Kr.4" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs focus:border-pupr-blue focus:outline-none"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5 pt-2 border-t border-slate-100">
+                        <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">4. Uraian Kegiatan (Pilih minimal 1)</p>
+                        <div id="roleTasksContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto p-3 rounded-2xl bg-slate-50 border border-slate-200/80"></div>
+                        <div class="p-3 rounded-2xl bg-amber-50/50 border border-amber-200/70 mt-2">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                                <input type="checkbox" id="chkTugasLain" onchange="toggleManualTaskInput()" class="w-4 h-4 rounded accent-pupr-blue">
+                                <span>Yang lain (Isi manual):</span>
+                            </label>
+                            <input type="text" id="inpTugasLainManual" disabled placeholder="Tulis uraian kegiatan tambahan..." class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white disabled:bg-slate-100 text-xs focus:border-pupr-blue focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">5. Usulan Perbaikan / Catatan *</label>
+                        <input type="text" id="inpUsulanPerbaikan" required placeholder="Tuliskan usulan atau isi 'Tidak ada'" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:border-pupr-blue focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex items-center gap-3 border-t border-slate-200">
+                    <button type="button" onclick="closeSheet('reportFormSheet')" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">Tutup</button>
+                    <button type="submit" id="btnSubmitReport" class="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-pupr-deep to-pupr-blue hover:from-blue-900 hover:to-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-lg transition disabled:opacity-50">Kirim Laporan & Reset Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LAINNYA -->
+    <div id="confirmResetModal" class="hidden fixed inset-0 z-[60] bg-slate-950/75 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this) closeConfirmResetModal()">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100"><h3 class="text-base font-extrabold text-slate-900">Hapus Data Sesi Tersimpan?</h3><p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Semua foto 0%, 50%, 100% dan draf formulir yang belum dikirim akan dikosongkan.</p><div class="flex gap-2.5 mt-5"><button type="button" onclick="closeConfirmResetModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Batal</button><button type="button" onclick="executeResetSessionData()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold">Ya, Kosongkan</button></div></div>
+    </div>
+    <div id="adminGalleryModal" class="hidden fixed inset-0 z-[60] bg-slate-950/75 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this) closeAdminGalleryModal()">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100"><div class="flex items-start justify-between mb-3"><div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><button type="button" onclick="closeAdminGalleryModal()" class="text-slate-400 hover:text-slate-600 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><h3 class="text-base font-extrabold text-slate-900">Unggah Galeri Dibatasi</h3><p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Untuk mencegah manipulasi absensi & progres, pegawai wajib mengambil foto langsung dari kamera. Masukkan PIN Admin jika ada kondisi darurat.</p><div class="mt-4 pt-4 border-t border-slate-100"><label for="adminPinInput" class="block text-[11px] font-bold text-slate-700 mb-1.5">PIN Otorisasi Admin</label><div class="flex gap-2"><input type="password" id="adminPinInput" placeholder="Masukkan PIN" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-pupr-blue"><button type="button" onclick="verifyAdminGalleryUnlock()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">Izinkan</button></div><p id="adminPinError" class="hidden text-[11px] text-red-600 font-semibold mt-1.5"></p></div><input type="file" id="adminGalleryFileInput" accept="image/*" class="hidden" onchange="handleAdminGalleryUpload(event)"></div>
+    </div>
+    <div id="previewModal" class="hidden fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-md flex-col justify-between p-4 sm:p-6">
+        <div class="flex items-center justify-between max-w-3xl w-full mx-auto"><div><span id="previewBadge" class="inline-block text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-400 text-slate-950">Progres 0%</span><h3 class="text-base sm:text-lg font-bold text-white mt-1">Pratinjau Dokumentasi</h3></div><button type="button" onclick="closePreviewModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>
+        <div class="flex-1 flex items-center justify-center my-4 overflow-hidden"><img id="previewImageResult" src="" alt="Hasil Foto" class="max-h-full max-w-full rounded-2xl border border-white/15 shadow-2xl object-contain"></div>
+        <div class="max-w-xl w-full mx-auto grid grid-cols-2 sm:grid-cols-3 gap-3"><button type="button" onclick="closePreviewModal()" class="py-3.5 px-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs sm:text-sm transition">Ulangi</button><button type="button" onclick="downloadCapturedPhoto()" class="py-3.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg><span>Simpan</span></button><button type="button" onclick="confirmUsePhoto()" id="btnGunakanFoto" class="col-span-2 sm:col-span-1 py-3.5 px-4 rounded-2xl bg-pupr-blue hover:bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Simpan ke Form</span></button></div>
+    </div>
+    <div id="countdownOverlay" class="hidden fixed inset-0 z-40 items-center justify-center pointer-events-none"><div id="countdownText" class="text-8xl sm:text-9xl font-black text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)]">3</div></div>
+    <div id="flashEffect"></div>
+    <div id="toastBox" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-[70] bg-slate-900/95 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 max-w-[90vw]"><span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span><span id="toastText">Notifikasi</span></div>
+    <canvas id="photoCanvas" class="hidden"></canvas>
+
+    <script>
+        // Inisialisasi Supabase
+        initSupabase();
+        
+        // 1. Safe Storage Helpers
+        function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+        function safeSetStorage(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
+        function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+        // 2. User Context (Akan diisi dari Supabase)
+        let user = { id_pegawai: 'MEMUAT...', nama: 'MEMUAT...', jabatan: '...', daerah_irigasi: '...' };
+
+        // 3. State Aplikasi
+        let videoStream = null;
+        let facingMode = 'environment';
+        let currentMode = '0';
+        let currentTheme = 1;
+        let timerSeconds = 0;
+        let zoomLevel = 1.0;
+        let gridEnabled = true;
+        let countdownTimer = null;
+        let latestCapturedBase64 = '';
+        let latestCaptureMeta = null;
+        let currentLat = -8.443026;
+        let currentLng = 114.194000;
+        let isGalleryAllowedByAdmin = false;
+
+        let orientationMode = 'auto'; 
+        let physicalOrientation = 'portrait'; 
+
+        let capturedPhotosByMode = { '0': null, '50': null, '100': null };
+        let photoMetaByMode = { '0': null, '50': null, '100': null };
+        const SESSION_PHOTO_KEY = 'bbws_session_photos_v2';
+
+        const DEFAULT_PU_LOGO_SVG = "assets/img/logo-bbws.svg";
+        const logoState = { visible: true, src: DEFAULT_PU_LOGO_SVG, position: 'top-right', size: 56, opacity: 100, stroke: true, rounded: true };
+        const logoImageObj = new Image();
+        logoImageObj.src = logoState.src;
+
+        // 4. Inisialisasi Awal
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Ambil Sesi Login
+            const session = await checkSession();
+            if (!session || !session.profile) return;
+
+            // Set data user dari Supabase
+            user = {
+                id_pegawai: session.profile.id_petugas,
+                nama: session.profile.nama,
+                jabatan: session.profile.role === 'pekarya' ? 'Pekarya' : (session.profile.role === 'ppa' ? 'PPA' : 'Staf Pengamat'),
+                daerah_irigasi: session.profile.daerah_irigasi || 'D.I Bening'
+            };
+            
+            // Set Input Field D.I
+            document.getElementById('inpDI').value = user.daerah_irigasi;
+
+            initCamera();
+            updateLocationInfo(false);
+            updateWatermarkInfo();
+            updateLogoSettings();
+            populateRoleTasks();
+            loadSessionData();
+
+            window.addEventListener('resize', detectWindowOrientationFallback);
+            window.addEventListener('devicemotion', handleDeviceMotion);
+            window.addEventListener('deviceorientation', handleDeviceOrientation);
+            detectWindowOrientationFallback();
+
+            const formInputs = document.querySelectorAll('#dailyOpReportForm input, #dailyOpReportForm textarea, #customNoteInput');
+            formInputs.forEach(input => {
+                input.addEventListener('input', saveSessionData);
+                input.addEventListener('change', saveSessionData);
+            });
+
+            setInterval(updateWatermarkInfo, 30000);
+        });
+
+        // 5. Toast & Modal Helpers
+        let toastTimer = null;
+        function showToast(msg) {
+            document.getElementById('toastText').innerText = msg;
+            const box = document.getElementById('toastBox');
+            box.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => box.classList.add('hidden'), 3000);
+        }
+        function openSheet(id) { const el = document.getElementById(id); el.classList.remove('hidden'); el.classList.add('flex'); }
+        function closeSheet(id) { const el = document.getElementById(id); el.classList.add('hidden'); el.classList.remove('flex'); }
+        function openReportFormSheet() { openSheet('reportFormSheet'); }
+        function openConfirmResetModal() { openSheet('confirmResetModal'); }
+        function closeConfirmResetModal() { closeSheet('confirmResetModal'); }
+        function closeAdminGalleryModal() { closeSheet('adminGalleryModal'); }
+
+        // 6. Auto-Orientation Engine
+        function applyPhysicalOrientation(orient) {
+            physicalOrientation = orient;
+            const viewportIsPortrait = window.innerHeight >= window.innerWidth;
+            const cssOrient = viewportIsPortrait ? orient : 'portrait';
+            document.body.setAttribute('data-phys-orient', cssOrient);
+            const labelEl = document.getElementById('orientBadgeText');
+            if(labelEl) {
+                const isLandscape = !viewportIsPortrait || orient !== 'portrait';
+                if (orientationMode === 'auto') labelEl.innerText = isLandscape ? 'Auto (L)' : 'Auto (P)';
+                else labelEl.innerText = orientationMode === 'portrait' ? 'Potret' : 'Lanskap';
+            }
+        }
+
+        function setOrientationMode(mode) {
+            orientationMode = mode;
+            ['auto', 'portrait', 'landscape'].forEach(m => {
+                const btn = document.getElementById('oriMode-' + m);
+                if (btn) {
+                    btn.className = (m === mode) ? 'py-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold' : 'py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold';
+                }
+            });
+            if (mode === 'portrait') applyPhysicalOrientation('portrait');
+            else if (mode === 'landscape') applyPhysicalOrientation('landscape-left');
+            else detectWindowOrientationFallback();
+            showToast('Mode orientasi: ' + (mode === 'auto' ? 'Otomatis Sensor' : mode === 'portrait' ? 'Potret' : 'Lanskap'));
+        }
+
+        function cycleOrientationMode() {
+            const next = orientationMode === 'auto' ? 'landscape' : (orientationMode === 'landscape' ? 'portrait' : 'auto');
+            setOrientationMode(next);
+        }
+
+        function detectWindowOrientationFallback() {
+            if (orientationMode !== 'auto') {
+                applyPhysicalOrientation(orientationMode === 'landscape' ? 'landscape-left' : 'portrait');
+                return;
+            }
+            applyPhysicalOrientation('portrait');
+        }
+
+        function handleDeviceMotion(e) {
+            if (orientationMode !== 'auto') return;
+            const g = e.accelerationIncludingGravity;
+            if (!g || g.x === null || g.y === null) return;
+            const ax = g.x, ay = g.y;
+            if (Math.abs(ax) > Math.abs(ay) * 1.35 && Math.abs(ax) > 4.5) {
+                applyPhysicalOrientation(ax > 0 ? 'landscape-right' : 'landscape-left');
+            } else if (Math.abs(ay) > Math.abs(ax) * 1.35 && Math.abs(ay) > 4.5) {
+                applyPhysicalOrientation('portrait');
+            }
+        }
+
+        function handleDeviceOrientation(e) {
+            if (orientationMode !== 'auto') return;
+            if (typeof e.gamma !== 'number' || typeof e.beta !== 'number') return;
+            if (Math.abs(e.gamma) > 45 && Math.abs(e.beta) < 45) {
+                applyPhysicalOrientation(e.gamma > 0 ? 'landscape-right' : 'landscape-left');
+            } else if (Math.abs(e.beta) > 45 && Math.abs(e.gamma) < 35) {
+                applyPhysicalOrientation('portrait');
+            }
+        }
+
+        async function requestMotionPermission() {
+            try {
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    const res = await DeviceMotionEvent.requestPermission();
+                    if (res !== 'granted') return showToast('Izin sensor ditolak oleh perangkat.');
+                }
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    await DeviceOrientationEvent.requestPermission();
+                }
+                window.addEventListener('devicemotion', handleDeviceMotion);
+                window.addEventListener('deviceorientation', handleDeviceOrientation);
+                document.getElementById('sensorStatusBadge').innerText = 'Sensor Aktif';
+                showToast('Sensor auto-orientasi aktif!');
+            } catch (err) {
+                showToast('Sensor otomatis aktif di browser ini.');
+            }
+        }
+
+        // 7. Kamera, Zoom, Grid & GPS
+        async function initCamera() {
+            const fallbackEl = document.getElementById('cameraFallback');
+            const videoEl = document.getElementById('cameraStream');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                fallbackEl.classList.remove('hidden');
+                document.getElementById('cameraErrorMsg').innerText = 'Browser tidak mendukung kamera langsung. Gunakan tombol Simulasi Jepret untuk pratinjau.';
+                return;
+            }
+            try {
+                const constraints = { video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false };
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoEl.srcObject = videoStream;
+                videoEl.classList.toggle('mirror', facingMode === 'user');
+                fallbackEl.classList.add('hidden');
+            } catch (err) {
+                fallbackEl.classList.remove('hidden');
+                document.getElementById('cameraErrorMsg').innerText = 'Gagal akses kamera: ' + err.message;
+            }
+        }
+
+        function switchCamera() {
+            facingMode = facingMode === 'environment' ? 'user' : 'environment';
+            if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+            initCamera();
+        }
+
+        function toggleGrid() {
+            gridEnabled = !gridEnabled;
+            document.getElementById('gridOverlay').classList.toggle('hidden', !gridEnabled);
+            document.getElementById('btnQuickGrid').classList.toggle('text-amber-300', gridEnabled);
+            document.getElementById('btnQuickGrid').classList.toggle('text-white/50', !gridEnabled);
+        }
+
+        function cycleZoom() {
+            zoomLevel = zoomLevel === 1.0 ? 1.5 : (zoomLevel === 1.5 ? 2.0 : 1.0);
+            document.getElementById('zoomLabel').innerText = zoomLevel.toFixed(1) + 'x';
+            const videoEl = document.getElementById('cameraStream');
+            const mirrorPrefix = facingMode === 'user' ? 'scaleX(-1) ' : '';
+            videoEl.style.transform = `${mirrorPrefix}scale(${zoomLevel})`;
+        }
+
+        function cycleTimer() {
+            timerSeconds = timerSeconds === 0 ? 3 : (timerSeconds === 3 ? 5 : 0);
+            document.getElementById('timerLabel').innerText = timerSeconds + 's';
+        }
+
+        function updateLocationInfo(manualTrigger) {
+            const coordsEl = document.getElementById('wmCoords');
+            const addressEl = document.getElementById('wmAddress');
+            if (!navigator.geolocation) {
+                coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°S, ${Math.abs(currentLng).toFixed(6)}°E`;
+                addressEl.innerText = 'Sembulung, Banyuwangi, East Java';
+                return;
+            }
+            if (manualTrigger) showToast('Memperbarui koordinat GPS...');
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    currentLat = pos.coords.latitude;
+                    currentLng = pos.coords.longitude;
+                    const latDir = currentLat < 0 ? 'S' : 'N';
+                    const lngDir = currentLng < 0 ? 'W' : 'E';
+                    coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°${latDir}, ${Math.abs(currentLng).toFixed(6)}°${lngDir}`;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentLat}&lon=${currentLng}`);
+                        if (res.ok) {
+                            const geo = await res.json();
+                            const addr = geo.address || {};
+                            const parts = [addr.village || addr.suburb || addr.hamlet, addr.city_district || addr.county, addr.state].filter(Boolean);
+                            let finalAddr = parts.length ? parts.join(', ') : (geo.display_name || 'Titik Terverifikasi');
+                            if (finalAddr.length > 46) finalAddr = finalAddr.substring(0, 43) + '...';
+                            addressEl.innerText = finalAddr;
+                        } else {
+                            addressEl.innerText = (user.daerah_irigasi || 'Wilayah Kerja') + ' • GPS Terkunci';
+                        }
+                    } catch (e) {
+                        addressEl.innerText = (user.daerah_irigasi || 'Wilayah Kerja') + ' • GPS Terkunci';
+                    }
+                },
+                () => {
+                    coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°S, ${Math.abs(currentLng).toFixed(6)}°E`;
+                    addressEl.innerText = 'Sembulung, Banyuwangi, East Java (Simulasi GPS)';
+                },
+                { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+            );
+        }
+
+        // 8. Mode Progres & Watermark
+        function setMode(mode) {
+            currentMode = mode;
+            ['0', '50', '100'].forEach(m => {
+                const btn = document.getElementById('btnMode' + m);
+                if (m === mode) {
+                    btn.className = 'px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/10 transition flex items-center gap-1.5';
+                }
+            });
+            document.getElementById('wmProgressBadge').innerText = mode + '%';
+        }
+
+        function updateWatermarkInfo() {
+            const now = new Date();
+            document.getElementById('wmTime').innerText = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            document.getElementById('wmDate').innerText = `${days[now.getDay()]}, ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            document.getElementById('wmId').innerText = user.id_pegawai || 'OPI-SP-1';
+            document.getElementById('formIdPetugas').innerText = user.id_pegawai || '-';
+            document.getElementById('formNamaPetugas').innerText = user.nama || '-';
+            document.getElementById('formJabatanPetugas').innerText = user.jabatan || '-';
+        }
+
+        // 9. Pengaturan Logo
+        function setLogoPosition(pos) {
+            logoState.position = pos;
+            ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach(p => {
+                const btn = document.getElementById('pos-' + p);
+                if(btn) btn.className = (p === pos) ? 'py-2 px-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-xs font-bold text-pupr-blue' : 'py-2 px-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50';
+            });
+            updateLogoSettings();
+        }
+        function toggleLogoOption(opt) {
+            if (opt === 'stroke') logoState.stroke = !logoState.stroke;
+            if (opt === 'rounded') logoState.rounded = !logoState.rounded;
+            const btnStroke = document.getElementById('btnLogoStroke');
+            if(btnStroke) btnStroke.className = logoState.stroke ? 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue' : 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border border-slate-200 text-slate-500';
+            const btnRound = document.getElementById('btnLogoRounded');
+            if(btnRound) btnRound.className = logoState.rounded ? 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue' : 'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border border-slate-200 text-slate-500';
+            updateLogoSettings();
+        }
+        function handleLogoUpload(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                logoState.src = ev.target.result;
+                logoImageObj.src = logoState.src;
+                document.getElementById('liveLogoImg').src = logoState.src;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+        function resetDefaultLogo() {
+            logoState.src = DEFAULT_PU_LOGO_SVG;
+            logoImageObj.src = logoState.src;
+            document.getElementById('liveLogoImg').src = logoState.src;
+        }
+        function updateLogoSettings() {
+            const wrapper = document.getElementById('liveLogoWrapper');
+            const img = document.getElementById('liveLogoImg');
+            if (!img.getAttribute('src')) img.src = logoState.src;
+            logoState.visible = document.getElementById('toggleShowLogo') ? document.getElementById('toggleShowLogo').checked : true;
+            logoState.size = document.getElementById('logoSizeRange') ? parseInt(document.getElementById('logoSizeRange').value, 10) : 56;
+            logoState.opacity = document.getElementById('logoOpacityRange') ? parseInt(document.getElementById('logoOpacityRange').value, 10) : 100;
+            
+            if(document.getElementById('logoSizeVal')) document.getElementById('logoSizeVal').innerText = logoState.size + 'px';
+            if(document.getElementById('logoOpacityVal')) document.getElementById('logoOpacityVal').innerText = logoState.opacity + '%';
+
+            wrapper.style.display = logoState.visible ? 'block' : 'none';
+            wrapper.className = 'absolute z-[15] pointer-events-none transition-all duration-200';
+            if (logoState.position === 'top-left') wrapper.classList.add('top-20', 'left-4');
+            else if (logoState.position === 'top-right') wrapper.classList.add('top-20', 'right-4');
+            else if (logoState.position === 'bottom-left') wrapper.classList.add('bottom-44', 'left-4');
+            else wrapper.classList.add('bottom-44', 'right-4');
+
+            img.style.width = logoState.size + 'px';
+            img.style.height = logoState.size + 'px';
+            img.style.opacity = (logoState.opacity / 100).toString();
+            img.style.borderRadius = logoState.rounded ? '14px' : '2px';
+            img.style.border = logoState.stroke ? '2px solid #FFFFFF' : 'none';
+        }
+
+        // 10. Templat Watermark
+        function selectTemplate(id) {
+            currentTheme = id;
+            [1, 2, 3, 4].forEach(t => {
+                const el = document.getElementById('tplCard' + t);
+                if(el) el.className = (t === id) ? 'text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition' : 'text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition';
+            });
+            const banner = document.getElementById('wmHeaderBanner');
+            const inner = document.getElementById('wmInnerWrap');
+            banner.classList.toggle('hidden', id !== 2);
+            banner.classList.toggle('flex', id === 2);
+            if (id === 3) inner.className = 'p-3 rounded-2xl bg-slate-900/75 backdrop-blur-md border border-white/15';
+            else if (id === 2) inner.className = 'p-3 rounded-b-2xl bg-slate-900/80 backdrop-blur-md';
+            else inner.className = 'p-0.5 rounded-2xl';
+        }
+
+        function updateCustomNote() {
+            const val = document.getElementById('customNoteInput').value.trim();
+            const el = document.getElementById('wmNoteDisplay');
+            if (val) { el.innerText = 'Ket: ' + val; el.classList.remove('hidden'); }
+            else { el.innerText = ''; el.classList.add('hidden'); }
+        }
+
+        // 11. Capture & Render Canvas
+        function triggerCapture() {
+            if (countdownTimer) return;
+            if (timerSeconds === 0) return captureFromVideo();
+            const overlay = document.getElementById('countdownOverlay');
+            const text = document.getElementById('countdownText');
+            let count = timerSeconds;
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            text.innerText = count;
+            countdownTimer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    text.innerText = count;
+                } else {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                    captureFromVideo();
+                }
+            }, 1000);
+        }
+
+        function captureFromVideo() {
+            const video = document.getElementById('cameraStream');
+            if (!video.videoWidth) {
+                return simulateCameraCapture();
+            }
+            const flash = document.getElementById('flashEffect');
+            flash.classList.remove('flash-animate');
+            void flash.offsetWidth;
+            flash.classList.add('flash-animate');
+            renderWatermarkedImage(video, video.videoWidth, video.videoHeight, facingMode === 'user');
+        }
+
+        function simulateCameraCapture() {
+            const off = document.createElement('canvas');
+            off.width = 1280;
+            off.height = 720;
+            const octx = off.getContext('2d');
+            const grad = octx.createLinearGradient(0, 0, 1280, 720);
+            grad.addColorStop(0, '#0F172A');
+            grad.addColorStop(0.5, '#1E3A8A');
+            grad.addColorStop(1, '#0B1120');
+            octx.fillStyle = grad;
+            octx.fillRect(0, 0, 1280, 720);
+            octx.fillStyle = 'rgba(255,255,255,0.08)';
+            octx.font = 'bold 34px Inter, sans-serif';
+            octx.fillText('PRATINJAU KAMERA LAPANGAN • BBWS BRANTAS', 80, 340);
+            const flash = document.getElementById('flashEffect');
+            flash.classList.remove('flash-animate');
+            void flash.offsetWidth;
+            flash.classList.add('flash-animate');
+            renderWatermarkedImage(off, off.width, off.height, false);
+        }
+
+        function renderWatermarkedImage(source, rawW, rawH, mirror) {
+            const canvas = document.getElementById('photoCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const needRotateForLandscape = (physicalOrientation !== 'portrait' && rawW < rawH);
+            const w = needRotateForLandscape ? rawH : rawW;
+            const h = needRotateForLandscape ? rawW : rawH;
+            canvas.width = w;
+            canvas.height = h;
+
+            ctx.save();
+            if (needRotateForLandscape) {
+                if (physicalOrientation === 'landscape-left') {
+                    ctx.translate(w, 0);
+                    ctx.rotate(Math.PI / 2);
+                } else {
+                    ctx.translate(0, h);
+                    ctx.rotate(-Math.PI / 2);
+                }
+            }
+            if (mirror) {
+                ctx.translate(rawW, 0);
+                ctx.scale(-1, 1);
+            }
+            if (zoomLevel > 1.0) {
+                const zw = rawW / zoomLevel;
+                const zh = rawH / zoomLevel;
+                ctx.drawImage(source, (rawW - zw) / 2, (rawH - zh) / 2, zw, zh, 0, 0, rawW, rawH);
+            } else {
+                ctx.drawImage(source, 0, 0, rawW, rawH);
+            }
+            ctx.restore();
+
+            const base = Math.max(18, Math.floor(Math.min(w, h) * 0.026));
+            const pad = Math.floor(base * 1.1);
+
+            if (logoState.visible && logoImageObj.complete) {
+                const sz = Math.floor(base * (logoState.size / 18));
+                let lx = w - sz - pad, ly = pad;
+                if (logoState.position === 'top-left') { lx = pad; ly = pad; }
+                else if (logoState.position === 'bottom-left') { lx = pad; ly = h - sz - (base * 8.5); }
+                else if (logoState.position === 'bottom-right') { lx = w - sz - pad; ly = h - sz - (base * 8.5); }
+                ctx.save();
+                ctx.globalAlpha = logoState.opacity / 100;
+                ctx.beginPath();
+                ctx.roundRect(lx, ly, sz, sz, logoState.rounded ? sz * 0.18 : 0);
+                ctx.save();
+                ctx.clip();
+                ctx.drawImage(logoImageObj, lx, ly, sz, sz);
+                ctx.restore();
+                if (logoState.stroke) {
+                    ctx.lineWidth = Math.max(2, base * 0.15);
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            const wmH = base * 7.6;
+            const wmY = h - wmH - pad;
+            const wmW = Math.min(w - (pad * 2), base * 26);
+
+            if (currentTheme !== 4) {
+                ctx.fillStyle = currentTheme === 3 ? 'rgba(15, 23, 42, 0.78)' : 'rgba(15, 23, 42, 0.86)';
+                ctx.beginPath();
+                ctx.roundRect(pad, wmY, wmW, wmH, 16);
+                ctx.fill();
+            }
+
+            if (currentTheme === 1 || currentTheme === 2) {
+                ctx.fillStyle = '#1D4ED8';
+                ctx.beginPath();
+                ctx.roundRect(pad, wmY, wmW, base * 1.2, [16, 16, 0, 0]);
+                ctx.fill();
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = `bold ${base * 0.5}px Inter, sans-serif`;
+                ctx.textBaseline = 'middle';
+                ctx.fillText('INSPEKSI LAPANGAN • BBWS BRANTAS', pad + base * 0.8, wmY + base * 0.6);
+            }
+
+            const contentY = (currentTheme === 1 || currentTheme === 2) ? wmY + base * 1.7 : wmY + base * 0.8;
+
+            ctx.fillStyle = '#F59E0B';
+            ctx.beginPath();
+            ctx.roundRect(pad + base * 0.8, contentY, base * 3.4, base * 1.2, 6);
+            ctx.fill();
+            ctx.fillStyle = '#0F172A';
+            ctx.font = `bold ${base * 0.58}px Inter, sans-serif`;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(user.id_pegawai || 'OPI-SP-1', pad + base * 1.15, contentY + base * 0.6);
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.roundRect(pad + base * 4.5, contentY, base * 2.6, base * 1.2, 6);
+            ctx.fill();
+            ctx.fillStyle = '#0F172A';
+            ctx.fillText(document.getElementById('wmTime').innerText, pad + base * 4.95, contentY + base * 0.6);
+
+            ctx.fillStyle = '#1D4ED8';
+            ctx.beginPath();
+            ctx.roundRect(pad + base * 7.4, contentY, base * 2.3, base * 1.2, 6);
+            ctx.fill();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText(currentMode + '%', pad + base * 7.9, contentY + base * 0.6);
+
+            const detailX = pad + base * 0.8;
+            const detailStartY = contentY + base * 1.65;
+            ctx.strokeStyle = '#F59E0B';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(detailX, detailStartY);
+            ctx.lineTo(detailX, detailStartY + base * 4.4);
+            ctx.stroke();
+
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold ${base * 0.62}px Inter, sans-serif`;
+            ctx.fillText(document.getElementById('wmDate').innerText, detailX + base * 0.75, detailStartY);
+
+            ctx.fillStyle = '#E2E8F0';
+            ctx.font = `${base * 0.54}px Inter, sans-serif`;
+            ctx.fillText(document.getElementById('wmAddress').innerText, detailX + base * 0.75, detailStartY + base * 1.05);
+
+            ctx.fillStyle = '#FCD34D';
+            ctx.font = `bold ${base * 0.54}px Inter, sans-serif`;
+            ctx.fillText(document.getElementById('wmCoords').innerText, detailX + base * 0.75, detailStartY + base * 2.1);
+
+            const note = document.getElementById('customNoteInput').value.trim();
+            if (note) {
+                ctx.fillStyle = '#E0F2FE';
+                ctx.font = `bold ${base * 0.48}px Inter, sans-serif`;
+                ctx.fillText('Ket: ' + note, detailX + base * 0.75, detailStartY + base * 3.15);
+            }
+
+            ctx.fillStyle = '#6EE7B7';
+            ctx.font = `500 ${base * 0.44}px Inter, sans-serif`;
+            ctx.fillText('Waktu & koordinat GPS terkunci sistem', detailX + base * 0.75, detailStartY + base * 4.15);
+
+            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            latestCaptureMeta = {
+                captured_at: new Date().toISOString(),
+                time_label: document.getElementById('wmTime').innerText,
+                lat: currentLat,
+                lng: currentLng,
+                orientation: physicalOrientation,
+                source: 'camera_live'
+            };
+            openPreviewModal(latestCapturedBase64, currentMode);
+        }
+
+        // 12. Preview & Konfirmasi Foto
+        function openPreviewModal(base64, mode) {
+            document.getElementById('previewImageResult').src = base64;
+            document.getElementById('previewBadge').innerText = 'Progres ' + mode + '%';
+            openSheet('previewModal');
+        }
+        function closePreviewModal() { closeSheet('previewModal'); }
+
+        function downloadCapturedPhoto() {
+            if (!latestCapturedBase64) return;
+            const a = document.createElement('a');
+            a.href = latestCapturedBase64;
+            a.download = `Inspeksi_BBWS_${currentMode}pct_${Date.now()}.jpg`;
+            a.click();
+        }
+
+        function confirmUsePhoto() {
+            if (!latestCapturedBase64) return;
+            capturedPhotosByMode[currentMode] = latestCapturedBase64;
+            photoMetaByMode[currentMode] = latestCaptureMeta;
+            updatePhotoSlotsUI();
+            saveSessionData();
+            closePreviewModal();
+            showToast(`Foto ${currentMode}% tersimpan!`);
+
+            if (currentMode === '0' && !capturedPhotosByMode['50']) setMode('50');
+            else if (currentMode === '50' && !capturedPhotosByMode['100']) setMode('100');
+            else if (currentMode === '100') {
+                setTimeout(() => {
+                    showToast('Foto 100% lengkap! Silakan lengkapi laporan.');
+                    openReportFormSheet();
+                }, 600);
+            }
+        }
+
+        function previewSlotPhoto(mode) {
+            if (capturedPhotosByMode[mode]) {
+                latestCapturedBase64 = capturedPhotosByMode[mode];
+                openPreviewModal(latestCapturedBase64, mode);
+            }
+        }
+
+        function jumpToCameraMode(mode) {
+            setMode(mode);
+            closeSheet('reportFormSheet');
+            showToast(`Mode kamera siap untuk Foto ${mode}%`);
+        }
+
+        // 13. Penyimpanan Sesi & Sinkronisasi UI
+        function saveSessionData() {
+            const checkedTasks = Array.from(document.querySelectorAll('input[name="uraianKegiatan"]:checked')).map(el => el.value);
+            const sessionData = {
+                photos: capturedPhotosByMode,
+                meta: photoMetaByMode,
+                form: {
+                    saluran: document.getElementById('inpSaluran').value,
+                    bangunan: document.getElementById('inpBangunan').value,
+                    tasks: checkedTasks,
+                    tugasLainChecked: document.getElementById('chkTugasLain').checked,
+                    tugasLainManual: document.getElementById('inpTugasLainManual').value,
+                    usulan: document.getElementById('inpUsulanPerbaikan').value,
+                    note: document.getElementById('customNoteInput').value
+                }
+            };
+            if (!safeSetStorage(SESSION_PHOTO_KEY, JSON.stringify(sessionData))) {
+                showToast('Memori lokal hampir penuh, segera kirim laporan.');
+            }
+        }
+
+        function loadSessionData() {
+            const saved = safeGetStorage(SESSION_PHOTO_KEY);
+            if (!saved) {
+                updatePhotoSlotsUI();
+                return;
+            }
+            try {
+                const data = JSON.parse(saved);
+                if (data.photos) capturedPhotosByMode = data.photos;
+                if (data.meta) photoMetaByMode = data.meta;
+                if (data.form) {
+                    const f = data.form;
+                    document.getElementById('inpSaluran').value = f.saluran || '';
+                    document.getElementById('inpBangunan').value = f.bangunan || '';
+                    if (Array.isArray(f.tasks)) {
+                        document.querySelectorAll('input[name="uraianKegiatan"]').forEach(cb => {
+                            cb.checked = f.tasks.includes(cb.value);
+                        });
+                    }
+                    document.getElementById('chkTugasLain').checked = Boolean(f.tugasLainChecked);
+                    document.getElementById('inpTugasLainManual').value = f.tugasLainManual || '';
+                    document.getElementById('inpUsulanPerbaikan').value = f.usulan || '';
+                    document.getElementById('customNoteInput').value = f.note || '';
+                    toggleManualTaskInput(true);
+                    updateCustomNote();
+                }
+            } catch (e) {}
+            updatePhotoSlotsUI();
+        }
+
+        function updatePhotoSlotsUI() {
+            let count = 0;
+            let latestThumb = null;
+            ['0', '50', '100'].forEach(mode => {
+                const slot = document.getElementById('slotImg' + mode);
+                const chk = document.getElementById('chkMode' + mode);
+                const metaEl = document.getElementById('metaTime' + mode);
+                if (capturedPhotosByMode[mode]) {
+                    slot.innerHTML = `<img src="${capturedPhotosByMode[mode]}" class="w-full h-full object-cover rounded-xl">`;
+                    slot.classList.remove('bg-slate-200/70', 'text-slate-400');
+                    if(chk) chk.classList.remove('hidden');
+                    if (photoMetaByMode[mode] && photoMetaByMode[mode].time_label) {
+                        metaEl.innerText = 'Jam ' + photoMetaByMode[mode].time_label;
+                        metaEl.className = 'text-[9px] font-bold text-emerald-600 mb-1.5';
+                    }
+                    latestThumb = capturedPhotosByMode[mode];
+                    count++;
+                } else {
+                    slot.innerHTML = 'Belum';
+                    slot.classList.add('bg-slate-200/70', 'text-slate-400');
+                    if(chk) chk.classList.add('hidden');
+                    metaEl.innerText = mode === '0' ? 'Absen Masuk' : (mode === '50' ? 'Progres Kerja' : 'Absen Pulang');
+                    metaEl.className = 'text-[9px] text-slate-400 mb-1.5';
+                }
+            });
+
+            document.getElementById('photoProgressCountBadge').innerText = count + '/3';
+            const thumbBox = document.getElementById('sessionThumbBox');
+            if (latestThumb) {
+                thumbBox.innerHTML = `<img src="${latestThumb}" alt="Foto Terakhir" class="w-full h-full object-cover">`;
+            } else {
+                thumbBox.innerHTML = `<svg class="w-5 h-5 text-slate-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
+            }
+
+            const attBadge = document.getElementById('attendanceSummaryBadge');
+            if (photoMetaByMode['0'] && photoMetaByMode['100']) {
+                attBadge.innerText = `Masuk ${photoMetaByMode['0'].time_label} • Selesai ${photoMetaByMode['100'].time_label}`;
+                attBadge.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200';
+            } else if (photoMetaByMode['0']) {
+                attBadge.innerText = `Absen Masuk: ${photoMetaByMode['0'].time_label}`;
+                attBadge.className = 'text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200';
+            } else {
+                attBadge.innerText = 'Belum Absen Masuk';
+                attBadge.className = 'text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md';
+            }
+
+            checkFormLockStatus();
+        }
+
+        function checkFormLockStatus() {
+            const wrapper = document.getElementById('formInputsWrapper');
+            const lockStatus = document.getElementById('photoLockStatus');
+            const ready = Boolean(capturedPhotosByMode['0'] && capturedPhotosByMode['50'] && capturedPhotosByMode['100']);
+            if (ready) {
+                wrapper.classList.remove('opacity-50', 'pointer-events-none');
+                lockStatus.innerText = 'Form Terbuka (0%, 50%, 100% Lengkap)';
+                lockStatus.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200';
+            } else {
+                wrapper.classList.add('opacity-50', 'pointer-events-none');
+                lockStatus.innerText = 'Terkunci (Lengkapi Foto 0%, 50%, 100%)';
+                lockStatus.className = 'text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200';
+            }
+        }
+
+        function executeResetSessionData() {
+            safeRemoveStorage(SESSION_PHOTO_KEY);
+            capturedPhotosByMode = { '0': null, '50': null, '100': null };
+            photoMetaByMode = { '0': null, '50': null, '100': null };
+            document.getElementById('dailyOpReportForm').reset();
+            document.getElementById('inpDI').value = user.daerah_irigasi; // Re-set D.I
+            document.getElementById('customNoteInput').value = '';
+            updateCustomNote();
+            toggleManualTaskInput(true);
+            updatePhotoSlotsUI();
+            setMode('0');
+            closeConfirmResetModal();
+            closeSheet('reportFormSheet');
+            showToast('Sesi foto & formulir dikosongkan.');
+        }
+
+        function toggleManualTaskInput(skipSave) {
+            const chk = document.getElementById('chkTugasLain');
+            const inp = document.getElementById('inpTugasLainManual');
+            inp.disabled = !chk.checked;
+            if (!chk.checked) inp.value = '';
+            if (!skipSave) saveSessionData();
+        }
+
+        function populateRoleTasks() {
+            const container = document.getElementById('roleTasksContainer');
+            const tasks = ['Pembersihan Saluran', 'Penambangan Sedimen', 'Penebasan Rumput/Tumbuhan', 'Perbaikan Ringan Bangunan', 'Patroli Keamanan', 'Pengangkatan Sampah'];
+            container.innerHTML = tasks.map(task => `
+                <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition">
+                    <input type="checkbox" name="uraianKegiatan" value="${task}" class="w-4 h-4 rounded accent-pupr-blue" onchange="saveSessionData()">
+                    <span class="text-xs font-medium text-slate-700">${task}</span>
+                </label>
+            `).join('');
+        }
+
+        // 14. Submit Laporan ke Supabase (Tabel `laporan`)
+                // 14. Submit Laporan ke GAS (GDrive) lalu ke Supabase
+        async function submitDailyReport(e) {
+            e.preventDefault();
+            if (!capturedPhotosByMode['0'] || !capturedPhotosByMode['50'] || !capturedPhotosByMode['100']) {
+                return showToast('Foto 0%, 50%, dan 100% wajib lengkap sebelum mengirim!');
+            }
+            const checkedTasks = Array.from(document.querySelectorAll('input[name="uraianKegiatan"]:checked')).map(el => el.value);
+            if (document.getElementById('chkTugasLain').checked && document.getElementById('inpTugasLainManual').value.trim()) {
+                checkedTasks.push(document.getElementById('inpTugasLainManual').value.trim());
+            }
+            if (checkedTasks.length === 0) return showToast('Pilih minimal 1 uraian kegiatan!');
+
+            const btn = document.getElementById('btnSubmitReport');
+            btn.disabled = true;
+            btn.innerText = 'Mengunggah Foto ke Drive...';
+
+            // ========================================================
+            // GANTI URL DI BAWAH INI DENGAN URL WEB APP GAS ANDA
+            // ========================================================
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec";
+            
+            try {
+                // 1. Kirim Data & Foto ke Google Apps Script (GDrive)
+                const payloadGAS = {
+                    id_petugas: user.id_pegawai,
+                    daerah_irigasi: user.daerah_irigasi,
+                    foto_0: capturedPhotosByMode['0'],
+                    foto_50: capturedPhotosByMode['50'],
+                    foto_100: capturedPhotosByMode['100']
+                };
+
+                const responseGAS = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payloadGAS)
+                });
+                
+                const resultGAS = await responseGAS.json();
+                
+                if (resultGAS.status !== 'success') {
+                    throw new Error(resultGAS.message || 'Gagal upload ke Google Drive');
+                }
+
+                btn.innerText = 'Menyimpan ke Database...';
+
+                // 2. Jika upload ke GDrive sukses, simpan LINK-nya ke Supabase
+                const payloadSupabase = {
+                    id_petugas: user.id_pegawai,
+                    daerah_irigasi: user.daerah_irigasi,
+                    jenis_pekerjaan: checkedTasks.join(', '),
+                    keterangan: document.getElementById('inpUsulanPerbaikan').value + ' | Saluran: ' + document.getElementById('inpSaluran').value + ' | Bangunan: ' + document.getElementById('inpBangunan').value,
+                    status: 'terkirim',
+                    lokasi_lat: photoMetaByMode['0'].lat,
+                    lokasi_lng: photoMetaByMode['0'].lng,
+                    
+                    // Link dari GAS (lh3)
+                    foto_0_url: resultGAS.data.foto_0_url,
+                    foto_50_url: resultGAS.data.foto_50_url,
+                    foto_100_url: resultGAS.data.foto_100_url,
+                    
+                    // FileId juga disimpan (untuk jaga-jaga jika folder dipindah)
+                    foto_0_fileid: resultGAS.data.foto_0_url.split('/d/')[1],
+                    foto_50_fileid: resultGAS.data.foto_50_url.split('/d/')[1],
+                    foto_100_fileid: resultGAS.data.foto_100_url.split('/d/')[1],
+
+                    waktu_foto_0: photoMetaByMode['0'].captured_at,
+                    waktu_foto_50: photoMetaByMode['50'].captured_at,
+                    waktu_foto_100: photoMetaByMode['100'].captured_at
+                };
+
+                const { data, error } = await supabaseClient.from('laporan').insert([payloadSupabase]);
+                if (error) throw error;
+
+                showToast('✅ Laporan berhasil dikirim!');
+                executeResetSessionData();
+                
+                setTimeout(() => window.location.href = 'home.html', 1500);
+
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = 'Kirim Laporan & Reset Form';
+                showToast('❌ Gagal: ' + err.message);
+            }
+        }
+
+        // 15. Otorisasi Galeri Admin
+        function handleGalleryButtonClick() {
+            if (isGalleryAllowedByAdmin) {
+                document.getElementById('adminGalleryFileInput').click();
+            } else {
+                openSheet('adminGalleryModal');
+            }
+        }
+        function verifyAdminGalleryUnlock() {
+            const pin = document.getElementById('adminPinInput').value;
+            if (pin === '1234') { // PIN Default
+                isGalleryAllowedByAdmin = true;
+                closeAdminGalleryModal();
+                showToast('Akses galeri diizinkan sementara (Admin).');
+                document.getElementById('adminGalleryFileInput').click();
+            } else {
+                document.getElementById('adminPinError').innerText = 'PIN Admin salah!';
+                document.getElementById('adminPinError').classList.remove('hidden');
+            }
+        }
+        function handleAdminGalleryUpload(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => renderWatermarkedImage(img, img.width, img.height, false);
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+    </script>
+</body>
+</html>

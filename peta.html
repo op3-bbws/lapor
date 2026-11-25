@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1E3A8A">
+  <title>Peta D.I - BBWS Brantas</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- Library Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            pupr: {
+              navy: '#0F172A',
+              deep: '#1E3A8A',
+              blue: '#1D4ED8',
+              gold: '#F59E0B',
+              amber: '#FBBF24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body {
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #F8FAFC;
+    }
+
+    /* Sidebar & Footer selaras home.html & profile.html */
+    .sidebar {
+      background: linear-gradient(180deg, #0F235E 0%, #1E3A8A 52%, #172554 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 10px 0 32px rgba(15, 23, 42, 0.12) !important;
+    }
+    .sidebar-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 12px 13px !important;
+      border-radius: 22px !important;
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      margin-bottom: 14px !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-brand-logo {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 11px !important;
+      object-fit: cover !important;
+      border: 1.5px solid rgba(251, 191, 36, 0.65) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      padding: 2px !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22) !important;
+    }
+    .sidebar-brand-title {
+      display: block !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #FFFFFF !important;
+      letter-spacing: -0.01em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-menu {
+      border-radius: 18px !important;
+      transition: all 0.2s ease !important;
+    }
+    .sidebar-menu:hover:not(.active) {
+      background: rgba(11, 19, 46, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .sidebar-menu.active {
+      background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%) !important;
+      color: #0F172A !important;
+      font-weight: 800 !important;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.28) !important;
+    }
+    .sidebar-menu.active svg {
+      fill: #0F172A !important;
+    }
+    .sidebar-footer {
+      padding: 14px 12px 18px 12px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: linear-gradient(180deg, rgba(10, 19, 51, 0.32) 0%, rgba(7, 14, 38, 0.56) 100%) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      border-bottom-left-radius: 26px !important;
+      border-bottom-right-radius: 26px !important;
+    }
+    .sidebar-clock-card {
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 22px !important;
+      padding: 13px 15px !important;
+      text-align: left !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-clock-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 5px !important;
+    }
+    .sidebar-live-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      color: #6EE7B7 !important;
+    }
+    .sidebar-live-dot {
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 9999px !important;
+      background: #10B981 !important;
+      box-shadow: 0 0 8px #10B981 !important;
+    }
+    .sidebar-clock-time {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      color: #FFFFFF !important;
+      letter-spacing: 0.04em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-clock-date {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: rgba(226, 232, 240, 0.82) !important;
+      margin-top: 2px !important;
+    }
+    .sidebar-logout-btn {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      padding: 11px 16px !important;
+      border-radius: 20px !important;
+      background: rgba(15, 23, 42, 0.56) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(248, 113, 113, 0.34) !important;
+      color: #FECACA !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(4, 9, 24, 0.22) !important;
+    }
+    .sidebar-logout-btn:hover {
+      background: rgba(220, 38, 38, 0.88) !important;
+      border-color: rgba(254, 202, 202, 0.45) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.34) !important;
+    }
+
+    /* Area Peta & Panel Kaca Cerah */
+    .map-stage {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    #map {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: #E2E8F0;
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(30, 58, 138, 0.1);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+    }
+    .widget-container {
+      position: absolute;
+      z-index: 900;
+      pointer-events: none;
+    }
+    .widget-container > * {
+      pointer-events: auto;
+    }
+    .leaflet-control-attribution {
+      display: none !important;
+    }
+    @media (max-width: 767px) {
+      .bottom-nav {
+        display: flex !important;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR DESKTOP & TABLET -->
+  <aside class="sidebar" aria-label="Navigasi Utama">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="assets/img/logo.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Logo BBWS" class="sidebar-brand-logo">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-title">BBWS Brantas</span>
+          <span class="sidebar-brand-sub">PUPR • Pelaporan</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="home.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Beranda</span>
+        </a>
+        <a href="peta.html" class="sidebar-menu active">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>Peta D.I</span>
+        </a>
+        <a href="kamera.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>Laporan</span>
+        </a>
+        <a href="raport.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          <span>Raport</span>
+        </a>
+        <a href="profile.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          <span>Profil</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-clock-card" aria-label="Waktu Saat Ini">
+        <div class="sidebar-clock-top">
+          <span class="sidebar-live-badge">
+            <span class="sidebar-live-dot"></span>
+            WIB Aktif
+          </span>
+          <span id="sidebarPetugasCode" class="text-[10px] font-mono font-bold text-amber-300/90">O&P</span>
+        </div>
+        <div class="sidebar-clock-time tabular-nums" id="sidebarClockTime">--:--:--</div>
+        <div class="sidebar-clock-date" id="sidebarClockDate">Memuat tanggal...</div>
+      </div>
+
+      <button type="button" class="sidebar-logout-btn" id="btnLogout" title="Keluar dari akun">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Keluar Sesi</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- STAGE PETA UTAMA -->
+  <div class="map-stage">
+    <div id="map"></div>
+
+    <!-- KIRI ATAS: HEADER & FILTER WILAYAH D.I -->
+    <div class="widget-container top-4 left-4 sm:top-6 sm:left-6 flex flex-col gap-3 max-w-[calc(100vw-32px)] sm:w-80">
+      <div class="glass-surface px-4 py-3 rounded-2xl flex items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-2 py-0.5 rounded-md bg-blue-100 text-pupr-deep text-[10px] font-extrabold uppercase tracking-wider">BBWS Brantas</span>
+            <span id="mapDataSourcePill" title="Status Koneksi Server BBWS Brantas" class="w-5 h-5 rounded-md bg-slate-200/80 text-slate-600 inline-flex items-center justify-center">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </span>
+          </div>
+          <h1 class="text-sm sm:text-base font-extrabold text-pupr-blue mt-0.5 leading-tight">Peta Daerah Irigasi</h1>
+        </div>
+
+        <button type="button" onclick="loadMarkers(true)" title="Sinkronkan Data Server BBWS" class="w-9 h-9 rounded-xl bg-blue-50 hover:bg-blue-100 text-pupr-blue flex items-center justify-center transition active:scale-95 shrink-0 border-0 cursor-pointer">
+          <svg id="mapRefreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="glass-surface p-3.5 rounded-2xl">
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="filterDI" class="text-[10px] font-extrabold text-pupr-blue uppercase tracking-wider">Filter Daerah Irigasi</label>
+          <span id="markerCountBadge" class="text-[10px] font-bold text-slate-500 tabular-nums">0 titik</span>
+        </div>
+        <select id="filterDI" onchange="applyMapFilter()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-pupr-blue">
+          <option value="all">Semua Daerah Irigasi</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- KANAN ATAS: PROFIL RINGKAS & LEGENDA STATUS -->
+    <div class="widget-container top-4 right-4 sm:top-6 sm:right-6 hidden sm:flex flex-col items-end gap-3">
+      <a href="profile.html" class="glass-surface flex items-center gap-3 pl-2 pr-4 py-2 rounded-full no-underline hover:bg-white transition">
+        <img id="userAvatar" src="assets/img/pegawai.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Avatar Petugas" class="w-8 h-8 rounded-full bg-slate-200 object-cover border border-blue-200">
+        <div class="text-right">
+          <p class="text-[10px] font-bold text-slate-500 leading-tight">Petugas Aktif</p>
+          <p id="userName" class="text-xs font-extrabold text-pupr-blue leading-tight">Memuat...</p>
+        </div>
+      </a>
+
+      <div class="glass-surface p-3.5 rounded-2xl flex flex-col gap-2">
+        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Status Laporan</span>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm"></span> Terverifikasi
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+          <span class="w-3 h-3 rounded-full bg-amber-400 shadow-sm"></span> Menunggu Verifikasi
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+          <span class="w-3 h-3 rounded-full bg-red-500 shadow-sm"></span> Ditolak / Revisi
+        </div>
+      </div>
+    </div>
+
+    <!-- KIRI BAWAH: PANEL DETAIL TITIK LOKASI -->
+    <div class="widget-container bottom-24 sm:bottom-6 left-4 sm:left-6 w-[calc(100vw-32px)] sm:w-[350px]">
+      <div class="glass-surface p-4 sm:p-5 rounded-3xl hidden" id="infoPanel">
+        <div class="flex justify-between items-start gap-2 mb-3">
+          <div class="min-w-0">
+            <span id="infoStatusBadge" class="inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700">MENUNGGU</span>
+            <h2 id="infoTitle" class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight mt-1 truncate">Nama Saluran</h2>
+          </div>
+          <button type="button" onclick="document.getElementById('infoPanel').classList.add('hidden')" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition shrink-0 border-0 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="space-y-2.5 text-xs">
+          <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200/70 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-7 h-7 rounded-full bg-pupr-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0" id="infoInisial">P</div>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400">Petugas Lapangan</p>
+                <p id="infoPetugas" class="font-bold text-slate-800 truncate">Nama Petugas</p>
+              </div>
+            </div>
+            <span id="infoKoordinat" class="font-mono text-[10px] text-slate-500 shrink-0">-</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200/70">
+              <p class="text-[10px] font-bold text-slate-400 mb-0.5">Volume / Luas</p>
+              <p id="infoLuas" class="text-xs font-extrabold text-pupr-blue truncate">-</p>
+            </div>
+            <div class="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200/70">
+              <p class="text-[10px] font-bold text-slate-400 mb-0.5">Daerah Irigasi</p>
+              <p id="infoDI" class="text-xs font-extrabold text-slate-800 truncate">-</p>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 mb-1">Dokumentasi Lapangan</p>
+            <img id="infoFoto" src="https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR" onerror="this.src='https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR'" alt="Foto Lokasi" class="w-full h-28 object-cover rounded-xl border border-slate-200">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="mapToastBox" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[1200] bg-slate-900/95 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 max-w-[90vw]">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="mapToastText">Notifikasi</span>
+  </div>
+
+  <!-- FLOATING NAV MOBILE (5 Menu Lengkap Senada Dashboard) -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi Mobile">
+    <a href="home.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Beranda</span>
+    </a>
+    <a href="peta.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span>Peta</span>
+    </a>
+    <a href="kamera.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span>Laporan</span>
+    </a>
+    <a href="raport.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      <span>Raport</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <span>Profil</span>
+    </a>
+  </nav>
+
+  <script>
+    let map;
+    let markersLayer;
+    let allMapReports = [];
+    let mapToastTimer = null;
+
+    function showMapToast(msg) {
+      const box = document.getElementById('mapToastBox');
+      const text = document.getElementById('mapToastText');
+      if (!box || !text) return;
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(mapToastTimer);
+      mapToastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
+    }
+
+    function getDemoMapReports() {
+      return [
+        {
+          id: 'm-1',
+          jenis_pekerjaan: 'Pembersihan Saluran Sekunder B.Kr.4',
+          daerah_irigasi: 'D.I Bening',
+          nama_petugas: 'Budi Santoso',
+          status: 'diverifikasi',
+          lokasi_lat: -7.536,
+          lokasi_lng: 112.238,
+          volume_ringkas: '120 m² • 85 m',
+          foto_100_url: 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Titik+B.Kr.4+100%25'
+        },
+        {
+          id: 'm-2',
+          jenis_pekerjaan: 'Pengerukan Sedimen Pintu Sadap',
+          daerah_irigasi: 'D.I Warujayeng',
+          nama_petugas: 'Siti Rahmawati',
+          status: 'terkirim',
+          lokasi_lat: -7.612,
+          lokasi_lng: 111.904,
+          volume_ringkas: '2.5 m³ Sedimen',
+          foto_0_url: 'https://placehold.co/320x180/1D4ED8/FFFFFF?text=Pintu+Sadap+0%25'
+        },
+        {
+          id: 'm-3',
+          jenis_pekerjaan: 'Perbaikan Tanggul & Bronjong',
+          daerah_irigasi: 'D.I Lodoyo',
+          nama_petugas: 'Hendra Wijaya',
+          status: 'ditolak',
+          lokasi_lat: -8.132,
+          lokasi_lng: 112.185,
+          volume_ringkas: 'Revisi Dokumentasi',
+          foto_0_url: 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Tanggul+Lodoyo'
+        }
+      ];
+    }
+
+    function initMap() {
+      map = L.map('map', {
+        zoomControl: false,
+        attributionControl: false
+      }).setView([-7.536, 112.238], 10);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+    }
+
+    function populateDIFilter(reports) {
+      const select = document.getElementById('filterDI');
+      if (!select) return;
+      const currentVal = select.value;
+      const uniqueDIs = [...new Set(reports.map(r => r.daerah_irigasi).filter(Boolean))];
+
+      select.innerHTML = `<option value="all">Semua Daerah Irigasi</option>` +
+        uniqueDIs.map(di => `<option value="${di}">${di}</option>`).join('');
+
+      if ([...select.options].some(o => o.value === currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function applyMapFilter() {
+      if (!markersLayer) return;
+      markersLayer.clearLayers();
+
+      const selectedDI = document.getElementById('filterDI')?.value || 'all';
+      const filtered = allMapReports.filter(item => {
+        if (!item.lokasi_lat || !item.lokasi_lng) return false;
+        return selectedDI === 'all' || item.daerah_irigasi === selectedDI;
+      });
+
+      document.getElementById('markerCountBadge').textContent = `${filtered.length} titik`;
+
+      const bounds = [];
+      filtered.forEach(item => {
+        const lat = parseFloat(item.lokasi_lat);
+        const lng = parseFloat(item.lokasi_lng);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        let color = '#F59E0B';
+        if (item.status === 'diverifikasi') color = '#10B981';
+        else if (item.status === 'ditolak') color = '#EF4444';
+
+        const customIcon = L.divIcon({
+          className: 'custom-marker',
+          html: `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 3px solid #FFFFFF; box-shadow: 0 3px 10px rgba(15,23,42,0.35);"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+
+        const marker = L.marker([lat, lng], { icon: customIcon });
+        marker.on('click', () => showInfoPanel(item));
+        marker.addTo(markersLayer);
+        bounds.push([lat, lng]);
+      });
+
+      if (bounds.length > 0 && selectedDI !== 'all') {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+      }
+    }
+
+    async function loadMarkers(isManual = false) {
+      if (isManual) {
+        const icon = document.getElementById('mapRefreshIcon');
+        icon?.classList.remove('animate-spin');
+        void icon?.offsetWidth;
+        icon?.classList.add('animate-spin');
+        setTimeout(() => icon?.classList.remove('animate-spin'), 650);
+      }
+
+      if (typeof initSupabase === 'function') {
+        initSupabase();
+      }
+
+      let profile = null;
+      if (typeof checkSession === 'function') {
+        try {
+          const session = await checkSession();
+          profile = session?.profile || null;
+        } catch (e) {
+          console.warn('checkSession fallback:', e);
+        }
+      }
+      if (!profile) {
+        try {
+          profile = JSON.parse(localStorage.getItem('user_bbws') || 'null');
+        } catch (e) {}
+      }
+
+      const kode = profile?.id_petugas || profile?.id_pegawai || 'O&P';
+      document.getElementById('userName').textContent = profile?.nama || 'Petugas Lapangan';
+      document.getElementById('sidebarPetugasCode').textContent = kode;
+      if (profile?.foto_pegawai || profile?.foto_apps) {
+        document.getElementById('userAvatar').src = profile.foto_pegawai || profile.foto_apps;
+      }
+
+      const pill = document.getElementById('mapDataSourcePill');
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          const { data: laporan, error } = await supabaseClient
+            .from('laporan')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+          if (error) throw error;
+          allMapReports = Array.isArray(laporan) && laporan.length > 0 ? laporan : getDemoMapReports();
+
+          if (pill) {
+            pill.title = 'Terhubung ke Server BBWS Brantas';
+            pill.className = 'w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 inline-flex items-center justify-center';
+            pill.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M5 13l4 4L19 7"/></svg>`;
+          }
+          if (isManual) showMapToast('Data peta diperbarui dari Server BBWS Brantas.');
+        } catch (err) {
+          console.warn('Fallback peta BBWS:', err);
+          allMapReports = getDemoMapReports();
+          if (pill) {
+            pill.title = 'Mode Sinkronisasi Offline BBWS';
+            pill.className = 'w-5 h-5 rounded-md bg-amber-100 text-amber-700 inline-flex items-center justify-center';
+            pill.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>`;
+          }
+          if (isManual) showMapToast('Data disinkronkan dari cache lokal Server BBWS.');
+        }
+      } else {
+        allMapReports = getDemoMapReports();
+        if (isManual) showMapToast('Data disinkronkan dari cache lokal Server BBWS.');
+      }
+
+      populateDIFilter(allMapReports);
+      applyMapFilter();
+    }
+
+    function showInfoPanel(data) {
+      const panel = document.getElementById('infoPanel');
+      panel.classList.remove('hidden');
+
+      const badge = document.getElementById('infoStatusBadge');
+      if (data.status === 'diverifikasi') {
+        badge.className = 'inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-700';
+        badge.textContent = 'TERVERIFIKASI';
+      } else if (data.status === 'ditolak') {
+        badge.className = 'inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-red-100 text-red-700';
+        badge.textContent = 'DITOLAK';
+      } else {
+        badge.className = 'inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700';
+        badge.textContent = 'MENUNGGU';
+      }
+
+      document.getElementById('infoTitle').textContent = data.jenis_pekerjaan || 'Pekerjaan Lapangan';
+      document.getElementById('infoDI').textContent = data.daerah_irigasi || '-';
+
+      const nama = data.nama_petugas || data.id_petugas || 'Petugas';
+      const inisial = nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('infoInisial').textContent = inisial || 'P';
+      document.getElementById('infoPetugas').textContent = nama;
+      document.getElementById('infoLuas').textContent = data.volume_ringkas || `${data.vol_luas || 0} m² • ${data.vol_panjang || 0} m`;
+
+      const lat = parseFloat(data.lokasi_lat);
+      const lng = parseFloat(data.lokasi_lng);
+      document.getElementById('infoKoordinat').textContent = (!isNaN(lat) && !isNaN(lng)) ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : '-';
+
+      const fotoUrl = data.foto_100_url || data.foto_50_url || data.foto_0_url || 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR';
+      document.getElementById('infoFoto').src = fotoUrl;
+    }
+
+    // Jam Sidebar
+    const clockTimeEl = document.getElementById('sidebarClockTime');
+    const clockDateEl = document.getElementById('sidebarClockDate');
+    function updateSidebarClock() {
+      const now = new Date();
+      if (clockTimeEl) clockTimeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (clockDateEl) clockDateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+
+    // Logout
+    document.getElementById('btnLogout')?.addEventListener('click', async () => {
+      if (typeof logout === 'function') {
+        await logout();
+      } else {
+        try { localStorage.removeItem('user_bbws'); } catch (e) {}
+        showMapToast('Sesi diakhiri.');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      loadMarkers(false);
+    });
+  </script>
+</body>
+</html>
