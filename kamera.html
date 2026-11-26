@@ -59,7 +59,6 @@
             will-change: transform;
             backface-visibility: hidden;
         }
-        /* Disesuaikan dengan arah rotasi visual pada gbr: jam 9 (landscape-right) -> 90deg, jam 3 (landscape-left) -> -90deg */
         body[data-phys-orient="landscape-right"] .orient-icon { transform: translate3d(0, 0, 0) rotate(90deg); }
         body[data-phys-orient="landscape-left"] .orient-icon { transform: translate3d(0, 0, 0) rotate(-90deg); }
 
@@ -73,25 +72,25 @@
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
             transform-origin: bottom left;
         }
-        /* Posisi jam 9 (HP miring ke kiri): tegak terbaca dengan rotate(90deg) di area kiri layar potret */
+        /* Posisi -90 (HP miring ke kiri / jam 9): tegak terbaca dengan rotate(90deg) */
         body[data-phys-orient="landscape-right"] .watermark {
             position: fixed;
-            top: 92px;
+            top: 96px;
             left: 16px;
             bottom: auto;
             right: auto;
-            max-width: min(440px, calc(100dvh - 260px));
+            max-width: min(380px, calc(100dvh - 280px));
             transform: translate3d(0, 0, 0) rotate(90deg) translateY(-100%);
             transform-origin: top left;
         }
-        /* Posisi jam 3 (HP miring ke kanan): tegak terbaca dengan rotate(-90deg) di area bawah layar potret */
+        /* Posisi 90 (HP miring ke kanan / jam 3): tegak terbaca dengan rotate(-90deg) tanpa terpotong & tanpa menabrak tombol */
         body[data-phys-orient="landscape-left"] .watermark {
             position: fixed;
-            bottom: 185px;
-            left: 16px;
+            bottom: 215px;
+            left: 56px;
             top: auto;
             right: auto;
-            max-width: min(440px, calc(100dvh - 260px));
+            max-width: min(350px, calc(100dvh - 300px));
             transform: translate3d(0, 0, 0) rotate(-90deg) translateX(-100%);
             transform-origin: bottom left;
         }
@@ -196,7 +195,7 @@
     </div>
 
     <!-- LOGO LIVE OVERLAY -->
-    <div id="liveLogoWrapper" class="absolute z-[15] top-20 right-4 pointer-events-none transition-all duration-200" style="transform: translate3d(0,0,0); backface-visibility: hidden;">
+    <div id="liveLogoWrapper" class="fixed z-[25] top-20 right-4 pointer-events-none transition-all duration-200" style="transform: translate3d(0,0,0); backface-visibility: hidden;">
         <img id="liveLogoImg" src="assets/img/logo-bbws.svg" onerror="this.src='assets/img/logo.png'" alt="Logo Instansi" class="orient-icon w-16 h-16 object-contain rounded-xl border-2 border-white shadow-lg bg-white/10">
     </div>
 
@@ -743,8 +742,6 @@
                     if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
                 } else {
                     if (Math.abs(gx) > Math.abs(gy) * 1.35 && Math.abs(gx) > 4.5) {
-                        // gx > 0 berarti HP miring ke kiri (jam 9, bagian atas HP di kiri) -> landscape-right (visual 90deg)
-                        // gx < 0 berarti HP miring ke kanan (jam 3, bagian atas HP di kanan) -> landscape-left (visual -90deg)
                         const targetOrient = gx > 0 ? 'landscape-right' : 'landscape-left';
                         if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
                     } else if (Math.abs(gy) > Math.abs(gx) * 1.35 && Math.abs(gy) > 4.5) {
@@ -800,7 +797,6 @@
         function applyPhysicalOrientation(orient) {
             physicalOrientation = orient;
             const viewportIsPortrait = window.innerHeight >= window.innerWidth;
-            // Jika OS browser sudah memutar layar ke landscape, CSS body tetap 'portrait' agar tidak dobel rotasi
             const cssOrient = viewportIsPortrait ? orient : 'portrait';
             document.body.setAttribute('data-phys-orient', cssOrient);
             updateLogoSettings();
@@ -1138,20 +1134,20 @@
 
             const isLandscapeViewport = window.innerWidth > window.innerHeight;
             wrapper.style.display = logoState.visible ? 'block' : 'none';
-            wrapper.className = 'absolute z-[15] pointer-events-none transition-all duration-200';
+            wrapper.className = 'fixed z-[25] pointer-events-none transition-all duration-200';
 
             if (!isLandscapeViewport && physicalOrientation === 'landscape-right') {
-                // Jam 9 (HP miring ke kiri, rotasi visual 90deg): pojok kanan atas pengamat berada di pojok kiri bawah layar potret
+                // Mode -90 (HP miring ke kiri): top-right pengamat berada di area bawah-kiri layar potret
                 if (logoState.position === 'top-left') wrapper.classList.add('top-20', 'left-4');
-                else if (logoState.position === 'top-right') wrapper.classList.add('bottom-44', 'left-4');
+                else if (logoState.position === 'top-right') wrapper.classList.add('bottom-28', 'left-4');
                 else if (logoState.position === 'bottom-left') wrapper.classList.add('top-20', 'right-16');
-                else wrapper.classList.add('bottom-44', 'right-16');
+                else wrapper.classList.add('bottom-28', 'right-16');
             } else if (!isLandscapeViewport && physicalOrientation === 'landscape-left') {
-                // Jam 3 (HP miring ke kanan, rotasi visual -90deg): pojok kanan atas pengamat berada di pojok kanan atas layar potret
-                if (logoState.position === 'top-left') wrapper.classList.add('bottom-44', 'right-4');
-                else if (logoState.position === 'top-right') wrapper.classList.add('top-20', 'right-4');
-                else if (logoState.position === 'bottom-left') wrapper.classList.add('bottom-44', 'left-4');
-                else wrapper.classList.add('top-20', 'left-4');
+                // Mode 90 (HP miring ke kanan): top-right pengamat berada di pojok kanan-atas layar potret (kotak kuning atas pada gbr)
+                if (logoState.position === 'top-left') wrapper.classList.add('bottom-28', 'right-4');
+                else if (logoState.position === 'top-right') wrapper.classList.add('top-6', 'right-4');
+                else if (logoState.position === 'bottom-left') wrapper.classList.add('bottom-28', 'left-4');
+                else wrapper.classList.add('top-6', 'left-4');
             } else {
                 // Mode Potret normal atau layar OS benar-benar Landscape
                 if (logoState.position === 'top-left') wrapper.classList.add(isLandscapeViewport ? 'top-14' : 'top-20', 'left-4');
@@ -1283,17 +1279,17 @@
             canvas.width = w;
             canvas.height = h;
 
-            // Gambar frame video / foto sesuai orientasi visual layar agar hasil jepretan sama dengan tampilan
+            // Gambar frame video / foto sehingga sisi atas-bawah objek di foto tegak lurus sesuai sudut pandang saat memotret
             ctx.save();
             if (needRotateForLandscape) {
                 if (physicalOrientation === 'landscape-right') {
-                    // Jam 9 (visual 90deg searah jarum jam)
-                    ctx.translate(w, 0);
-                    ctx.rotate(Math.PI / 2);
-                } else {
-                    // Jam 3 (visual -90deg berlawanan jarum jam)
+                    // Mode -90 (HP miring ke kiri): rotasi canvas -90deg agar objek di foto tidak terbalik atas-bawah
                     ctx.translate(0, h);
                     ctx.rotate(-Math.PI / 2);
+                } else {
+                    // Mode 90 (HP miring ke kanan): rotasi canvas +90deg agar objek di foto tidak terbalik atas-bawah
+                    ctx.translate(w, 0);
+                    ctx.rotate(Math.PI / 2);
                 }
             }
             if (mirror) {
