@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Laporan Harian & Giat Kerja — BBWS Brantas</title>
+  <meta name="theme-color" content="#1E3A8A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo-bbws.svg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brantas: {
+              blue: '#1E3A8A',
+              dark: '#172554',
+              light: '#EFF6FF',
+              gold: '#F59E0B',
+              goldLight: '#FEF3C7',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1E3A8A 0%, #172554 65%, #1E40AF 100%);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    input[type="number"]::-webkit-inner-spin-button {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="pb-28 lg:pb-10 lg:pl-64 min-h-screen">
+
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40">
+    <div class="p-5 flex items-center gap-3 border-b border-slate-100">
+      <img src="assets/img/logo-bbws.svg" alt="BBWS Brantas" class="w-10 h-10 object-contain" />
+      <div>
+        <h1 class="font-extrabold text-brantas-blue text-base leading-tight">BBWS BRANTAS</h1>
+        <p class="text-[11px] font-semibold text-slate-500">Sistem OP Irigasi 2026</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1.5 text-sm font-semibold">
+      <a href="home.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="home" class="w-5 h-5"></i> Beranda
+      </a>
+      <a href="tugas.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="clipboard-list" class="w-5 h-5"></i> Tugas & Verifikasi
+      </a>
+      <a href="kamera.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="camera" class="w-5 h-5"></i> Kamera Lapangan
+      </a>
+      <a href="laporan.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brantas-blue text-white shadow-sm">
+        <i data-lucide="file-plus-2" class="w-5 h-5 text-brantas-gold"></i> Buat Laporan
+      </a>
+      <a href="raport.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Raport Kinerja
+      </a>
+      <a href="peta.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="map-pin" class="w-5 h-5"></i> Peta Sebaran D.I
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-slate-100">
+      <a href="profile.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition">
+        <img id="sidebarAvatar" src="assets/img/logo-bbws.svg" alt="Profil" class="w-9 h-9 rounded-full object-cover border border-slate-200 bg-slate-100" />
+        <div class="overflow-hidden">
+          <p id="sidebarName" class="text-xs font-bold text-slate-800 truncate">Memuat Petugas...</p>
+          <p id="sidebarRole" class="text-[11px] text-slate-500 truncate">-</p>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- HEADER MOBILE & DESKTOP -->
+  <header class="hero-gradient text-white pt-5 pb-14 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="max-w-4xl mx-auto flex items-center justify-between relative z-10">
+      <div class="flex items-center gap-3">
+        <a href="home.html" class="lg:hidden w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> FORMULIR KINERJA OP 2026
+          </span>
+          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight">Laporan Kinerja & Giat Kerja</h1>
+        </div>
+      </div>
+
+      <a href="profile.html" class="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-2xl border border-white/15 transition">
+        <div class="text-right hidden sm:block">
+          <p id="headerUserName" class="text-xs font-bold leading-tight">Memuat...</p>
+          <p id="headerUserId" class="text-[10px] text-amber-300 font-semibold">-</p>
+        </div>
+        <img id="headerAvatar" src="assets/img/logo-bbws.svg" alt="Avatar" class="w-8 h-8 rounded-full object-cover bg-white/20 border border-white/40" />
+      </a>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-9 relative z-20 space-y-5">
+
+    <!-- BANNER STATUS GIAT KERJA HARI INI (MUNCUL OTOMATIS JIKA ANGGOTA SUDAH DIABSENKAN DALAM GIAT KERJA) -->
+    <div id="giatKerjaNotice" class="hidden glass-surface rounded-2xl p-4 border-l-4 border-emerald-500 bg-emerald-50/95">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+          <i data-lucide="users" class="w-5 h-5"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-sm font-extrabold text-emerald-900">Tercatat dalam Giat Kerja (Quick Response) Hari Ini</h3>
+          <p id="giatKerjaNoticeText" class="text-xs text-emerald-800 mt-1 leading-relaxed">
+            Anda sudah terdaftar sebagai anggota tim Giat Kerja hari ini. Kehadiran & jam kerja Anda otomatis terpenuhi tanpa perlu mengirim foto 0%, 50%, 100% terpisah.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM UTAMA LAPORAN -->
+    <form id="dailyReportForm" class="space-y-5" novalidate>
+
+      <!-- BAGIAN 1 (PALING ATAS): DOKUMENTASI FOTO 0%, 50%, 100% -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">1</span>
+              Dokumentasi Foto Progres (Wajib Kamera Live)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Ambil foto 0%, 50%, dan 100% ber-watermark GPS, Timestamp, & Logo PU.</p>
+          </div>
+          <a href="kamera.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brantas-light text-brantas-blue text-xs font-bold hover:bg-blue-100 transition">
+            <i data-lucide="camera" class="w-4 h-4"></i> Buka Kamera Inspeksi
+          </a>
+        </div>
+
+        <!-- 3 SLOT FOTO GRID -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <!-- SLOT 0% -->
+          <div id="cardSlot0" class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-3 flex flex-col justify-between transition">
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-800 text-white text-[11px] font-extrabold">FOTO 0% (AWAL)</span>
+              <span id="badgeSlot0" class="text-[11px] font-bold text-amber-600">Belum Ada</span>
+            </div>
+            <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-200/70 flex items-center justify-center mb-2.5">
+              <img id="previewSlot0" src="" alt="Foto 0%" class="hidden w-full h-full object-cover" />
+              <div id="emptySlot0" class="text-center p-3">
+                <i data-lucide="image-plus" class="w-7 h-7 text-slate-400 mx-auto mb-1"></i>
+                <p class="text-[11px] font-semibold text-slate-500">Sebelum Pekerjaan</p>
+              </div>
+            </div>
+            <div id="metaSlot0" class="hidden text-[10px] text-slate-600 bg-white p-2 rounded-lg border border-slate-200 mb-2 space-y-0.5">
+              <p class="font-bold text-slate-800 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-brantas-blue"></i> <span id="timeSlot0">-</span></p>
+              <p class="truncate flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-rose-500"></i> <span id="gpsSlot0">-</span></p>
+            </div>
+            <div class="flex gap-1.5">
+              <a href="kamera.html?slot=0" class="flex-1 py-2 px-3 rounded-xl bg-brantas-blue text-white text-xs font-bold text-center hover:bg-brantas-dark transition flex items-center justify-center gap-1.5">
+                <i data-lucide="camera" class="w-3.5 h-3.5"></i> <span id="btnTextSlot0">Ambil 0%</span>
+              </a>
+              <button type="button" id="clearSlot0" onclick="clearPhotoSlot('0')" class="hidden p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100" title="Hapus Foto">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- SLOT 50% -->
+          <div id="cardSlot50" class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-3 flex flex-col justify-between transition">
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-lg bg-amber-500 text-white text-[11px] font-extrabold">FOTO 50% (PROSES)</span>
+              <span id="badgeSlot50" class="text-[11px] font-bold text-amber-600">Belum Ada</span>
+            </div>
+            <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-200/70 flex items-center justify-center mb-2.5">
+              <img id="previewSlot50" src="" alt="Foto 50%" class="hidden w-full h-full object-cover" />
+              <div id="emptySlot50" class="text-center p-3">
+                <i data-lucide="image-plus" class="w-7 h-7 text-slate-400 mx-auto mb-1"></i>
+                <p class="text-[11px] font-semibold text-slate-500">Sedang Dikerjakan</p>
+              </div>
+            </div>
+            <div id="metaSlot50" class="hidden text-[10px] text-slate-600 bg-white p-2 rounded-lg border border-slate-200 mb-2 space-y-0.5">
+              <p class="font-bold text-slate-800 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-brantas-blue"></i> <span id="timeSlot50">-</span></p>
+              <p class="truncate flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-rose-500"></i> <span id="gpsSlot50">-</span></p>
+            </div>
+            <div class="flex gap-1.5">
+              <a href="kamera.html?slot=50" class="flex-1 py-2 px-3 rounded-xl bg-brantas-blue text-white text-xs font-bold text-center hover:bg-brantas-dark transition flex items-center justify-center gap-1.5">
+                <i data-lucide="camera" class="w-3.5 h-3.5"></i> <span id="btnTextSlot50">Ambil 50%</span>
+              </a>
+              <button type="button" id="clearSlot50" onclick="clearPhotoSlot('50')" class="hidden p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100" title="Hapus Foto">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- SLOT 100% -->
+          <div id="cardSlot100" class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-3 flex flex-col justify-between transition">
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold">FOTO 100% (SELESAI)</span>
+              <span id="badgeSlot100" class="text-[11px] font-bold text-amber-600">Belum Ada</span>
+            </div>
+            <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-200/70 flex items-center justify-center mb-2.5">
+              <img id="previewSlot100" src="" alt="Foto 100%" class="hidden w-full h-full object-cover" />
+              <div id="emptySlot100" class="text-center p-3">
+                <i data-lucide="image-plus" class="w-7 h-7 text-slate-400 mx-auto mb-1"></i>
+                <p class="text-[11px] font-semibold text-slate-500">Hasil Akhir Kegiatan</p>
+              </div>
+            </div>
+            <div id="metaSlot100" class="hidden text-[10px] text-slate-600 bg-white p-2 rounded-lg border border-slate-200 mb-2 space-y-0.5">
+              <p class="font-bold text-slate-800 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-brantas-blue"></i> <span id="timeSlot100">-</span></p>
+              <p class="truncate flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-rose-500"></i> <span id="gpsSlot100">-</span></p>
+            </div>
+            <div class="flex gap-1.5">
+              <a href="kamera.html?slot=100" class="flex-1 py-2 px-3 rounded-xl bg-brantas-blue text-white text-xs font-bold text-center hover:bg-brantas-dark transition flex items-center justify-center gap-1.5">
+                <i data-lucide="camera" class="w-3.5 h-3.5"></i> <span id="btnTextSlot100">Ambil 100%</span>
+              </a>
+              <button type="button" id="clearSlot100" onclick="clearPhotoSlot('100')" class="hidden p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100" title="Hapus Foto">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESTIMASI JAM KERJA OTOMATIS DARI FOTO 0% - 100% -->
+        <div id="workDurationBar" class="mt-3.5 p-3 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center justify-between text-xs">
+          <span class="font-semibold text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="timer" class="w-4 h-4 text-brantas-blue"></i> Estimasi Durasi Kerja (Foto 0% → 100%):
+          </span>
+          <span id="workDurationText" class="font-extrabold text-brantas-blue">Menunggu foto 0% & 100%</span>
+        </div>
+      </section>
+
+      <!-- BAGIAN 2: IDENTITAS PETUGAS & METODE KERJA -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">2</span>
+          Identitas Petugas & Metode Kerja
+        </h2>
+
+        <!-- INFO PETUGAS OTOMATIS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase">ID Petugas OP</label>
+            <input type="text" id="idPetugasInput" readonly class="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-extrabold text-brantas-blue" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase">Nama Petugas</label>
+            <input type="text" id="namaPetugasInput" readonly class="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase">PPK / Daerah Irigasi</label>
+            <input type="text" id="diPetugasInput" readonly class="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase">Jabatan</label>
+            <input type="text" id="jabatanPetugasInput" readonly class="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800" />
+          </div>
+        </div>
+
+        <!-- PILIHAN METODE KERJA (INDIVIDU / KELOMPOK / GIAT KERJA QUICK RESPONSE) -->
+        <div>
+          <label class="block text-xs font-extrabold text-slate-800 mb-2">
+            Metode Kerja <span class="text-rose-500">*</span>
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <label class="cursor-pointer">
+              <input type="radio" name="metode_kerja" value="Individu" class="peer sr-only" checked onchange="handleMetodeKerjaChange()" />
+              <div class="p-3.5 rounded-xl border-2 border-slate-200 bg-white peer-checked:border-brantas-blue peer-checked:bg-blue-50/50 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold text-slate-800">Individu</span>
+                  <i data-lucide="user" class="w-4 h-4 text-brantas-blue"></i>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">Pekerjaan rutin mandiri di wilayah pos masing-masing.</p>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="metode_kerja" value="Kelompok" class="peer sr-only" onchange="handleMetodeKerjaChange()" />
+              <div class="p-3.5 rounded-xl border-2 border-slate-200 bg-white peer-checked:border-brantas-blue peer-checked:bg-blue-50/50 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold text-slate-800">Kelompok</span>
+                  <i data-lucide="users" class="w-4 h-4 text-brantas-blue"></i>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">Kerja sama tim rutin antar-petugas di satu saluran/bangunan.</p>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="metode_kerja" value="Giat Kerja" class="peer sr-only" onchange="handleMetodeKerjaChange()" />
+              <div class="p-3.5 rounded-xl border-2 border-amber-300 bg-amber-50/40 peer-checked:border-amber-500 peer-checked:bg-amber-50 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold text-amber-900">Giat Kerja (Quick Response)</span>
+                  <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                </div>
+                <p class="text-[11px] text-amber-800/80 mt-1">Min. 1x/minggu per D.I/Kejuron. Anggota dipilih otomatis absen hadir.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- PANEL PEMILIH ANGGOTA TIM (MUNCUL JIKA KELOMPOK ATAU GIAT KERJA) -->
+        <div id="teamSelectorBox" class="hidden rounded-2xl border border-amber-300 bg-amber-50/50 p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 id="teamSelectorTitle" class="text-xs font-extrabold text-slate-800">Pilih Anggota Tim yang Terlibat</h3>
+              <p id="teamSelectorSubtitle" class="text-[11px] text-slate-600">
+                Anggota yang dicentang otomatis tercatat hadir & memenuhi laporan hari ini (tidak perlu kirim foto 0-50-100 terpisah).
+              </p>
+            </div>
+            <span id="selectedMemberCount" class="px-2.5 py-1 rounded-lg bg-brantas-blue text-white text-xs font-extrabold">
+              0 Anggota Dipilih
+            </span>
+          </div>
+
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input type="text" id="memberSearchInput" oninput="filterTeamMembers()" placeholder="Cari nama, ID Petugas, atau Kejuron di D.I ini..."
+              class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div id="teamMembersList" class="max-h-56 overflow-y-auto custom-scrollbar grid grid-cols-1 sm:grid-cols-2 gap-2 pr-1">
+            <p class="text-xs text-slate-500 col-span-full py-3 text-center">Memuat daftar pegawai satu Daerah Irigasi...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- BAGIAN 3: LOKASI WILAYAH & INFRASTRUKTUR -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">3</span>
+          Lokasi Wilayah & Bangunan Irigasi
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Wilayah / KorSDA <span class="text-rose-500">*</span></label>
+            <input type="text" id="wilayahKorsda" required placeholder="Contoh: KorSDA Nganjuk / KorSDA Sidoarjo"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kejuron <span class="text-rose-500">*</span></label>
+            <input type="text" id="kejuron" required placeholder="Contoh: Kejuron Bening / Kejuron Porong"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Saluran <span class="text-rose-500">*</span></label>
+            <input type="text" id="namaSaluran" required placeholder="Contoh: Saluran Induk Bening / Sekunder..."
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Bangunan <span class="text-rose-500">*</span></label>
+            <input type="text" id="namaBangunan" required placeholder="Contoh: B.Bn 1 / Pintu Bagi Sadap..."
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Desa / Kelurahan <span class="text-rose-500">*</span></label>
+            <input type="text" id="desaKelurahan" required placeholder="Contoh: Desa Jimbaran / Kelurahan Jimbaran"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kecamatan <span class="text-rose-500">*</span></label>
+            <input type="text" id="kecamatan" required placeholder="Nama Kecamatan"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kabupaten / Kota <span class="text-rose-500">*</span></label>
+            <input type="text" id="kabupaten" required placeholder="Contoh: Kabupaten Blitar / Kota Blitar"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+          </div>
+        </div>
+      </section>
+
+      <!-- BAGIAN 4: VOLUME HASIL PEKERJAAN (DESIMAL, DEFAULT 0) -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">4</span>
+            Volume Hasil Pekerjaan
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Gunakan titik (.) untuk desimal (contoh: 10.45). Biarkan <strong>0</strong> jika tidak ada pekerjaan pada item tersebut.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="block text-xs font-bold text-slate-700">Luas Area Kegiatan (m²)</label>
+            <input type="number" step="0.01" min="0" id="volLuasArea" value="0" required
+              class="mt-1.5 w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="block text-xs font-bold text-slate-700">Panjang Saluran (m)</label>
+            <input type="number" step="0.01" min="0" id="volPanjangSaluran" value="0" required
+              class="mt-1.5 w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="block text-xs font-bold text-slate-700">Menutup Bocoran (m)</label>
+            <input type="number" step="0.01" min="0" id="volMenutupBocoran" value="0" required
+              class="mt-1.5 w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="block text-xs font-bold text-slate-700">Angkat Sedimen (m³)</label>
+            <input type="number" step="0.01" min="0" id="volAngkatSedimen" value="0" required
+              class="mt-1.5 w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="block text-xs font-bold text-slate-700">Pembersihan Sampah (m³)</label>
+            <input type="number" step="0.01" min="0" id="volPembersihanSampah" value="0" required
+              class="mt-1.5 w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <label class="block text-xs font-bold text-slate-700">Angkat / Potong Pohon (bh)</label>
+            <input type="number" step="0.01" min="0" id="volPotongPohon" value="0" required
+              class="mt-1.5 w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          </div>
+        </div>
+      </section>
+
+      <!-- BAGIAN 5: URGENSI KEGIATAN & USULAN PERBAIKAN -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">5</span>
+            Urgensi Kegiatan & Usulan Perbaikan
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Pilih satu atau lebih jenis pekerjaan yang dilaksanakan hari ini <span class="text-rose-500">*</span></p>
+        </div>
+
+        <div id="urgensiChecklistGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <!-- Diisi otomatis via JS sesuai 20 item GForm -->
+        </div>
+
+        <!-- OPSI YANG LAIN -->
+        <div class="flex items-center gap-2.5 pt-1">
+          <input type="checkbox" id="urgensiLainCheck" onchange="toggleUrgensiLain()" class="w-4 h-4 rounded text-brantas-blue focus:ring-brantas-blue" />
+          <label for="urgensiLainCheck" class="text-xs font-bold text-slate-700 shrink-0">Yang lain:</label>
+          <input type="text" id="urgensiLainText" disabled placeholder="Tuliskan kegiatan lainnya..."
+            class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs disabled:bg-slate-100 disabled:text-slate-400 focus:outline-none focus:border-brantas-blue" />
+        </div>
+
+        <!-- USULAN PERBAIKAN -->
+        <div class="pt-2">
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Usulan Perbaikan / Catatan Lapangan <span class="text-rose-500">*</span>
+          </label>
+          <textarea id="usulanPerbaikan" rows="3" required placeholder="Tuliskan kondisi kerusakan saluran/pintu air atau isi 'Tidak ada / Normal' jika kondisi baik..."
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue"></textarea>
+        </div>
+      </section>
+
+      <!-- TOMBOL KIRIM LAPORAN -->
+      <div class="pt-1 pb-6">
+        <button type="submit" id="submitReportBtn"
+          class="w-full py-4 px-6 rounded-2xl bg-brantas-blue hover:bg-brantas-dark text-white font-extrabold text-sm shadow-lg shadow-blue-900/25 flex items-center justify-center gap-2.5 transition active:scale-[0.99]">
+          <i data-lucide="send" class="w-5 h-5 text-brantas-gold"></i>
+          <span>KIRIM LAPORAN & UNGGAH DOKUMENTASI</span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <!-- OVERLAY LOADING PROSES UPLOAD DRIVE & SUPABASE -->
+  <div id="uploadOverlay" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-brantas-light text-brantas-blue mx-auto flex items-center justify-center animate-pulse">
+        <i data-lucide="cloud-upload" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-slate-800">Mengirim Laporan...</h3>
+        <p id="uploadStepText" class="text-xs text-slate-500 mt-1">Menyiapkan foto dokumentasi ke Google Drive...</p>
+      </div>
+      <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+        <div id="uploadProgressBar" class="bg-brantas-blue h-2 rounded-full transition-all duration-300" style="width: 15%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION MOBILE (5 IKON UTAMA) -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 px-2 py-1.5">
+    <div class="grid grid-cols-5 items-center text-[10px] font-bold text-slate-500">
+      <a href="home.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="tugas.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="clipboard-list" class="w-5 h-5 mb-0.5"></i>
+        <span>Tugas</span>
+      </a>
+      <a href="kamera.html" class="flex flex-col items-center -mt-5">
+        <div class="w-12 h-12 rounded-2xl bg-slate-800 text-white shadow-lg flex items-center justify-center border-2 border-white">
+          <i data-lucide="camera" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <span class="mt-1 text-slate-700">Kamera</span>
+      </a>
+      <a href="laporan.html" class="flex flex-col items-center py-1 text-brantas-blue">
+        <i data-lucide="file-plus-2" class="w-5 h-5 mb-0.5 text-brantas-gold"></i>
+        <span class="font-extrabold">Laporan</span>
+      </a>
+      <a href="raport.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5"></i>
+        <span>Raport</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // =========================================================================
+    // 1. KONFIGURASI SUPABASE & API GOOGLE APPS SCRIPT (SESUAIKAN DENGAN PROJECT)
+    // =========================================================================
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Daftar 20 Urgensi Kegiatan sesuai Google Form BBWS Brantas
+    const URGENSI_ITEMS = [
+      "Babat Rumput",
+      "Menaikkan Sampah di Saluran",
+      "Membersihkan Tanaman Liar di Tanggul",
+      "Membersihkan Sampah di Bangunan Pintu Air",
+      "Melaksanakan Tugas Lain Dari Pimpinan",
+      "Bersih Enceng Gondok di Sungai",
+      "Merapikan Tanggul Dekat Bangunan",
+      "Perbaikan Tanggul Saluran",
+      "Memotong Pohon",
+      "Mengecat Ban Banan Saluran",
+      "Gelontor Waled/Gali Sedimen",
+      "Membersihkan Bangunan Ukur",
+      "Memberi Pelumas Pintu Air",
+      "Memeriksa Kondisi Debit Air",
+      "Membantu Juru Mengatur Debit Air",
+      "Monitoring Bencana Banjir",
+      "Mengikuti Bimtek",
+      "Pengawasan Kontraktual/ Swakelola",
+      "Melaksanakan Tugas dari Pimpinan",
+      "Input Data SMOPI dan Monitoring Pengisian SMOPI"
+    ];
+
+    let currentUser = null;
+    let photoSlots = { '0': null, '50': null, '100': null };
+    let diColleagues = [];
+    let selectedMemberIds = new Set();
+
+    // =========================================================================
+    // 2. INISIALISASI HALAMAN
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      renderUrgensiCheckboxes();
+      await loadCurrentUser();
+      await loadCapturedPhotos();
+      await checkTodayGiatKerjaStatus();
+      await loadColleaguesInDI();
+    });
+
+    function renderUrgensiCheckboxes() {
+      const container = document.getElementById('urgensiChecklistGrid');
+      container.innerHTML = URGENSI_ITEMS.map((item, idx) => `
+        <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition">
+          <input type="checkbox" name="urgensi_item" value="${item}" class="mt-0.5 w-4 h-4 rounded text-brantas-blue focus:ring-brantas-blue" />
+          <span class="text-xs font-medium text-slate-700 leading-snug">${item}</span>
+        </label>
+      `).join('');
+    }
+
+    function toggleUrgensiLain() {
+      const cb = document.getElementById('urgensiLainCheck');
+      const txt = document.getElementById('urgensiLainText');
+      txt.disabled = !cb.checked;
+      if (cb.checked) txt.focus();
+      else txt.value = '';
+    }
+
+    // =========================================================================
+    // 3. MUAT DATA PENGGUNA LOGIN
+    // =========================================================================
+    async function loadCurrentUser() {
+      const rawSession = localStorage.getItem('bbws_user') || localStorage.getItem('user_session');
+      if (!rawSession) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = JSON.parse(rawSession);
+
+      // Sinkronkan profil terbaru dari Supabase jika online
+      try {
+        const { data } = await sb
+          .from('pegawai')
+          .select('*')
+          .eq('id_petugas', currentUser.id_petugas || currentUser.id)
+          .single();
+        if (data) {
+          currentUser = { ...currentUser, ...data };
+          localStorage.setItem('bbws_user', JSON.stringify(currentUser));
+        }
+      } catch (e) {
+        console.warn('Mode offline: menggunakan cache profil lokal.');
+      }
+
+      const idPetugas = currentUser.id_petugas || currentUser.id || '-';
+      const nama = currentUser.nama || '-';
+      const ppk = currentUser.ppk_op || currentUser.ppk || '-';
+      const di = currentUser.daerah_irigasi || '-';
+      const jabatan = currentUser.jabatan || currentUser.role || '-';
+
+      document.getElementById('headerUserName').textContent = nama;
+      document.getElementById('headerUserId').textContent = idPetugas;
+      document.getElementById('sidebarName').textContent = nama;
+      document.getElementById('sidebarRole').textContent = `${jabatan} • ${di}`;
+
+      document.getElementById('idPetugasInput').value = idPetugas;
+      document.getElementById('namaPetugasInput').value = nama;
+      document.getElementById('diPetugasInput').value = `${ppk} — ${di}`;
+      document.getElementById('jabatanPetugasInput').value = jabatan;
+
+      // Isi otomatis Wilayah/KorSDA & Kejuron jika sudah tersimpan di profil pegawai
+      if (currentUser.wilayah_korsda) document.getElementById('wilayahKorsda').value = currentUser.wilayah_korsda;
+      if (currentUser.kejuron) document.getElementById('kejuron').value = currentUser.kejuron;
+
+      // Foto profil dari Google Drive thumbnail
+      if (currentUser.foto_pegawai_id) {
+        const avatarUrl = `https://lh3.googleusercontent.com/d/${currentUser.foto_pegawai_id}`;
+        document.getElementById('headerAvatar').src = avatarUrl;
+        document.getElementById('sidebarAvatar').src = avatarUrl;
+      }
+    }
+
+    // =========================================================================
+    // 4. AMBIL FOTO HASIL JEPRETAN KAMERA (INDEXEDDB + LOCALSTORAGE FALLBACK)
+    // =========================================================================
+    function openPhotoDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('BBWS_Kamera_DB', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('captured_photos')) {
+            db.createObjectStore('captured_photos', { keyPath: 'slot' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadCapturedPhotos() {
+      // 1) Cek IndexedDB (utama untuk foto resolusi tinggi tanpa kena limit 5MB)
+      try {
+        const db = await openPhotoDB();
+        const tx = db.transaction('captured_photos', 'readonly');
+        const store = tx.objectStore('captured_photos');
+        const allReq = store.getAll();
+        await new Promise((res) => {
+          allReq.onsuccess = () => {
+            (allReq.result || []).forEach(item => {
+              if (['0', '50', '100'].includes(String(item.slot))) {
+                photoSlots[String(item.slot)] = item;
+              }
+            });
+            res();
+          };
+          allReq.onerror = () => res();
+        });
+      } catch (err) {
+        console.warn('IndexedDB tidak tersedia, cek localStorage:', err);
+      }
+
+      // 2) Fallback kompatibilitas dengan localStorage kamera lama
+      try {
+        const legacyRaw = localStorage.getItem('bbws_session_photos');
+        if (legacyRaw) {
+          const legacy = JSON.parse(legacyRaw);
+          ['0', '50', '100'].forEach(s => {
+            if (!photoSlots[s] && legacy[s]) photoSlots[s] = legacy[s];
+          });
+        }
+      } catch (e) {}
+
+      renderPhotoSlotsUI();
+    }
+
+    function renderPhotoSlotsUI() {
+      ['0', '50', '100'].forEach(slot => {
+        const data = photoSlots[slot];
+        const card = document.getElementById(`cardSlot${slot}`);
+        const badge = document.getElementById(`badgeSlot${slot}`);
+        const img = document.getElementById(`previewSlot${slot}`);
+        const empty = document.getElementById(`emptySlot${slot}`);
+        const meta = document.getElementById(`metaSlot${slot}`);
+        const btnText = document.getElementById(`btnTextSlot${slot}`);
+        const clearBtn = document.getElementById(`clearSlot${slot}`);
+
+        if (data && data.imageData) {
+          card.classList.remove('border-dashed', 'border-slate-300', 'bg-slate-50/70');
+          card.classList.add('border-solid', 'border-emerald-400', 'bg-emerald-50/30');
+          badge.textContent = 'Siap Unggah ✓';
+          badge.className = 'text-[11px] font-extrabold text-emerald-600';
+          img.src = data.imageData;
+          img.classList.remove('hidden');
+          empty.classList.add('hidden');
+          meta.classList.remove('hidden');
+          document.getElementById(`timeSlot${slot}`).textContent = data.timestamp || '-';
+          document.getElementById(`gpsSlot${slot}`).textContent = data.coords || `${data.lat || '-'}, ${data.lng || '-'}`;
+          btnText.textContent = `Ulangi ${slot}%`;
+          clearBtn.classList.remove('hidden');
+        } else {
+          card.classList.add('border-dashed', 'border-slate-300', 'bg-slate-50/70');
+          card.classList.remove('border-solid', 'border-emerald-400', 'bg-emerald-50/30');
+          badge.textContent = 'Belum Ada';
+          badge.className = 'text-[11px] font-bold text-amber-600';
+          img.classList.add('hidden');
+          empty.classList.remove('hidden');
+          meta.classList.add('hidden');
+          btnText.textContent = `Ambil ${slot}%`;
+          clearBtn.classList.add('hidden');
+        }
+      });
+
+      updateWorkDurationEstimate();
+      lucide.createIcons();
+    }
+
+    async function clearPhotoSlot(slot) {
+      photoSlots[slot] = null;
+      try {
+        const db = await openPhotoDB();
+        const tx = db.transaction('captured_photos', 'readwrite');
+        tx.objectStore('captured_photos').delete(slot);
+      } catch (e) {}
+      try {
+        const legacyRaw = localStorage.getItem('bbws_session_photos');
+        if (legacyRaw) {
+          const legacy = JSON.parse(legacyRaw);
+          delete legacy[slot];
+          localStorage.setItem('bbws_session_photos', JSON.stringify(legacy));
+        }
+      } catch (e) {}
+      renderPhotoSlotsUI();
+    }
+
+    function updateWorkDurationEstimate() {
+      const el = document.getElementById('workDurationText');
+      if (photoSlots['0']?.isoTime && photoSlots['100']?.isoTime) {
+        const start = new Date(photoSlots['0'].isoTime);
+        const end = new Date(photoSlots['100'].isoTime);
+        const diffMs = Math.max(0, end - start);
+        const mins = Math.floor(diffMs / 60000);
+        const hrs = Math.floor(mins / 60);
+        const remMins = mins % 60;
+        el.textContent = `${hrs} Jam ${remMins} Menit`;
+      } else if (photoSlots['0'] && photoSlots['100']) {
+        el.textContent = 'Tercatat dari timestamp foto';
+      } else {
+        el.textContent = 'Menunggu foto 0% & 100%';
+      }
+    }
+
+    // =========================================================================
+    // 5. CEK STATUS GIAT KERJA HARI INI & DAFTAR REKAN SATU D.I
+    // =========================================================================
+    async function checkTodayGiatKerjaStatus() {
+      if (!currentUser) return;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const myId = currentUser.id_petugas || currentUser.id;
+
+      try {
+        const { data } = await sb
+          .from('laporan_peserta')
+          .select('id, laporan!inner(id, tanggal, metode_kerja, nama_petugas, nama_saluran, kejuron)')
+          .eq('id_pegawai', myId)
+          .eq('laporan.tanggal', todayStr)
+          .eq('laporan.metode_kerja', 'Giat Kerja');
+
+        if (data && data.length > 0) {
+          const info = data[0].laporan;
+          document.getElementById('giatKerjaNotice').classList.remove('hidden');
+          document.getElementById('giatKerjaNoticeText').innerHTML =
+            `Anda sudah terdaftar dalam <strong>Giat Kerja (Quick Response)</strong> hari ini yang dikirim oleh <strong>${info.nama_petugas}</strong> di <strong>${info.nama_saluran || info.kejuron}</strong>. Kewajiban absensi & laporan harian Anda sudah otomatis terpenuhi.`;
+        }
+      } catch (e) {
+        console.warn('Gagal memeriksa status Giat Kerja:', e);
+      }
+    }
+
+    async function loadColleaguesInDI() {
+      if (!currentUser || !currentUser.daerah_irigasi) return;
+      const myId = currentUser.id_petugas || currentUser.id;
+
+      try {
+        const { data, error } = await sb
+          .from('pegawai')
+          .select('id_petugas, nama, jabatan, kejuron, wilayah_korsda')
+          .eq('daerah_irigasi', currentUser.daerah_irigasi)
+          .neq('id_petugas', myId)
+          .order('nama', { ascending: true });
+
+        if (!error && data) {
+          diColleagues = data;
+          renderTeamMembers(diColleagues);
+        }
+      } catch (e) {
+        console.warn('Gagal memuat daftar anggota D.I:', e);
+      }
+    }
+
+    function handleMetodeKerjaChange() {
+      const selected = document.querySelector('input[name="metode_kerja"]:checked')?.value;
+      const box = document.getElementById('teamSelectorBox');
+      const title = document.getElementById('teamSelectorTitle');
+      const subtitle = document.getElementById('teamSelectorSubtitle');
+
+      if (selected === 'Kelompok' || selected === 'Giat Kerja') {
+        box.classList.remove('hidden');
+        if (selected === 'Giat Kerja') {
+          title.textContent = `Daftar Anggota Giat Kerja (Quick Response) — ${currentUser?.daerah_irigasi || ''}`;
+          subtitle.textContent = 'Centang seluruh pegawai yang turun langsung di lokasi darurat/kritis ini. Mereka otomatis tercatat hadir & mendapat kredit jam kerja tanpa perlu kirim laporan terpisah.';
+        } else {
+          title.textContent = `Daftar Anggota Kerja Kelompok — ${currentUser?.daerah_irigasi || ''}`;
+          subtitle.textContent = 'Pilih rekan petugas yang bekerja sama dalam kegiatan rutin ini.';
+        }
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function renderTeamMembers(list) {
+      const container = document.getElementById('teamMembersList');
+      if (!list || list.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 col-span-full py-3 text-center">Tidak ada data pegawai lain di ${currentUser?.daerah_irigasi || 'D.I ini'}.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(emp => {
+        const checked = selectedMemberIds.has(emp.id_petugas) ? 'checked' : '';
+        return `
+          <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 hover:border-brantas-blue cursor-pointer transition">
+            <input type="checkbox" value="${emp.id_petugas}" ${checked} onchange="toggleMemberSelection('${emp.id_petugas}', this.checked)"
+              class="w-4 h-4 rounded text-brantas-blue focus:ring-brantas-blue" />
+            <div class="overflow-hidden">
+              <p class="text-xs font-bold text-slate-800 truncate">${emp.nama}</p>
+              <p class="text-[10px] text-slate-500 truncate">${emp.id_petugas} • ${emp.jabatan} ${emp.kejuron ? '(' + emp.kejuron + ')' : ''}</p>
+            </div>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function filterTeamMembers() {
+      const q = document.getElementById('memberSearchInput').value.toLowerCase().trim();
+      const filtered = diColleagues.filter(emp =>
+        (emp.nama || '').toLowerCase().includes(q) ||
+        (emp.id_petugas || '').toLowerCase().includes(q) ||
+        (emp.kejuron || '').toLowerCase().includes(q)
+      );
+      renderTeamMembers(filtered);
+    }
+
+    function toggleMemberSelection(id, isChecked) {
+      if (isChecked) selectedMemberIds.add(id);
+      else selectedMemberIds.delete(id);
+      document.getElementById('selectedMemberCount').textContent = `${selectedMemberIds.size} Anggota Dipilih`;
+    }
+
+    // =========================================================================
+    // 6. UPLOAD FOTO KE GOOGLE DRIVE VIA GAS & SIMPAN METADATA KE SUPABASE
+    // =========================================================================
+    function extractCleanDriveId(responseObj) {
+      if (!responseObj) return '';
+      if (responseObj.fileId) return String(responseObj.fileId).trim();
+      const url = responseObj.fileUrl || responseObj.url || '';
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) return match[1];
+      return url.split('/d/')[1]?.split('/')[0] || '';
+    }
+
+    async function uploadSinglePhotoToDrive(slot, photoObj, metaFolder) {
+      const payload = {
+        action: 'uploadLaporanPhoto',
+        slot: slot,
+        id_petugas: metaFolder.id_petugas,
+        nama_petugas: metaFolder.nama_petugas,
+        ppk_op: metaFolder.ppk_op,
+        daerah_irigasi: metaFolder.daerah_irigasi,
+        tanggal: metaFolder.tanggal,
+        imageBase64: photoObj.imageData
+      };
+
+      const res = await fetch(GAS_WEBAPP_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (!json.success && json.status !== 'success') {
+        throw new Error(json.message || `Gagal mengunggah foto ${slot}% ke Google Drive`);
+      }
+      return {
+        fileId: extractCleanDriveId(json),
+        fileUrl: json.fileUrl || `https://drive.google.com/file/d/${extractCleanDriveId(json)}/view`
+      };
+    }
+
+    document.getElementById('dailyReportForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validasi 3 foto wajib ada
+      if (!photoSlots['0'] || !photoSlots['50'] || !photoSlots['100']) {
+        alert('Lengkapi seluruh dokumentasi Foto 0%, 50%, dan 100% dari Kamera Lapangan terlebih dahulu.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      const metodeKerja = document.querySelector('input[name="metode_kerja"]:checked')?.value || 'Individu';
+      if ((metodeKerja === 'Giat Kerja' || metodeKerja === 'Kelompok') && selectedMemberIds.size === 0) {
+        alert(`Anda memilih metode ${metodeKerja}. Silakan centang minimal 1 anggota tim yang terlibat.`);
+        return;
+      }
+
+      // Validasi field lokasi & usulan perbaikan
+      const requiredIds = ['wilayahKorsda', 'kejuron', 'namaSaluran', 'namaBangunan', 'desaKelurahan', 'kecamatan', 'kabupaten', 'usulanPerbaikan'];
+      for (const fieldId of requiredIds) {
+        const el = document.getElementById(fieldId);
+        if (!el.value.trim()) {
+          el.focus();
+          alert('Mohon lengkapi seluruh kolom Lokasi dan Usulan Perbaikan yang bertanda wajib (*).');
+          return;
+        }
+      }
+
+      // Kumpulkan Urgensi Kegiatan
+      const checkedUrgensi = Array.from(document.querySelectorAll('input[name="urgensi_item"]:checked')).map(cb => cb.value);
+      if (document.getElementById('urgensiLainCheck').checked && document.getElementById('urgensiLainText').value.trim()) {
+        checkedUrgensi.push(`Lainnya: ${document.getElementById('urgensiLainText').value.trim()}`);
+      }
+      if (checkedUrgensi.length === 0) {
+        alert('Pilih minimal 1 item pada daftar Urgensi Kegiatan.');
+        return;
+      }
+
+      // Tampilkan overlay loading
+      const overlay = document.getElementById('uploadOverlay');
+      const stepText = document.getElementById('uploadStepText');
+      const progressBar = document.getElementById('uploadProgressBar');
+      overlay.classList.remove('hidden');
+
+      try {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const metaFolder = {
+          id_petugas: currentUser.id_petugas || currentUser.id,
+          nama_petugas: currentUser.nama,
+          ppk_op: currentUser.ppk_op || currentUser.ppk || 'OP',
+          daerah_irigasi: currentUser.daerah_irigasi || 'Umum',
+          tanggal: todayStr
+        };
+
+        // 1. Upload Foto 0% ke Drive
+        stepText.textContent = 'Mengunggah Foto 0% (Awal) ke Google Drive...';
+        progressBar.style.width = '30%';
+        const drive0 = await uploadSinglePhotoToDrive('0', photoSlots['0'], metaFolder);
+
+        // 2. Upload Foto 50% ke Drive
+        stepText.textContent = 'Mengunggah Foto 50% (Proses) ke Google Drive...';
+        progressBar.style.width = '55%';
+        const drive50 = await uploadSinglePhotoToDrive('50', photoSlots['50'], metaFolder);
+
+        // 3. Upload Foto 100% ke Drive
+        stepText.textContent = 'Mengunggah Foto 100% (Selesai) ke Google Drive...';
+        progressBar.style.width = '80%';
+        const drive100 = await uploadSinglePhotoToDrive('100', photoSlots['100'], metaFolder);
+
+        // 4. Hitung durasi kerja (menit)
+        let durasiMenit = 0;
+        if (photoSlots['0'].isoTime && photoSlots['100'].isoTime) {
+          durasiMenit = Math.max(0, Math.round((new Date(photoSlots['100'].isoTime) - new Date(photoSlots['0'].isoTime)) / 60000));
+        }
+
+        // 5. Simpan record ke Supabase (tanpa file gambar, hanya Drive ID & URL)
+        stepText.textContent = 'Menyimpan data laporan ke database pusat...';
+        progressBar.style.width = '92%';
+
+        const reportPayload = {
+          tanggal: todayStr,
+          id_petugas: metaFolder.id_petugas,
+          nama_petugas: metaFolder.nama_petugas,
+          jabatan: currentUser.jabatan || currentUser.role,
+          ppk_op: metaFolder.ppk_op,
+          daerah_irigasi: metaFolder.daerah_irigasi,
+          wilayah_korsda: document.getElementById('wilayahKorsda').value.trim(),
+          kejuron: document.getElementById('kejuron').value.trim(),
+          metode_kerja: metodeKerja,
+          nama_saluran: document.getElementById('namaSaluran').value.trim(),
+          nama_bangunan: document.getElementById('namaBangunan').value.trim(),
+          desa_kelurahan: document.getElementById('desaKelurahan').value.trim(),
+          kecamatan: document.getElementById('kecamatan').value.trim(),
+          kabupaten: document.getElementById('kabupaten').value.trim(),
+          luas_area_m2: parseFloat(document.getElementById('volLuasArea').value) || 0,
+          panjang_saluran_m: parseFloat(document.getElementById('volPanjangSaluran').value) || 0,
+          menutup_bocoran_m: parseFloat(document.getElementById('volMenutupBocoran').value) || 0,
+          angkat_sedimen_m3: parseFloat(document.getElementById('volAngkatSedimen').value) || 0,
+          pembersihan_sampah_m3: parseFloat(document.getElementById('volPembersihanSampah').value) || 0,
+          potong_pohon_bh: parseFloat(document.getElementById('volPotongPohon').value) || 0,
+          urgensi_kegiatan: checkedUrgensi,
+          usulan_perbaikan: document.getElementById('usulanPerbaikan').value.trim(),
+          foto_0_drive_id: drive0.fileId,
+          foto_0_url: drive0.fileUrl,
+          waktu_foto_0: photoSlots['0'].isoTime || new Date().toISOString(),
+          foto_50_drive_id: drive50.fileId,
+          foto_50_url: drive50.fileUrl,
+          waktu_foto_50: photoSlots['50'].isoTime || new Date().toISOString(),
+          foto_100_drive_id: drive100.fileId,
+          foto_100_url: drive100.fileUrl,
+          waktu_foto_100: photoSlots['100'].isoTime || new Date().toISOString(),
+          durasi_kerja_menit: durasiMenit,
+          latitude: photoSlots['0'].lat || null,
+          longitude: photoSlots['0'].lng || null,
+          status_verifikasi: 'menunggu'
+        };
+
+        const { data: insertedReport, error: insertError } = await sb
+          .from('laporan')
+          .insert([reportPayload])
+          .select('id')
+          .single();
+
+        if (insertError) throw insertError;
+
+        // 6. Jika Kelompok / Giat Kerja, simpan daftar peserta ke tabel laporan_peserta
+        if ((metodeKerja === 'Giat Kerja' || metodeKerja === 'Kelompok') && selectedMemberIds.size > 0 && insertedReport?.id) {
+          const pesertaRows = Array.from(selectedMemberIds).map(memberId => ({
+            id_laporan: insertedReport.id,
+            id_pegawai: memberId,
+            jenis_keikutsertaan: metodeKerja
+          }));
+          const { error: pesertaErr } = await sb.from('laporan_peserta').insert(pesertaRows);
+          if (pesertaErr) console.error('Gagal menyimpan daftar peserta:', pesertaErr);
+        }
+
+        // 7. Bersihkan foto sesi lokal setelah sukses terkirim
+        await clearPhotoSlot('0');
+        await clearPhotoSlot('50');
+        await clearPhotoSlot('100');
+
+        progressBar.style.width = '100%';
+        stepText.textContent = 'Laporan berhasil terkirim!';
+
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+          alert(`Laporan ${metodeKerja} berhasil dikirim ke Google Drive & tercatat di sistem!`);
+          window.location.href = 'home.html';
+        }, 500);
+
+      } catch (err) {
+        overlay.classList.add('hidden');
+        console.error(err);
+        alert('Terjadi kendala saat mengirim laporan: ' + (err.message || 'Periksa koneksi internet Anda.'));
+      }
+    });
+  </script>
+</body>
+</html>
