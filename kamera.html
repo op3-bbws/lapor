@@ -52,7 +52,7 @@
             background-size: 33.333% 33.333%;
         }
 
-        /* GPU Hardware Acceleration & Rotasi Ikon Sesuai Sudut Jam */
+        /* GPU Hardware Acceleration & Rotasi Ikon Sesuai Sudut Jam (12, 3, 6, 9) */
         .orient-icon {
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
             transform: translate3d(0, 0, 0);
@@ -66,6 +66,10 @@
         /* Jam 3 (HP miring ke kanan +90deg): putar -90deg agar tegak di mata pengguna */
         body[data-phys-orient="landscape-cw"] .orient-icon {
             transform: translate3d(0, 0, 0) rotate(-90deg);
+        }
+        /* Jam 6 (HP terbalik 180deg): putar 180deg agar tegak di mata pengguna */
+        body[data-phys-orient="upside-down"] .orient-icon {
+            transform: translate3d(0, 0, 0) rotate(180deg);
         }
 
         /* =========================================================================
@@ -82,9 +86,7 @@
         }
 
         /* 1. Posisi JAM 9 (HP miring ke kiri / -90deg):
-              - Sisi kiri layar potret menjadi BAWAH bagi pengamat
-              - Sisi atas layar potret menjadi KIRI bagi pengamat
-              - Jadi pojok KIRI BAWAH pengamat berada di area KIRI ATAS layar potret! */
+              Pojok KIRI BAWAH pengamat berada di area KIRI ATAS layar potret */
         body[data-phys-orient="landscape-ccw"] .watermark {
             position: fixed;
             top: 82px;
@@ -98,9 +100,7 @@
         }
 
         /* 2. Posisi JAM 3 (HP miring ke kanan / +90deg):
-              - Sisi kanan layar potret menjadi BAWAH bagi pengamat
-              - Sisi bawah layar potret menjadi KIRI bagi pengamat
-              - Jadi pojok KIRI BAWAH pengamat berada di area KANAN BAWAH layar potret (di atas tombol footer)! */
+              Pojok KIRI BAWAH pengamat berada di area KANAN BAWAH layar potret */
         body[data-phys-orient="landscape-cw"] .watermark {
             position: fixed;
             bottom: 185px;
@@ -111,6 +111,20 @@
             max-width: min(360px, calc(100dvh - 290px));
             transform-origin: bottom right;
             transform: translate3d(0, 0, 0) rotate(-90deg) translateY(100%);
+        }
+
+        /* 3. Posisi JAM 6 (HP terbalik 180deg):
+              Pojok KIRI BAWAH pengamat berada di area KANAN ATAS layar potret */
+        body[data-phys-orient="upside-down"] .watermark {
+            position: fixed;
+            top: 76px;
+            right: 16px;
+            bottom: auto;
+            left: auto;
+            width: min(360px, calc(100vw - 84px));
+            max-width: min(360px, calc(100vw - 84px));
+            transform-origin: top right;
+            transform: translate3d(0, 0, 0) rotate(180deg) translateY(-100%);
         }
 
         /* Layout khusus saat layar OS benar-benar dalam orientasi Landscape (OS Auto-Rotate aktif) */
@@ -384,7 +398,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="font-bold text-slate-900">Orientasi Kamera & Waterpas (LPF α=0.15)</p>
-                            <p class="text-[11px] text-slate-500">Mendukung mode Potret maupun Lanskap penuh</p>
+                            <p class="text-[11px] text-slate-500">Mendukung mode Potret, Lanskap & Terbalik 180°</p>
                         </div>
                         <span id="sensorStatusBadge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">Sensor Siap</span>
                     </div>
@@ -605,10 +619,11 @@
         let currentLng = 114.194000;
         let isGalleryAllowedByAdmin = false;
 
-        // Orientasi Fisik:
-        // 'portrait'      -> Jam 12 (0 deg)
+        // Orientasi Fisik (Sudut Jam):
+        // 'portrait'      -> Jam 12 (0 deg / HP tegak normal, gy > 0)
         // 'landscape-ccw' -> Jam 9  (-90 deg / HP dimiringkan ke kiri, gx > 0)
         // 'landscape-cw'  -> Jam 3  (+90 deg / HP dimiringkan ke kanan, gx < 0)
+        // 'upside-down'   -> Jam 6  (180 deg / HP terbalik ke bawah, gy < 0)
         let orientationMode = 'auto';
         let physicalOrientation = 'portrait';
 
@@ -687,7 +702,7 @@
         function closeConfirmResetModal() { closeSheet('confirmResetModal'); }
         function closeAdminGalleryModal() { closeSheet('adminGalleryModal'); }
 
-        // 6. Sensor Low-Pass Filter & Deteksi Orientasi Timemark (Jam 12, Jam 3, Jam 9)
+        // 6. Sensor Low-Pass Filter & Deteksi Orientasi Timemark (Jam 12, Jam 3, Jam 6, Jam 9)
         function debounce(fn, delay) {
             let timer = null;
             return function (...args) {
@@ -757,17 +772,18 @@
             if (orientationMode === 'auto') {
                 if (isViewportLandscape) {
                     const angle = getScreenAngle();
-                    // angle 90 = HP diputar berlawanan jarum jam (-90 / Jam 9)
-                    // angle 270 / -90 = HP diputar searah jarum jam (+90 / Jam 3)
                     const targetOrient = (angle === 270 || angle === -90) ? 'landscape-cw' : 'landscape-ccw';
                     if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
                 } else {
                     if (Math.abs(gx) > Math.abs(gy) * 1.35 && Math.abs(gx) > 4.5) {
-                        // gx > 0 berarti sisi kiri HP menghadap ke bawah (Jam 9 / -90 deg)
-                        // gx < 0 berarti sisi kanan HP menghadap ke bawah (Jam 3 / +90 deg)
+                        // gx > 0 -> Jam 9 (-90 deg) | gx < 0 -> Jam 3 (+90 deg)
                         const targetOrient = gx > 0 ? 'landscape-ccw' : 'landscape-cw';
                         if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
-                    } else if (Math.abs(gy) > Math.abs(gx) * 1.35 && Math.abs(gy) > 4.5) {
+                    } else if (gy < -4.5 && Math.abs(gy) > Math.abs(gx) * 1.35) {
+                        // gy < -4.5 -> Jam 6 (180 deg / HP terbalik)
+                        if (physicalOrientation !== 'upside-down') applyPhysicalOrientation('upside-down');
+                    } else if (gy > 4.5 && Math.abs(gy) > Math.abs(gx) * 1.35) {
+                        // gy > 4.5 -> Jam 12 (0 deg / HP tegak normal)
                         if (physicalOrientation !== 'portrait') applyPhysicalOrientation('portrait');
                     }
                 }
@@ -782,6 +798,8 @@
                     deg = (scrAngle === 270 || scrAngle === -90) ? deg + 90 : deg - 90;
                 } else if (Math.abs(gx) > Math.abs(gy)) {
                     deg = gx > 0 ? deg - 90 : deg + 90;
+                } else if (gy < 0) {
+                    deg = deg > 0 ? deg - 180 : deg + 180;
                 }
 
                 if (deg > 180) deg -= 360;
@@ -1049,7 +1067,7 @@
             document.getElementById('wmId').innerText = user.id_pegawai || 'OPI-SP-1';
         }
 
-        // 9. Pengaturan Logo Lengkap (Mengikuti Sudut Pandang Mata Pengguna)
+        // 9. Pengaturan Logo Lengkap (Mengikuti Sudut Pandang Mata Pengguna pada Jam 12, 3, 6, 9)
         function setLogoPosition(pos) {
             logoState.position = pos;
             ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach(p => {
@@ -1161,20 +1179,22 @@
 
             if (!isLandscapeViewport && physicalOrientation === 'landscape-ccw') {
                 // JAM 9 (HP miring ke kiri / -90deg):
-                // Kanan layar potret = ATAS pengamat | Bawah layar potret = KANAN pengamat
-                // Kiri layar potret  = BAWAH pengamat | Atas layar potret  = KIRI pengamat
                 if (logoState.position === 'top-right') wrapper.classList.add('bottom-44', 'right-16');      // Kanan Atas pengamat
                 else if (logoState.position === 'top-left') wrapper.classList.add('top-20', 'right-16');    // Kiri Atas pengamat
                 else if (logoState.position === 'bottom-left') wrapper.classList.add('top-20', 'left-4');   // Kiri Bawah pengamat
                 else wrapper.classList.add('bottom-44', 'left-4');                                          // Kanan Bawah pengamat
             } else if (!isLandscapeViewport && physicalOrientation === 'landscape-cw') {
                 // JAM 3 (HP miring ke kanan / +90deg):
-                // Kiri layar potret  = ATAS pengamat | Atas layar potret  = KANAN pengamat
-                // Kanan layar potret = BAWAH pengamat | Bawah layar potret = KIRI pengamat
                 if (logoState.position === 'top-right') wrapper.classList.add('top-20', 'left-4');          // Kanan Atas pengamat
                 else if (logoState.position === 'top-left') wrapper.classList.add('bottom-44', 'left-4');   // Kiri Atas pengamat
                 else if (logoState.position === 'bottom-left') wrapper.classList.add('bottom-44', 'right-16'); // Kiri Bawah pengamat
                 else wrapper.classList.add('top-20', 'right-16');                                           // Kanan Bawah pengamat
+            } else if (!isLandscapeViewport && physicalOrientation === 'upside-down') {
+                // JAM 6 (HP terbalik 180deg):
+                if (logoState.position === 'top-right') wrapper.classList.add('bottom-44', 'left-4');       // Kanan Atas pengamat
+                else if (logoState.position === 'top-left') wrapper.classList.add('bottom-44', 'right-16'); // Kiri Atas pengamat
+                else if (logoState.position === 'bottom-left') wrapper.classList.add('top-20', 'right-16'); // Kiri Bawah pengamat
+                else wrapper.classList.add('top-20', 'left-4');                                             // Kanan Bawah pengamat
             } else {
                 // JAM 12 (Potret normal) atau OS benar-benar dalam mode Landscape
                 if (logoState.position === 'top-left') wrapper.classList.add(isLandscapeViewport ? 'top-14' : 'top-20', 'left-4');
@@ -1231,7 +1251,7 @@
             return lines.slice(0, 3);
         }
 
-        // 11. Capture & Render Canvas (Timemark Logic: Mark Kiri Bawah, Logo Kanan Atas)
+        // 11. Capture & Render Canvas (Timemark Logic: Foto Tegak Lurus, Mark Kiri Bawah, Logo Kanan Atas)
         function triggerCapture() {
             if (countdownTimer) return;
             if (timerSeconds === 0) return captureFromVideo();
@@ -1274,7 +1294,7 @@
         }
 
         function simulateCameraCapture() {
-            const isLandscape = (physicalOrientation !== 'portrait') || (window.innerWidth > window.innerHeight);
+            const isLandscape = (physicalOrientation === 'landscape-ccw' || physicalOrientation === 'landscape-cw') || (window.innerWidth > window.innerHeight);
             const off = document.createElement('canvas');
             off.width = isLandscape ? 1920 : 1080;
             off.height = isLandscape ? 1080 : 1920;
@@ -1299,24 +1319,31 @@
             const canvas = document.getElementById('photoCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Putar frame hanya jika fisik HP dimiringkan landscape namun stream video masih potret (rawW < rawH)
-            const needRotateForLandscape = (physicalOrientation !== 'portrait' && rawW < rawH);
-            const w = needRotateForLandscape ? rawH : rawW;
-            const h = needRotateForLandscape ? rawW : rawH;
+            // Tukar dimensi hanya jika posisi fisik landscape (Jam 3 atau Jam 9) dan stream video mentah masih potret (rawW < rawH)
+            const isPhysLandscape = (physicalOrientation === 'landscape-ccw' || physicalOrientation === 'landscape-cw');
+            const swapDimensions = isPhysLandscape && (rawW < rawH);
+            const needRotateFrame = swapDimensions || (physicalOrientation === 'upside-down');
+
+            const w = swapDimensions ? rawH : rawW;
+            const h = swapDimensions ? rawW : rawH;
             canvas.width = w;
             canvas.height = h;
 
-            // Gambar frame video sehingga arah baca foto selalu tegak lurus (Jam 12 di atas)
+            // Luruskan frame gambar agar atas-bawah objek di foto sesuai dengan pandangan mata saat memotret
             ctx.save();
-            if (needRotateForLandscape) {
+            if (needRotateFrame) {
                 if (physicalOrientation === 'landscape-ccw') {
-                    // Jam 9 (HP miring ke kiri -90deg): rotasi canvas +90deg agar sisi kanan layar potret berada di atas
-                    ctx.translate(w, 0);
-                    ctx.rotate(Math.PI / 2);
-                } else {
-                    // Jam 3 (HP miring ke kanan +90deg): rotasi canvas -90deg agar sisi kiri layar potret berada di atas
+                    // Jam 9 (HP miring ke kiri -90deg): rotasi -90deg (-Math.PI/2) agar sisi kanan stream berada di atas
                     ctx.translate(0, h);
                     ctx.rotate(-Math.PI / 2);
+                } else if (physicalOrientation === 'landscape-cw') {
+                    // Jam 3 (HP miring ke kanan +90deg): rotasi +90deg (+Math.PI/2) agar sisi kiri stream berada di atas
+                    ctx.translate(w, 0);
+                    ctx.rotate(Math.PI / 2);
+                } else if (physicalOrientation === 'upside-down') {
+                    // Jam 6 (HP terbalik 180deg): rotasi 180deg (Math.PI) agar sisi bawah stream berada di atas
+                    ctx.translate(w, h);
+                    ctx.rotate(Math.PI);
                 }
             }
             if (mirror) {
