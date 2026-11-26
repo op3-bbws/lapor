@@ -54,28 +54,37 @@ async function login(idPetugas, password) {
 }
 
 async function checkSession() {
-  const client = initSupabase();
-  const rawSession = localStorage.getItem("bbws_session");
+    try {
+        if (typeof supabaseClient === 'undefined' && typeof initSupabase === 'function') {
+            initSupabase();
+        }
+        const { data, error } = await supabaseClient.auth.getSession();
 
-  if (!rawSession) {
-    window.location.href = "index.html";
-    return null;
-  }
+        if (error || !data || !data.session) {
+            // Bersihkan token Supabase kedaluwarsa agar tidak muncul error 400 lagi
+            Object.keys(localStorage).forEach((k) => {
+                if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+                    localStorage.removeItem(k);
+                }
+            });
+            const cached = localStorage.getItem('bbws_last_valid_profile_v1');
+            return cached ? { session: null, profile: JSON.parse(cached), isCached: true } : null;
+        }
 
-  try {
-    const parsed = JSON.parse(rawSession);
-    if (client && parsed.access_token && parsed.refresh_token) {
-      await client.auth.setSession({
-        access_token: parsed.access_token,
-        refresh_token: parsed.refresh_token
-      });
+        const { data: profile } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('auth_id', data.session.user.id)
+            .single();
+
+        if (profile) {
+            localStorage.setItem('bbws_last_valid_profile_v1', JSON.stringify(profile));
+            return { session: data.session, profile, isCached: false };
+        }
+        return null;
+    } catch (e) {
+        return null;
     }
-    return parsed;
-  } catch (err) {
-    localStorage.removeItem("bbws_session");
-    window.location.href = "index.html";
-    return null;
-  }
 }
 
 async function refreshUserProfile() {
