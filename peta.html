@@ -52,7 +52,7 @@
       background-color: #F8FAFC;
     }
 
-    /* Sidebar & Footer selaras beranda/profil */
+    /* Sidebar & Footer selaras beranda/profil/tugas/raport */
     .sidebar {
       background: linear-gradient(180deg, #0F235E 0%, #1E3A8A 52%, #172554 100%) !important;
       border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -270,7 +270,7 @@
         <img src="assets/img/logo.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Logo BBWS" class="sidebar-brand-logo">
         <div class="sidebar-brand-text">
           <span class="sidebar-brand-title">BBWS Brantas</span>
-          <span class="sidebar-brand-sub">PUPR • Pelaporan</span>
+          <span class="sidebar-brand-sub">PUPR • Pelaporan OP</span>
         </div>
       </div>
 
@@ -279,17 +279,25 @@
           <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
           <span>Beranda</span>
         </a>
-        <a href="peta.html" class="sidebar-menu active">
-          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span>Peta D.I</span>
+        <a href="tugas.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <span>Tugas</span>
         </a>
         <a href="kamera.html" class="sidebar-menu">
-          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+          <span>Kamera</span>
+        </a>
+        <a href="laporan.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
           <span>Laporan</span>
         </a>
         <a href="raport.html" class="sidebar-menu">
           <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
           <span>Raport</span>
+        </a>
+        <a href="peta.html" class="sidebar-menu active">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>Peta D.I</span>
         </a>
         <a href="profile.html" class="sidebar-menu">
           <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
@@ -324,7 +332,7 @@
   <div class="map-stage">
     <div id="map"></div>
 
-    <!-- TOP BAR KONTROL (ANTI TUMPANG TINDIH DI DESKTOP & MOBILE) -->
+    <!-- TOP BAR KONTROL -->
     <div class="relative z-[900] p-3 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 pointer-events-none">
       <!-- KIRI: HEADER & FILTER D.I -->
       <div class="flex flex-col gap-2 w-full sm:w-80 pointer-events-auto">
@@ -362,7 +370,7 @@
       <!-- KANAN (DESKTOP): PROFIL & LEGENDA -->
       <div class="hidden sm:flex flex-col items-end gap-2.5 pointer-events-auto shrink-0">
         <a href="profile.html" class="glass-surface flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-full no-underline hover:bg-white transition">
-          <img id="userAvatar" src="assets/img/pegawai.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Avatar Petugas" class="w-7 h-7 rounded-full bg-slate-200 object-cover border border-blue-200">
+          <img id="userAvatar" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Avatar Petugas" class="w-7 h-7 rounded-full bg-slate-200 object-cover border border-blue-200">
           <div class="text-right">
             <p class="text-[9px] font-bold text-slate-400 leading-tight">Petugas Aktif</p>
             <p id="userName" class="text-xs font-extrabold text-pupr-blue leading-tight">Memuat...</p>
@@ -372,19 +380,19 @@
         <div class="glass-surface p-3 rounded-2xl flex flex-col gap-1.5">
           <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Status Laporan</span>
           <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Terverifikasi
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Disetujui
           </div>
           <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Menunggu Verifikasi
           </div>
           <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
-            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Ditolak / Revisi
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Perlu Revisi
           </div>
         </div>
       </div>
     </div>
 
-    <!-- PANEL DETAIL TITIK LOKASI (PROPORSIONAL & ANTI TUMPANG TINDIH) -->
+    <!-- PANEL DETAIL TITIK LOKASI -->
     <div id="infoPanel" class="hidden glass-surface p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl">
       <div class="flex justify-between items-start gap-2 mb-2.5">
         <div class="min-w-0">
@@ -421,7 +429,7 @@
 
         <div>
           <p class="text-[10px] font-bold text-slate-400 mb-1">Dokumentasi Lapangan</p>
-          <img id="infoFoto" src="https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR" onerror="this.src='https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR'" alt="Foto Lokasi" class="w-full h-24 sm:h-28 object-cover rounded-xl border border-slate-200">
+          <img id="infoFoto" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Foto Lokasi" class="w-full h-24 sm:h-28 object-cover rounded-xl border border-slate-200">
         </div>
       </div>
     </div>
@@ -439,17 +447,17 @@
       <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span>Beranda</span>
     </a>
-    <a href="peta.html" class="nav-item active">
-      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-      <span>Peta</span>
+    <a href="tugas.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      <span>Tugas</span>
     </a>
     <a href="kamera.html" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      <span>Laporan</span>
+      <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+      <span>Kamera</span>
     </a>
-    <a href="raport.html" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-      <span>Raport</span>
+    <a href="peta.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span>Peta D.I</span>
     </a>
     <a href="profile.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
@@ -473,40 +481,52 @@
       mapToastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
     }
 
+    function getDriveImg(idOrUrl, fallback = 'assets/img/pegawai.png') {
+      if (!idOrUrl || String(idOrUrl).trim() === '') return fallback;
+      const val = String(idOrUrl).trim();
+      if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+      if (typeof getDriveImageUrl === 'function') return getDriveImageUrl(val, fallback);
+      return `https://lh3.googleusercontent.com/d/${val}`;
+    }
+
     function getDemoMapReports() {
       return [
         {
           id: 'm-1',
-          jenis_pekerjaan: 'Pembersihan Saluran Sekunder B.Kr.4',
+          nama_saluran: 'Saluran Sekunder B.Kr.4',
+          jenis_pekerjaan: 'Pembersihan Saluran & Babat Rumput',
           daerah_irigasi: 'D.I Bening',
           nama_petugas: 'Budi Santoso',
-          status: 'diverifikasi',
+          status_verifikasi: 'diverifikasi',
           lokasi_lat: -7.536,
           lokasi_lng: 112.238,
-          volume_ringkas: '120 m² • 85 m',
-          foto_100_url: 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Titik+B.Kr.4+100%25'
+          luas_area_m2: 120,
+          panjang_saluran_m: 85,
+          foto_100_drive_id: 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Titik+B.Kr.4+100%25'
         },
         {
           id: 'm-2',
-          jenis_pekerjaan: 'Pengerukan Sedimen Pintu Sadap',
+          nama_saluran: 'Pintu Sadap Warujayeng',
+          jenis_pekerjaan: 'Pengangkatan Endapan Sedimen',
           daerah_irigasi: 'D.I Warujayeng',
           nama_petugas: 'Siti Rahmawati',
-          status: 'terkirim',
+          status_verifikasi: 'menunggu',
           lokasi_lat: -7.612,
           lokasi_lng: 111.904,
-          volume_ringkas: '2.5 m³ Sedimen',
-          foto_0_url: 'https://placehold.co/320x180/1D4ED8/FFFFFF?text=Pintu+Sadap+0%25'
+          angkat_sedimen_m3: 2.5,
+          foto_0_drive_id: 'https://placehold.co/320x180/1D4ED8/FFFFFF?text=Pintu+Sadap+0%25'
         },
         {
           id: 'm-3',
-          jenis_pekerjaan: 'Perbaikan Tanggul & Bronjong',
+          nama_saluran: 'Saluran Induk Lodoyo HM 12+50',
+          jenis_pekerjaan: 'Perbaikan Ringan Tanggul & Bronjong',
           daerah_irigasi: 'D.I Lodoyo',
           nama_petugas: 'Hendra Wijaya',
-          status: 'ditolak',
+          status_verifikasi: 'ditolak',
           lokasi_lat: -8.132,
           lokasi_lng: 112.185,
           volume_ringkas: 'Revisi Dokumentasi',
-          foto_0_url: 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Tanggul+Lodoyo'
+          foto_0_drive_id: 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Tanggul+Lodoyo'
         }
       ];
     }
@@ -517,7 +537,6 @@
         attributionControl: false
       }).setView([-7.536, 112.238], 10);
 
-      // Tile layer tanpa API key (OpenStreetMap dengan fallback Esri World Street Map)
       const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
       });
@@ -568,9 +587,10 @@
         const lng = parseFloat(item.lokasi_lng);
         if (isNaN(lat) || isNaN(lng)) return;
 
+        const st = (item.status_verifikasi || item.status || 'menunggu').toLowerCase();
         let color = '#F59E0B';
-        if (item.status === 'diverifikasi') color = '#10B981';
-        else if (item.status === 'ditolak') color = '#EF4444';
+        if (st === 'diverifikasi') color = '#10B981';
+        else if (st === 'ditolak') color = '#EF4444';
 
         const customIcon = L.divIcon({
           className: 'custom-marker',
@@ -599,12 +619,13 @@
         setTimeout(() => icon?.classList.remove('animate-spin'), 650);
       }
 
-      if (typeof initSupabase === 'function') {
-        initSupabase();
-      }
+      const client = typeof initSupabase === 'function' ? initSupabase() : null;
 
       let profile = null;
-      if (typeof checkSession === 'function') {
+      if (typeof refreshUserProfile === 'function') {
+        try { profile = await refreshUserProfile(); } catch (e) {}
+      }
+      if (!profile && typeof checkSession === 'function') {
         try {
           const session = await checkSession();
           profile = session?.profile || null;
@@ -612,25 +633,31 @@
       }
       if (!profile) {
         try {
-          profile = JSON.parse(localStorage.getItem('user_bbws') || 'null');
+          const raw = localStorage.getItem('bbws_session') || localStorage.getItem('user_bbws');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            profile = parsed?.profile || parsed;
+          }
         } catch (e) {}
       }
 
       const kode = profile?.id_petugas || profile?.id_pegawai || 'O&P';
       document.getElementById('userName').textContent = profile?.nama || 'Petugas Lapangan';
       document.getElementById('sidebarPetugasCode').textContent = kode;
-      if (profile?.foto_pegawai || profile?.foto_apps) {
-        document.getElementById('userAvatar').src = profile.foto_pegawai || profile.foto_apps;
+
+      const fotoProfil = profile?.foto_pegawai_id || profile?.foto_apps_id || profile?.foto_pegawai || profile?.foto_apps;
+      if (fotoProfil) {
+        document.getElementById('userAvatar').src = getDriveImg(fotoProfil, 'assets/img/pegawai.png');
       }
 
       const pill = document.getElementById('mapDataSourcePill');
-      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+      if (client) {
         try {
-          const { data: laporan, error } = await supabaseClient
+          const { data: laporan, error } = await client
             .from('laporan')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(100);
+            .limit(120);
 
           if (error) throw error;
           allMapReports = Array.isArray(laporan) && laporan.length > 0 ? laporan : getDemoMapReports();
@@ -663,33 +690,49 @@
       const panel = document.getElementById('infoPanel');
       panel.classList.remove('hidden');
 
+      const st = (data.status_verifikasi || data.status || 'menunggu').toLowerCase();
       const badge = document.getElementById('infoStatusBadge');
-      if (data.status === 'diverifikasi') {
+      if (st === 'diverifikasi') {
         badge.className = 'inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-700';
-        badge.textContent = 'TERVERIFIKASI';
-      } else if (data.status === 'ditolak') {
+        badge.textContent = 'DISETUJUI';
+      } else if (st === 'ditolak') {
         badge.className = 'inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-red-100 text-red-700';
-        badge.textContent = 'DITOLAK';
+        badge.textContent = 'PERLU REVISI';
       } else {
         badge.className = 'inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700';
         badge.textContent = 'MENUNGGU';
       }
 
-      document.getElementById('infoTitle').textContent = data.jenis_pekerjaan || 'Pekerjaan Lapangan';
+      document.getElementById('infoTitle').textContent = data.nama_saluran || data.jenis_pekerjaan || 'Pekerjaan Lapangan';
       document.getElementById('infoDI').textContent = data.daerah_irigasi || '-';
 
       const nama = data.nama_petugas || data.id_petugas || 'Petugas';
       const inisial = nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       document.getElementById('infoInisial').textContent = inisial || 'P';
       document.getElementById('infoPetugas').textContent = nama;
-      document.getElementById('infoLuas').textContent = data.volume_ringkas || `${data.vol_luas || 0} m² • ${data.vol_panjang || 0} m`;
+
+      const luas = parseFloat(data.luas_area_m2 || data.vol_luas) || 0;
+      const panjang = parseFloat(data.panjang_saluran_m || data.vol_panjang) || 0;
+      const sedimen = parseFloat(data.angkat_sedimen_m3) || 0;
+      const sampah = parseFloat(data.pembersihan_sampah_m3) || 0;
+
+      let volText = data.volume_ringkas || '';
+      if (!volText) {
+        const parts = [];
+        if (luas > 0) parts.push(`${luas} m²`);
+        if (panjang > 0) parts.push(`${panjang} m`);
+        if (sedimen > 0) parts.push(`${sedimen} m³ sedimen`);
+        if (sampah > 0) parts.push(`${sampah} m³ sampah`);
+        volText = parts.length > 0 ? parts.join(' • ') : 'Dokumentasi OP';
+      }
+      document.getElementById('infoLuas').textContent = volText;
 
       const lat = parseFloat(data.lokasi_lat);
       const lng = parseFloat(data.lokasi_lng);
       document.getElementById('infoKoordinat').textContent = (!isNaN(lat) && !isNaN(lng)) ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : '-';
 
-      const fotoUrl = data.foto_100_url || data.foto_50_url || data.foto_0_url || 'https://placehold.co/320x180/1E3A8A/FBBF24?text=Dokumentasi+PUPR';
-      document.getElementById('infoFoto').src = fotoUrl;
+      const fotoRaw = data.foto_100_drive_id || data.foto_50_drive_id || data.foto_0_drive_id || data.foto_100_url || data.foto_50_url || data.foto_0_url;
+      document.getElementById('infoFoto').src = getDriveImg(fotoRaw, 'assets/img/pegawai.png');
     }
 
     // Jam Sidebar
@@ -705,10 +748,15 @@
 
     // Logout
     document.getElementById('btnLogout')?.addEventListener('click', async () => {
-      if (typeof logout === 'function') await logout();
-      else {
-        try { localStorage.removeItem('user_bbws'); } catch (e) {}
-        showMapToast('Sesi diakhiri.');
+      if (confirm('Keluar dari sesi BBWS Brantas?')) {
+        if (typeof logout === 'function') await logout();
+        else {
+          try {
+            localStorage.removeItem('bbws_session');
+            localStorage.removeItem('user_bbws');
+          } catch (e) {}
+          window.location.href = 'index.html';
+        }
       }
     });
 
