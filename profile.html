@@ -16,8 +16,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS -->
+  <!-- Supabase SDK & Konfigurasi Terpusat -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
 
   <script>
     tailwind.config = {
@@ -93,7 +94,8 @@
 
     <div class="p-4 border-t border-slate-100">
       <a href="profile.html" class="flex items-center gap-3 p-2.5 rounded-xl bg-blue-50 text-brantas-blue transition">
-        <img id="sidebarAvatar" src="assets/img/logo-bbws.svg" alt="Profil" class="w-9 h-9 rounded-full object-cover border border-blue-200 bg-white" />
+        <img id="sidebarAvatar" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Profil"
+          class="w-9 h-9 rounded-full object-cover border border-blue-200 bg-white" />
         <div class="overflow-hidden">
           <p id="sidebarName" class="text-xs font-extrabold truncate">Memuat...</p>
           <p id="sidebarRole" class="text-[11px] text-slate-500 truncate">-</p>
@@ -117,7 +119,7 @@
         </div>
       </div>
 
-      <button type="button" onclick="logoutUser()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-rose-100 text-xs font-extrabold flex items-center gap-1.5 transition">
+      <button type="button" onclick="handleLogoutClick()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-rose-100 text-xs font-extrabold flex items-center gap-1.5 transition">
         <i data-lucide="log-out" class="w-4 h-4"></i>
         <span>Keluar</span>
       </button>
@@ -129,24 +131,24 @@
 
     <form id="profileForm" class="space-y-5">
 
-      <!-- BAGIAN 1: UNGGAH FOTO PEGAWAI & FOTO APPS (HERO POPOUT) -->
+      <!-- BAGIAN 1: UNGGAH FOTO PEGAWAI & FOTO APPS (DEFAULT assets/img/pegawai.png) -->
       <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
         <div>
           <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
             <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">1</span>
             Foto Pegawai & Foto Apps (Tampil di Hero Popout)
           </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Foto disimpan otomatis ke Google Drive dan terhubung ke kartu identitas beranda Anda.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Foto disimpan otomatis ke Google Drive. Sebelum diunggah, tampilan memakai gambar default petugas.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- FOTO PEGAWAI -->
           <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center text-center space-y-3">
             <div class="relative">
-              <img id="previewFotoPegawai" src="assets/img/logo-bbws.svg" alt="Foto Pegawai"
+              <img id="previewFotoPegawai" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Foto Pegawai"
                 class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md bg-white" />
               <span id="badgeFotoPegawai" class="mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">
-                Belum Diunggah
+                Default (pegawai.png)
               </span>
             </div>
             <div>
@@ -163,15 +165,12 @@
           <!-- FOTO APPS (HERO BANNER POPOUT) -->
           <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center text-center space-y-3">
             <div class="w-full">
-              <div class="aspect-[16/7] w-full rounded-xl overflow-hidden bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center">
-                <img id="previewFotoApps" src="" alt="Foto Apps" class="hidden w-full h-full object-cover" />
-                <div id="emptyFotoApps" class="text-slate-400 flex flex-col items-center">
-                  <i data-lucide="image" class="w-6 h-6 mb-0.5"></i>
-                  <span class="text-[10px] font-bold">Banner Hero Popout</span>
-                </div>
+              <div class="aspect-[16/7] w-full rounded-xl overflow-hidden bg-slate-200 border-2 border-white shadow-sm">
+                <img id="previewFotoApps" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Foto Apps"
+                  class="w-full h-full object-cover" />
               </div>
               <span id="badgeFotoApps" class="mt-1.5 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">
-                Belum Diunggah
+                Default (pegawai.png)
               </span>
             </div>
             <div>
@@ -187,7 +186,7 @@
         </div>
       </section>
 
-      <!-- BAGIAN 2: DATA KEPEGAWAIAN (OTOMATIS DARI SK / DATABASE) -->
+      <!-- BAGIAN 2: DATA KEPEGAWAIAN -->
       <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
         <div>
           <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
@@ -224,7 +223,7 @@
         </div>
       </section>
 
-      <!-- BAGIAN 3: KELENGKAPAN WILAYAH KERJA & KONTAK (DAPAT DIISI / DIPERBARUI) -->
+      <!-- BAGIAN 3: KELENGKAPAN WILAYAH KERJA & KONTAK -->
       <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
         <div>
           <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
@@ -254,8 +253,8 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Ganti Password / PIN Login (Opsional)</label>
-            <input type="password" id="profNewPassword" placeholder="Kosongkan jika tidak ingin mengganti"
+            <label class="block text-xs font-bold text-slate-700 mb-1">Ganti Password Login (Opsional)</label>
+            <input type="password" id="profNewPassword" minlength="6" placeholder="Min. 6 karakter (kosongkan jika tetap)"
               class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-brantas-blue" />
           </div>
         </div>
@@ -313,47 +312,22 @@
   </nav>
 
   <script>
-    // =========================================================================
-    // KONFIGURASI SUPABASE & GOOGLE APPS SCRIPT (GAS)
-    // =========================================================================
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-    const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec';
-
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let currentUser = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
-      await loadProfileData();
+      currentUser = await refreshUserProfile();
+      if (!currentUser) return;
+
+      populateProfileFields(currentUser);
     });
 
-    async function loadProfileData() {
-      const raw = localStorage.getItem('bbws_user') || localStorage.getItem('user_session');
-      if (!raw) {
-        window.location.href = 'index.html';
-        return;
-      }
-      currentUser = JSON.parse(raw);
-
-      try {
-        const { data } = await sb
-          .from('pegawai')
-          .select('*')
-          .eq('id_petugas', currentUser.id_petugas || currentUser.id)
-          .single();
-        if (data) {
-          currentUser = { ...currentUser, ...data };
-          localStorage.setItem('bbws_user', JSON.stringify(currentUser));
-        }
-      } catch (e) {}
-
-      const idPetugas = currentUser.id_petugas || currentUser.id || '-';
-      const nama = currentUser.nama || '-';
-      const jabatan = currentUser.jabatan || currentUser.role || '-';
-      const ppk = currentUser.ppk_op || currentUser.ppk || '-';
-      const di = currentUser.daerah_irigasi || '-';
+    function populateProfileFields(profile) {
+      const idPetugas = profile.id_petugas || '-';
+      const nama = profile.nama || '-';
+      const jabatan = profile.jabatan || profile.role || '-';
+      const ppk = profile.ppk_op || profile.ppk || '-';
+      const di = profile.daerah_irigasi || '-';
 
       document.getElementById('sidebarName').textContent = nama;
       document.getElementById('sidebarRole').textContent = `${jabatan} • ${di}`;
@@ -363,38 +337,34 @@
       document.getElementById('profJabatan').value = jabatan;
       document.getElementById('profOpDi').value = `${ppk} — ${di}`;
 
-      document.getElementById('profKorsda').value = currentUser.wilayah_korsda || '';
-      document.getElementById('profKejuron').value = currentUser.kejuron || '';
-      document.getElementById('profNoHp').value = currentUser.no_hp || '';
+      document.getElementById('profKorsda').value = profile.wilayah_korsda || '';
+      document.getElementById('profKejuron').value = profile.kejuron || '';
+      document.getElementById('profNoHp').value = profile.no_hp || '';
 
-      renderPhotoPreviews();
+      renderPhotoPreviews(profile);
     }
 
-    function renderPhotoPreviews() {
-      if (currentUser.foto_pegawai_id) {
-        const url = `https://lh3.googleusercontent.com/d/${currentUser.foto_pegawai_id}`;
-        document.getElementById('previewFotoPegawai').src = url;
-        document.getElementById('sidebarAvatar').src = url;
+    function renderPhotoPreviews(profile) {
+      const avatarUrl = getDriveImageUrl(profile.foto_pegawai_id, 'assets/img/pegawai.png');
+      document.getElementById('previewFotoPegawai').src = avatarUrl;
+      document.getElementById('sidebarAvatar').src = avatarUrl;
+
+      if (profile.foto_pegawai_id) {
         const badge = document.getElementById('badgeFotoPegawai');
         badge.textContent = 'Tersimpan di Drive ✓';
         badge.className = 'mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
       }
 
-      if (currentUser.foto_apps_id) {
-        const urlApps = `https://lh3.googleusercontent.com/d/${currentUser.foto_apps_id}`;
-        const imgApps = document.getElementById('previewFotoApps');
-        imgApps.src = urlApps;
-        imgApps.classList.remove('hidden');
-        document.getElementById('emptyFotoApps').classList.add('hidden');
+      const appsUrl = getDriveImageUrl(profile.foto_apps_id, 'assets/img/pegawai.png');
+      document.getElementById('previewFotoApps').src = appsUrl;
+
+      if (profile.foto_apps_id) {
         const badgeApps = document.getElementById('badgeFotoApps');
         badgeApps.textContent = 'Tersimpan di Drive ✓';
         badgeApps.className = 'mt-1.5 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
       }
     }
 
-    // =========================================================================
-    // KOMPRESI & UPLOAD FOTO PEGAWAI / FOTO APPS KE DRIVE VIA GAS
-    // =========================================================================
     function compressImageFile(file, maxWidth = 1000, quality = 0.82) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -434,6 +404,7 @@
       const file = event.target.files[0];
       if (!file) return;
 
+      const sb = initSupabase();
       const overlay = document.getElementById('profileLoadingOverlay');
       const loadText = document.getElementById('profileLoadingText');
       overlay.classList.remove('hidden');
@@ -449,10 +420,10 @@
           method: 'POST',
           body: JSON.stringify({
             action: 'uploadProfilePhoto',
-            photo_type: photoType, // 'foto_pegawai' atau 'foto_apps'
-            id_petugas: currentUser.id_petugas || currentUser.id,
+            photo_type: photoType,
+            id_petugas: currentUser.id_petugas,
             nama_petugas: currentUser.nama,
-            ppk_op: currentUser.ppk_op || currentUser.ppk || 'OP',
+            ppk_op: currentUser.ppk_op || 'OP',
             daerah_irigasi: currentUser.daerah_irigasi || 'Umum',
             imageBase64: base64Data
           })
@@ -471,16 +442,18 @@
           : { foto_apps_id: cleanId };
 
         const { error: dbErr } = await sb
-          .from('pegawai')
+          .from('users')
           .update(updateField)
-          .eq('id_petugas', currentUser.id_petugas || currentUser.id);
+          .eq('id_petugas', currentUser.id_petugas);
 
         if (dbErr) throw dbErr;
 
         currentUser = { ...currentUser, ...updateField };
-        localStorage.setItem('bbws_user', JSON.stringify(currentUser));
-        renderPhotoPreviews();
+        const sessionData = JSON.parse(localStorage.getItem('bbws_session') || '{}');
+        sessionData.profile = currentUser;
+        localStorage.setItem('bbws_session', JSON.stringify(sessionData));
 
+        renderPhotoPreviews(currentUser);
         overlay.classList.add('hidden');
         alert(photoType === 'foto_pegawai'
           ? 'Foto Pegawai berhasil diperbarui!'
@@ -491,12 +464,9 @@
       }
     }
 
-    // =========================================================================
-    // SIMPAN BIODATA WILAYAH & KONTAK KE SUPABASE
-    // =========================================================================
     document.getElementById('profileForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-
+      const sb = initSupabase();
       const overlay = document.getElementById('profileLoadingOverlay');
       const loadText = document.getElementById('profileLoadingText');
       overlay.classList.remove('hidden');
@@ -509,21 +479,24 @@
           no_hp: document.getElementById('profNoHp').value.trim()
         };
 
-        const newPass = document.getElementById('profNewPassword').value.trim();
-        if (newPass) {
-          updatePayload.password = newPass;
-        }
-
         const { error } = await sb
-          .from('pegawai')
+          .from('users')
           .update(updatePayload)
-          .eq('id_petugas', currentUser.id_petugas || currentUser.id);
+          .eq('id_petugas', currentUser.id_petugas);
 
         if (error) throw error;
 
-        delete updatePayload.password;
+        // Jika pengguna mengisi password baru, perbarui lewat Supabase Auth
+        const newPass = document.getElementById('profNewPassword').value.trim();
+        if (newPass) {
+          const { error: authErr } = await sb.auth.updateUser({ password: newPass });
+          if (authErr) throw authErr;
+        }
+
         currentUser = { ...currentUser, ...updatePayload };
-        localStorage.setItem('bbws_user', JSON.stringify(currentUser));
+        const sessionData = JSON.parse(localStorage.getItem('bbws_session') || '{}');
+        sessionData.profile = currentUser;
+        localStorage.setItem('bbws_session', JSON.stringify(sessionData));
 
         overlay.classList.add('hidden');
         alert('Profil & wilayah tugas berhasil diperbarui!');
@@ -534,11 +507,9 @@
       }
     });
 
-    function logoutUser() {
+    async function handleLogoutClick() {
       if (confirm('Keluar dari aplikasi BBWS Brantas?')) {
-        localStorage.removeItem('bbws_user');
-        localStorage.removeItem('user_session');
-        window.location.href = 'index.html';
+        await logout();
       }
     }
   </script>
