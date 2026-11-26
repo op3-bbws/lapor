@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kamera Inspeksi - BBWS Brantas</title>
+    <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
@@ -179,7 +180,7 @@
         </div>
 
         <!-- FALLBACK KAMERA -->
-        <div id="cameraFallback" class="hidden absolute inset-0 z-[6] bg-gradient-to-b from-slate-900 via-slate-950 to-black flex flex-col items-center justify-center px-6 text-center">
+        <div id="cameraFallback" class="hidden absolute inset-0 z-[6] bg-gradient-to-b from-slate-900 via-slate-950 to-black flex flex-col items-center justify-center px-6 text-center pointer-events-auto">
             <div class="w-16 h-16 rounded-3xl bg-amber-500/15 border border-amber-400/30 text-amber-400 flex items-center justify-center mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3l18 18"/></svg>
             </div>
@@ -200,7 +201,7 @@
     <!-- 2. UI OVERLAY UTAMA -->
     <div class="relative z-20 h-full w-full flex flex-col justify-between pointer-events-none">
         <!-- HEADER -->
-        <header id="cameraHeader" class="pointer-events-auto flex items-center justify-between gap-2 px-3.5 sm:px-5 pt-3.5 pb-4 bg-gradient-to-b from-black/85 via-black/45 to-transparent">
+        <header id="cameraHeader" class="relative z-30 pointer-events-auto flex items-center justify-between gap-2 px-3.5 sm:px-5 pt-3.5 pb-4 bg-gradient-to-b from-black/85 via-black/45 to-transparent">
             <div class="flex items-center gap-1.5 sm:gap-2">
                 <button type="button" onclick="window.location.href='home.html'" title="Kembali ke Beranda" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white transition active:scale-95">
                     <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -258,7 +259,7 @@
                 </div>
             </div>
 
-            <div class="pointer-events-auto flex flex-col items-center gap-2 mb-1.5 shrink-0 ml-auto">
+            <div class="relative z-30 pointer-events-auto flex flex-col items-center gap-2 mb-1.5 shrink-0 ml-auto">
                 <button type="button" onclick="cycleTimer()" title="Timer Jepret" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="timerLabel" class="orient-icon">0s</span></button>
                 <button type="button" onclick="cycleZoom()" title="Zoom Lensa" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="zoomLabel" class="orient-icon">1.0x</span></button>
                 <button type="button" onclick="openSheet('templateSheet'); setTimeout(() => document.getElementById('customNoteInput').focus(), 200)" title="Tambah Catatan Watermark" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
@@ -266,8 +267,8 @@
             </div>
         </div>
 
-        <!-- FOOTER -->
-        <footer id="cameraFooter" class="pointer-events-auto pt-2.5 pb-5 sm:pb-6 px-4 bg-gradient-to-t from-black via-black/85 to-transparent">
+        <!-- FOOTER (SHUTTER & KONTROL) -->
+        <footer id="cameraFooter" class="relative z-30 pointer-events-auto pt-2.5 pb-5 sm:pb-6 px-4 bg-gradient-to-t from-black via-black/85 to-transparent">
             <div class="max-w-md mx-auto">
                 <div id="modeSelectorRow" class="flex items-center justify-center gap-2 mb-4">
                     <button type="button" onclick="setMode('0')" id="btnMode0" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5"><span>0% Awal</span><span id="chkMode0" class="hidden text-emerald-800 font-black">✓</span></button>
@@ -282,7 +283,8 @@
                         <span class="text-[10px] font-semibold text-slate-300">Sesi Foto</span>
                     </button>
 
-                    <button id="shutterBtn" type="button" onclick="triggerCapture()" aria-label="Ambil Foto" class="w-20 h-20 rounded-full border-4 border-white p-1.5 flex items-center justify-center bg-transparent active:scale-90 transition shadow-[0_0_28px_rgba(255,255,255,0.25)]"><div class="w-full h-full bg-white hover:bg-slate-100 rounded-full transition"></div></button>
+                    <!-- TOMBOL SHUTTER -->
+                    <button id="shutterBtn" type="button" onclick="triggerCapture()" aria-label="Ambil Foto" class="w-20 h-20 rounded-full border-4 border-white p-1.5 flex items-center justify-center bg-transparent active:scale-90 transition shadow-[0_0_28px_rgba(255,255,255,0.25)] cursor-pointer"><div class="w-full h-full bg-white hover:bg-slate-100 rounded-full transition pointer-events-none"></div></button>
 
                     <button type="button" onclick="openSheet('templateSheet')" class="flex flex-col items-center gap-1 group">
                         <div class="w-12 h-12 rounded-2xl bg-white/15 group-hover:bg-white/25 border border-white/25 backdrop-blur-md flex items-center justify-center text-white transition"><svg class="w-5 h-5 text-sky-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg></div>
@@ -521,7 +523,7 @@
             <img id="previewImageResult" src="" alt="Hasil Foto" class="max-h-full max-w-full rounded-2xl border border-white/15 shadow-2xl object-contain">
         </div>
 
-        <!-- Strip Dokumentasi Sesi (0% • 50% • 100%) agar pegawai langsung lihat posisi sesi -->
+        <!-- Strip Dokumentasi Sesi (0% • 50% • 100%) -->
         <div class="max-w-xl w-full mx-auto mb-3 p-2.5 rounded-2xl bg-slate-900/90 border border-white/15">
             <div class="flex items-center justify-between px-1 mb-2">
                 <span class="text-[11px] font-extrabold text-slate-200">Target Slot Dokumentasi Sesi (Klik untuk pindah tahap):</span>
@@ -545,495 +547,77 @@
     <script>
         if (typeof initSupabase === 'function') initSupabase();
 
-        // =========================================================================
-        // KONFIGURASI GOOGLE DRIVE WEB APP (GOOGLE APPS SCRIPT)
-        // Ganti URL di bawah ini dengan URL Web App GAS Google Drive proyek Anda
-        // =========================================================================
-        const GAS_DRIVE_UPLOAD_URL = window.BBWS_DRIVE_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
+        // URL WEB APP GOOGLE APPS SCRIPT (GOOGLE DRIVE)
+        const GAS_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
 
         // 1. Safe Storage & IndexedDB Helpers
         function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
         function safeSetStorage(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
         function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
-const IDB_NAME = 'BBWS_Kamera_DB';
-    const IDB_VERSION = 2; // Disamakan dengan kamera.html agar tidak VersionError
-    const IDB_STORE = 'captured_photos';
-    const SESSION_META_KEY = 'bbws_session_photos_v2';
-    const DRAFT_FORM_KEY = 'bbws_laporan_draft_v1';
-    const GAS_DRIVE_UPLOAD_URL = (typeof GAS_WEBAPP_URL !== 'undefined' && !GAS_WEBAPP_URL.includes('YOUR_GAS'))
-      ? GAS_WEBAPP_URL
-      : 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
+        const IDB_NAME = 'BBWS_Kamera_DB';
+        const IDB_VERSION = 2;
+        const IDB_STORE = 'captured_photos';
 
-    let userProfile = null;
-    let metodeKerja = 'Individu';
-    let sessionPhotos = { '0': null, '50': null, '100': null };
-    let sessionMeta = { '0': null, '50': null, '100': null };
-    let lapToastTimer = null;
-
-    const URAIAN_LIST = [
-      'Pembersihan Saluran Irigasi',
-      'Babat Rumput & Semak Tanggul',
-      'Pengangkatan Endapan Sedimen',
-      'Pembersihan Sampah Pintu Air',
-      'Pelumasan & Operasi Pintu Air',
-      'Perbaikan Ringan Tanggul / Lining',
-      'Patroli Keamanan & Pencatatan Debit',
-      'Penanganan Darurat / Longsoran'
-    ];
-
-    function showLapToast(msg) {
-      const box = document.getElementById('lapToastBox');
-      const text = document.getElementById('lapToastText');
-      if (!box || !text) return;
-      text.textContent = msg;
-      box.classList.remove('hidden');
-      clearTimeout(lapToastTimer);
-      lapToastTimer = setTimeout(() => box.classList.add('hidden'), 3400);
-    }
-
-    function openCameraIDB() {
-      return new Promise((resolve, reject) => {
-        if (!window.indexedDB) return reject(new Error('IndexedDB tidak tersedia'));
-        const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(IDB_STORE)) {
-            db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
-          }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
-    async function loadPhotosFromIDB() {
-      try {
-        const db = await openCameraIDB();
-        if (!db.objectStoreNames.contains(IDB_STORE)) return [];
-        return new Promise((resolve) => {
-          const tx = db.transaction(IDB_STORE, 'readonly');
-          const req = tx.objectStore(IDB_STORE).getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
-        });
-      } catch (e) {
-        return [];
-      }
-    }
-
-    async function clearCameraIDB() {
-      try {
-        const db = await openCameraIDB();
-        if (!db.objectStoreNames.contains(IDB_STORE)) return false;
-        return new Promise((resolve) => {
-          const tx = db.transaction(IDB_STORE, 'readwrite');
-          tx.objectStore(IDB_STORE).clear();
-          tx.oncomplete = () => resolve(true);
-          tx.onerror = () => resolve(false);
-        });
-      } catch (e) {
-        return false;
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (window.lucide) lucide.createIcons();
-
-      renderUraianChecklist();
-
-      if (typeof checkSession === 'function') {
-        const s = await checkSession();
-        userProfile = s?.profile || null;
-      } else if (typeof refreshUserProfile === 'function') {
-        userProfile = await refreshUserProfile();
-      }
-
-      if (userProfile) {
-        document.getElementById('lapIdPetugas').value = userProfile.id_petugas || 'OPI-SP-1';
-        document.getElementById('lapNamaPetugas').value = userProfile.nama || 'Petugas Lapangan';
-        document.getElementById('lapDaerahIrigasi').value = userProfile.daerah_irigasi || 'D.I Bening';
-        document.getElementById('lapKejuron').value = userProfile.kejuron || '';
-        document.getElementById('sidebarPetugasCode').textContent = userProfile.id_petugas || 'O&P';
-      }
-
-      await loadCapturedSession();
-      restoreDraftFields();
-      await loadRekanPetugas();
-
-      document.querySelectorAll('#laporanMainForm input, #laporanMainForm textarea').forEach(el => {
-        el.addEventListener('input', saveDraftFields);
-        el.addEventListener('change', saveDraftFields);
-      });
-    });
-
-    function renderUraianChecklist() {
-      const grid = document.getElementById('uraianChecklistGrid');
-      grid.innerHTML = URAIAN_LIST.map(item => `
-        <label class="flex items-center gap-2.5 p-2.5 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50/50 cursor-pointer transition">
-          <input type="checkbox" name="chkUraian" value="${item}" onchange="saveDraftFields()" class="w-4 h-4 accent-pupr-blue shrink-0">
-          <span class="text-xs font-semibold text-slate-800">${item}</span>
-        </label>
-      `).join('');
-    }
-
-    function toggleUraianLain() {
-      const chk = document.getElementById('chkUraianLain');
-      const inp = document.getElementById('inpUraianLain');
-      inp.disabled = !chk.checked;
-      if (!chk.checked) inp.value = '';
-      saveDraftFields();
-    }
-
-    function setMetodeKerja(mode) {
-      metodeKerja = mode;
-      const btnInd = document.getElementById('btnMetodeIndividu');
-      const btnGiat = document.getElementById('btnMetodeGiat');
-      const box = document.getElementById('giatPesertaBox');
-
-      if (mode === 'Giat Kerja') {
-        btnGiat.className = 'py-3 px-3 rounded-2xl border-2 border-amber-500 bg-amber-50 text-amber-950 font-extrabold text-xs cursor-pointer transition flex items-center justify-center gap-2';
-        btnInd.className = 'py-3 px-3 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold text-xs cursor-pointer transition flex items-center justify-center gap-2';
-        box.classList.remove('hidden');
-      } else {
-        btnInd.className = 'py-3 px-3 rounded-2xl border-2 border-pupr-blue bg-blue-50 text-pupr-deep font-extrabold text-xs cursor-pointer transition flex items-center justify-center gap-2';
-        btnGiat.className = 'py-3 px-3 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold text-xs cursor-pointer transition flex items-center justify-center gap-2';
-        box.classList.add('hidden');
-      }
-      saveDraftFields();
-    }
-
-    async function loadRekanPetugas() {
-      const container = document.getElementById('pesertaListContainer');
-      const client = typeof initSupabase === 'function' ? initSupabase() : null;
-      if (!client || !userProfile) {
-        container.innerHTML = '<p class="text-[11px] text-slate-500">Daftar rekan tidak tersedia dalam mode offline.</p>';
-        return;
-      }
-      try {
-        let query = client
-          .from('users')
-          .select('id_petugas, nama, jabatan, daerah_irigasi')
-          .neq('id_petugas', userProfile.id_petugas)
-          .limit(30);
-
-        if (userProfile.daerah_irigasi) {
-          query = query.eq('daerah_irigasi', userProfile.daerah_irigasi);
-        }
-        const { data, error } = await query;
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          container.innerHTML = '<p class="text-[11px] text-slate-500">Belum ada data rekan petugas pada Daerah Irigasi ini.</p>';
-          return;
+        function openCameraIDB() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) return reject(new Error('IndexedDB tidak didukung'));
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(IDB_STORE)) {
+                        db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
         }
 
-        container.innerHTML = data.map(u => `
-          <label class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-amber-200/80 cursor-pointer">
-            <div class="flex items-center gap-2 min-w-0">
-              <input type="checkbox" name="chkPesertaGiat" value="${u.id_petugas}" data-nama="${u.nama}" onchange="updatePesertaCount()" class="w-4 h-4 accent-amber-500">
-              <span class="font-bold text-slate-800 truncate">${u.nama}</span>
-            </div>
-            <span class="font-mono text-[10px] text-slate-500 shrink-0">${u.id_petugas}</span>
-          </label>
-        `).join('');
-      } catch (e) {
-        container.innerHTML = '<p class="text-[11px] text-slate-500">Gagal memuat daftar rekan petugas.</p>';
-      }
-    }
-
-    function updatePesertaCount() {
-      const cnt = document.querySelectorAll('input[name="chkPesertaGiat"]:checked').length;
-      document.getElementById('pesertaCountChip').textContent = `${cnt} rekan dipilih`;
-    }
-
-    async function loadCapturedSession() {
-      const idbRows = await loadPhotosFromIDB();
-      idbRows.forEach(r => {
-        if (r && (r.mode === '0' || r.mode === '50' || r.mode === '100')) {
-          sessionPhotos[r.mode] = r.imageData;
-          if (r.meta) sessionMeta[r.mode] = r.meta;
-        }
-      });
-
-      try {
-        const metaRaw = localStorage.getItem(SESSION_META_KEY);
-        if (metaRaw) {
-          const parsed = JSON.parse(metaRaw);
-          if (parsed.meta) sessionMeta = { ...sessionMeta, ...parsed.meta };
-          if (parsed.form && parsed.form.note && !document.getElementById('lapCatatan').value) {
-            document.getElementById('lapCatatan').value = parsed.form.note;
-          }
-        }
-      } catch (e) {}
-
-      let count = 0;
-      ['0', '50', '100'].forEach(m => {
-        const slot = document.getElementById('lapSlot' + m);
-        const metaEl = document.getElementById('lapMeta' + m);
-        const imgSource = sessionPhotos[m] || sessionMeta[m]?.drive_url;
-        if (imgSource) {
-          sessionPhotos[m] = imgSource;
-          slot.innerHTML = `<img src="${imgSource}" alt="Foto ${m}%" class="w-full h-full object-cover rounded-xl">`;
-          const isDrive = sessionMeta[m]?.drive_status === 'uploaded' || String(imgSource).startsWith('http');
-          const timeText = sessionMeta[m]?.time_label ? `Jam ${sessionMeta[m].time_label}` : 'Tersimpan';
-          metaEl.textContent = isDrive ? `${timeText} • ☁ Drive` : timeText;
-          metaEl.className = isDrive
-            ? 'text-[10px] font-bold text-sky-600 mb-1.5'
-            : 'text-[10px] font-bold text-emerald-600 mb-1.5';
-          count++;
-        }
-      });
-
-      const pill = document.getElementById('lapPhotoLockPill');
-      pill.textContent = `${count}/3 Foto Sesi`;
-      if (count === 3) {
-        pill.className = 'px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider';
-      }
-
-      const att = document.getElementById('attendanceChip');
-      if (sessionMeta['0'] && sessionMeta['100']) {
-        att.textContent = `${sessionMeta['0'].time_label} - ${sessionMeta['100'].time_label}`;
-        att.className = 'badge bg-emerald-100 text-emerald-700';
-      } else if (sessionMeta['0']) {
-        att.textContent = `Masuk ${sessionMeta['0'].time_label}`;
-        att.className = 'badge badge-blue';
-      }
-
-      const gpsMeta = sessionMeta['0'] || sessionMeta['50'] || sessionMeta['100'];
-      if (gpsMeta && gpsMeta.lat && gpsMeta.lng) {
-        document.getElementById('gpsCoordChip').textContent = `${Number(gpsMeta.lat).toFixed(5)}, ${Number(gpsMeta.lng).toFixed(5)}`;
-      }
-    }
-
-    function previewPhotoSlot(mode) {
-      if (!sessionPhotos[mode]) {
-        window.location.href = `kamera.html?mode=${mode}`;
-        return;
-      }
-      document.getElementById('lapPreviewBadge').textContent = `Progres ${mode}%`;
-      document.getElementById('lapPreviewImg').src = sessionPhotos[mode];
-      const modal = document.getElementById('lapPreviewModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeLapPreview() {
-      const modal = document.getElementById('lapPreviewModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function saveDraftFields() {
-      const checked = Array.from(document.querySelectorAll('input[name="chkUraian"]:checked')).map(c => c.value);
-      const draft = {
-        metodeKerja,
-        saluran: document.getElementById('lapSaluran').value,
-        bangunan: document.getElementById('lapBangunan').value,
-        kejuron: document.getElementById('lapKejuron').value,
-        desa: document.getElementById('lapDesa').value,
-        kecamatan: document.getElementById('lapKecamatan').value,
-        luas: document.getElementById('inpLuasM2').value,
-        panjang: document.getElementById('inpPanjangM').value,
-        sedimen: document.getElementById('inpSedimenM3').value,
-        sampah: document.getElementById('inpSampahM3').value,
-        checked,
-        lainChecked: document.getElementById('chkUraianLain').checked,
-        lainText: document.getElementById('inpUraianLain').value,
-        catatan: document.getElementById('lapCatatan').value
-      };
-      try { localStorage.setItem(DRAFT_FORM_KEY, JSON.stringify(draft)); } catch (e) {}
-    }
-
-    function restoreDraftFields() {
-      try {
-        const raw = localStorage.getItem(DRAFT_FORM_KEY);
-        if (!raw) return;
-        const d = JSON.parse(raw);
-        if (d.metodeKerja) setMetodeKerja(d.metodeKerja);
-        if (d.saluran) document.getElementById('lapSaluran').value = d.saluran;
-        if (d.bangunan) document.getElementById('lapBangunan').value = d.bangunan;
-        if (d.kejuron) document.getElementById('lapKejuron').value = d.kejuron;
-        if (d.desa) document.getElementById('lapDesa').value = d.desa;
-        if (d.kecamatan) document.getElementById('lapKecamatan').value = d.kecamatan;
-        if (d.luas) document.getElementById('inpLuasM2').value = d.luas;
-        if (d.panjang) document.getElementById('inpPanjangM').value = d.panjang;
-        if (d.sedimen) document.getElementById('inpSedimenM3').value = d.sedimen;
-        if (d.sampah) document.getElementById('inpSampahM3').value = d.sampah;
-        if (Array.isArray(d.checked)) {
-          document.querySelectorAll('input[name="chkUraian"]').forEach(cb => {
-            cb.checked = d.checked.includes(cb.value);
-          });
-        }
-        if (d.lainChecked) {
-          document.getElementById('chkUraianLain').checked = true;
-          document.getElementById('inpUraianLain').disabled = false;
-          document.getElementById('inpUraianLain').value = d.lainText || '';
-        }
-        if (d.catatan) document.getElementById('lapCatatan').value = d.catatan;
-      } catch (e) {}
-    }
-
-    async function openResetConfirm() {
-      if (!confirm('Kosongkan semua foto sesi (0%, 50%, 100%) dan draf formulir ini?')) return;
-      await clearCameraIDB();
-      localStorage.removeItem(SESSION_META_KEY);
-      localStorage.removeItem(DRAFT_FORM_KEY);
-      showLapToast('Draf dan foto sesi telah dikosongkan.');
-      setTimeout(() => window.location.reload(), 600);
-    }
-
-    // Pastikan foto sudah punya URL Google Drive sebelum kirim ke Supabase
-    async function ensureDrivePhotoRef(mode, idPetugas, namaPetugas, daerahIrigasi) {
-      const meta = sessionMeta[mode] || {};
-      if (meta.drive_url) return meta.drive_url;
-      if (meta.drive_file_id) return `https://lh3.googleusercontent.com/d/${meta.drive_file_id}`;
-
-      const rawImg = sessionPhotos[mode];
-      if (!rawImg) return null;
-      if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) return rawImg;
-
-      try {
-        const base64Clean = rawImg.includes(',') ? rawImg.split(',')[1] : rawImg;
-        const dateCompact = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const fileName = `${idPetugas}_${dateCompact}_${mode}pct_${Date.now().toString().slice(-4)}.jpg`;
-        const res = await fetch(GAS_DRIVE_UPLOAD_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'upload_foto_sesi',
-            filename: fileName,
-            mimeType: 'image/jpeg',
-            base64: base64Clean,
-            id_petugas: idPetugas,
-            nama_petugas: namaPetugas,
-            daerah_irigasi: daerahIrigasi,
-            progres: mode,
-            lat: meta.lat || null,
-            lng: meta.lng || null,
-            address: meta.address || ''
-          })
-        });
-        const json = await res.json();
-        if (json && (json.fileUrl || json.url)) return json.fileUrl || json.url;
-        if (json && json.fileId) return `https://lh3.googleusercontent.com/d/${json.fileId}`;
-      } catch (e) {
-        console.warn(`Fallback ke Base64 lokal untuk foto ${mode}%:`, e);
-      }
-      return rawImg;
-    }
-
-    async function submitLaporanHarian(e) {
-      e.preventDefault();
-      if (!sessionPhotos['0'] || !sessionPhotos['50'] || !sessionPhotos['100']) {
-        showLapToast('Foto 0%, 50%, dan 100% wajib lengkap dari Kamera!');
-        return;
-      }
-
-      const selectedTasks = Array.from(document.querySelectorAll('input[name="chkUraian"]:checked')).map(c => c.value);
-      if (document.getElementById('chkUraianLain').checked && document.getElementById('inpUraianLain').value.trim()) {
-        selectedTasks.push(document.getElementById('inpUraianLain').value.trim());
-      }
-      if (selectedTasks.length === 0) {
-        showLapToast('Pilih minimal 1 uraian jenis pekerjaan!');
-        return;
-      }
-
-      const btn = document.getElementById('btnKirimLaporan');
-      btn.disabled = true;
-      btn.textContent = 'Menyinkronkan Foto Drive & Mengirim...';
-
-      const idPetugas = userProfile?.id_petugas || document.getElementById('lapIdPetugas').value;
-      const namaPetugas = userProfile?.nama || document.getElementById('lapNamaPetugas').value;
-      const daerahIrigasi = document.getElementById('lapDaerahIrigasi').value.trim();
-
-      const [foto0Ref, foto50Ref, foto100Ref] = await Promise.all([
-        ensureDrivePhotoRef('0', idPetugas, namaPetugas, daerahIrigasi),
-        ensureDrivePhotoRef('50', idPetugas, namaPetugas, daerahIrigasi),
-        ensureDrivePhotoRef('100', idPetugas, namaPetugas, daerahIrigasi)
-      ]);
-
-      const todayStr = new Date().toISOString().split('T')[0];
-      const meta0 = sessionMeta['0'] || {};
-      const meta100 = sessionMeta['100'] || {};
-
-      const payload = {
-        id_petugas: idPetugas,
-        nama_petugas: namaPetugas,
-        daerah_irigasi: daerahIrigasi,
-        kejuron: document.getElementById('lapKejuron').value.trim(),
-        desa_kelurahan: document.getElementById('lapDesa').value.trim(),
-        kecamatan: document.getElementById('lapKecamatan').value.trim(),
-        nama_saluran: document.getElementById('lapSaluran').value.trim(),
-        nama_bangunan: document.getElementById('lapBangunan').value.trim(),
-        jenis_pekerjaan: selectedTasks.join(', '),
-        metode_kerja: metodeKerja,
-        tanggal: todayStr,
-        jam_mulai: meta0.time_label || null,
-        jam_selesai: meta100.time_label || null,
-        lokasi_lat: meta0.lat || null,
-        lokasi_lng: meta0.lng || null,
-        luas_area_m2: parseFloat(document.getElementById('inpLuasM2').value) || 0,
-        panjang_saluran_m: parseFloat(document.getElementById('inpPanjangM').value) || 0,
-        angkat_sedimen_m3: parseFloat(document.getElementById('inpSedimenM3').value) || 0,
-        pembersihan_sampah_m3: parseFloat(document.getElementById('inpSampahM3').value) || 0,
-        catatan_lapangan: document.getElementById('lapCatatan').value.trim(),
-        status_verifikasi: 'menunggu',
-        foto_0_drive_id: foto0Ref,
-        foto_50_drive_id: foto50Ref,
-        foto_100_drive_id: foto100Ref
-      };
-
-      try {
-        const client = typeof initSupabase === 'function' ? initSupabase() : null;
-        if (!client) throw new Error('Koneksi Supabase tidak tersedia');
-
-        const { data: insertedRows, error } = await client
-          .from('laporan')
-          .insert([payload])
-          .select();
-
-        if (error) throw error;
-
-        const insertedId = insertedRows && insertedRows[0]?.id;
-        const selectedPeers = Array.from(document.querySelectorAll('input[name="chkPesertaGiat"]:checked'));
-        if (insertedId && metodeKerja === 'Giat Kerja' && selectedPeers.length > 0) {
-          const peerPayloads = selectedPeers.map(cb => ({
-            laporan_id: insertedId,
-            id_pegawai: cb.value,
-            nama_pegawai: cb.getAttribute('data-nama') || cb.value
-          }));
-          await client.from('laporan_peserta').insert(peerPayloads);
+        async function savePhotoToIDB(mode, imageData, meta) {
+            try {
+                const db = await openCameraIDB();
+                if (!db.objectStoreNames.contains(IDB_STORE)) return false;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    tx.objectStore(IDB_STORE).put({ mode: String(mode), imageData, meta, updatedAt: Date.now() });
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (e) {
+                return false;
+            }
         }
 
-        await clearCameraIDB();
-        localStorage.removeItem(SESSION_META_KEY);
-        localStorage.removeItem(DRAFT_FORM_KEY);
+        async function loadAllPhotosFromIDB() {
+            try {
+                const db = await openCameraIDB();
+                if (!db.objectStoreNames.contains(IDB_STORE)) return [];
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IDB_STORE, 'readonly');
+                    const req = tx.objectStore(IDB_STORE).getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => resolve([]);
+                });
+            } catch (e) {
+                return [];
+            }
+        }
 
-        showLapToast('Laporan berhasil dikirim ke Server BBWS Brantas!');
-        setTimeout(() => { window.location.href = 'home.html'; }, 1200);
-      } catch (err) {
-        btn.disabled = false;
-        btn.textContent = 'Kirim Laporan Harian OP';
-        showLapToast('Gagal mengirim: ' + (err.message || 'Periksa koneksi internet'));
-      }
-    }
-
-    function updateSidebarClock() {
-      const now = new Date();
-      const cTime = document.getElementById('sidebarClock');
-      const cDate = document.getElementById('sidebarClockDate');
-      if (cTime) cTime.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      if (cDate) cDate.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    }
-    updateSidebarClock();
-    setInterval(updateSidebarClock, 1000);
-
-    document.getElementById('btnLogout')?.addEventListener('click', async () => {
-      if (confirm('Keluar dari sesi BBWS Brantas?')) {
-        if (typeof logout === 'function') await logout();
-        else { localStorage.removeItem('bbws_session'); window.location.href = 'index.html'; }
-      }
-    });
+        async function clearAllPhotosIDB() {
+            try {
+                const db = await openCameraIDB();
+                if (!db.objectStoreNames.contains(IDB_STORE)) return false;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    tx.objectStore(IDB_STORE).clear();
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (e) {
+                return false;
+            }
+        }
 
         // 2. User Context & State Aplikasi
         let user = { id_pegawai: 'OPI-SP-1', nama: 'Petugas Lapangan', jabatan: 'PPA / Pekarya', daerah_irigasi: 'D.I Bening' };
@@ -1078,18 +662,40 @@ const IDB_NAME = 'BBWS_Kamera_DB';
 
         // 4. Inisialisasi Awal
         document.addEventListener('DOMContentLoaded', async () => {
+            let sessionResult = null;
             if (typeof checkSession === 'function') {
                 try {
-                    const session = await checkSession();
-                    if (session && session.profile) {
-                        user = {
-                            id_pegawai: session.profile.id_petugas || 'OPI-SP-1',
-                            nama: session.profile.nama || 'Petugas Lapangan',
-                            jabatan: session.profile.jabatan || session.profile.role || 'PPA / Pekarya',
-                            daerah_irigasi: session.profile.daerah_irigasi || 'D.I Bening'
-                        };
-                    }
-                } catch (e) {}
+                    sessionResult = await checkSession();
+                } catch (e) {
+                    Object.keys(localStorage).forEach((k) => {
+                        if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+                            safeRemoveStorage(k);
+                        }
+                    });
+                }
+            }
+
+            if (!sessionResult || !sessionResult.profile) {
+                const cachedRaw = safeGetStorage('bbws_last_valid_profile_v1') || safeGetStorage('bbws_session');
+                if (cachedRaw) {
+                    try {
+                        const parsed = JSON.parse(cachedRaw);
+                        const prof = parsed.profile ? parsed.profile : parsed;
+                        if (prof && (prof.id_petugas || prof.nama)) {
+                            sessionResult = { profile: prof, isCached: true };
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (sessionResult && sessionResult.profile) {
+                user = {
+                    id_pegawai: sessionResult.profile.id_petugas || 'OPI-SP-1',
+                    nama: sessionResult.profile.nama || 'Petugas Lapangan',
+                    jabatan: sessionResult.profile.jabatan || sessionResult.profile.role || 'PPA / Pekarya',
+                    daerah_irigasi: sessionResult.profile.daerah_irigasi || 'D.I Bening'
+                };
+                safeSetStorage('bbws_last_valid_profile_v1', JSON.stringify(sessionResult.profile));
             }
 
             updateWatermarkInfo();
@@ -1100,7 +706,6 @@ const IDB_NAME = 'BBWS_Kamera_DB';
 
             await loadSessionData();
 
-            // Tentukan mode aktif awal secara cerdas agar tidak menimpa foto 0% yang sudah ada
             const params = new URLSearchParams(window.location.search);
             const reqMode = params.get('mode');
             if (reqMode === '0' || reqMode === '50' || reqMode === '100') {
@@ -1334,7 +939,7 @@ const IDB_NAME = 'BBWS_Kamera_DB';
             const videoEl = document.getElementById('cameraStream');
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 fallbackEl.classList.remove('hidden');
-                document.getElementById('cameraErrorMsg').innerText = 'Browser tidak mendukung kamera langsung. Gunakan tombol Simulasi Jepret untuk pratinjau.';
+                document.getElementById('cameraErrorMsg').innerText = 'Browser tidak mendukung kamera langsung. Gunakan tombol Simulasi Jepret atau tombol shutter untuk pratinjau.';
                 return;
             }
             try {
@@ -1677,7 +1282,7 @@ const IDB_NAME = 'BBWS_Kamera_DB';
         }
 
         // 11. Capture & Render Canvas
-function triggerCapture() {
+        function triggerCapture() {
             if (countdownTimer) return;
             if (timerSeconds === 0) {
                 captureFromVideo();
@@ -1737,9 +1342,11 @@ function triggerCapture() {
             octx.font = 'bold 34px Inter, sans-serif';
             octx.fillText('PRATINJAU KAMERA LAPANGAN • BBWS BRANTAS', 80, Math.round(off.height * 0.42));
             const flash = document.getElementById('flashEffect');
-            flash.classList.remove('flash-animate');
-            void flash.offsetWidth;
-            flash.classList.add('flash-animate');
+            if (flash) {
+                flash.classList.remove('flash-animate');
+                void flash.offsetWidth;
+                flash.classList.add('flash-animate');
+            }
             renderWatermarkedImage(off, off.width, off.height, false);
         }
 
@@ -1988,9 +1595,7 @@ function triggerCapture() {
             openPreviewModal(latestCapturedBase64, currentMode);
         }
 
-        // =========================================================================
         // 12. PREVIEW SESI (0/50/100) + PROTEKSI ANTI-TINDIH + UPLOAD GOOGLE DRIVE
-        // =========================================================================
         function renderPreviewSessionStrip(selectedMode) {
             const stripEl = document.getElementById('previewSessionStrip');
             const countEl = document.getElementById('previewSessionProgressText');
@@ -2067,7 +1672,6 @@ function triggerCapture() {
             a.click();
         }
 
-        // Cek apakah slot target sudah terisi sebelum menyimpan agar tidak menimpa foto 0% tanpa sengaja
         async function confirmUsePhoto() {
             if (!latestCapturedBase64) return;
 
@@ -2106,7 +1710,6 @@ function triggerCapture() {
             await executeSavePhotoToSession(currentMode);
         }
 
-        // Upload otomatis ke Google Drive di latar belakang tanpa memblokir UI
         async function uploadPhotoToGoogleDrive(mode, base64Data, metaObj) {
             const petugasId = (user.id_pegawai || 'OPI-SP-1').replace(/[^a-zA-Z0-9_-]/g, '_');
             const dateCompact = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -2120,8 +1723,7 @@ function triggerCapture() {
             }
 
             try {
-                // Jika endpoint Drive belum dikonfigurasi, tandai sebagai antrean lokal
-                if (!GAS_DRIVE_UPLOAD_URL || GAS_DRIVE_UPLOAD_URL.includes('GANTI_DENGAN_ID')) {
+                if (!GAS_DRIVE_UPLOAD_URL || GAS_DRIVE_UPLOAD_URL.includes('YOUR_GAS')) {
                     if (photoMetaByMode[mode]) {
                         photoMetaByMode[mode].drive_status = 'queued_local';
                         saveSessionMetadata();
@@ -2187,10 +1789,8 @@ function triggerCapture() {
             closePreviewModal();
             showToast(`Foto ${targetMode}% tersimpan & mengunggah ke Drive...`);
 
-            // Unggah ke Google Drive di latar belakang
             uploadPhotoToGoogleDrive(targetMode, latestCapturedBase64, metaToSave);
 
-            // Otomatis arahkan mode kamera ke slot berikutnya yang masih kosong
             if (targetMode === '0' && !capturedPhotosByMode['50']) {
                 setMode('50');
             } else if (targetMode === '50' && !capturedPhotosByMode['100']) {
