@@ -556,13 +556,14 @@
         function safeSetStorage(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
         function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
-        const IDB_NAME = 'BBWS_Kamera_DB';
+const IDB_NAME = 'BBWS_Kamera_DB';
+        const IDB_VERSION = 2; // Naikkan versi untuk memperbaiki object store yang hilang
         const IDB_STORE = 'captured_photos';
 
         function openCameraIDB() {
             return new Promise((resolve, reject) => {
                 if (!window.indexedDB) return reject(new Error('IndexedDB tidak didukung'));
-                const req = indexedDB.open(IDB_NAME, 1);
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(IDB_STORE)) {
@@ -577,11 +578,12 @@
         async function savePhotoToIDB(mode, imageData, meta) {
             try {
                 const db = await openCameraIDB();
-                return new Promise((resolve, reject) => {
+                if (!db.objectStoreNames.contains(IDB_STORE)) return false;
+                return new Promise((resolve) => {
                     const tx = db.transaction(IDB_STORE, 'readwrite');
                     tx.objectStore(IDB_STORE).put({ mode: String(mode), imageData, meta, updatedAt: Date.now() });
                     tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => reject(tx.error);
+                    tx.onerror = () => resolve(false);
                 });
             } catch (e) {
                 return false;
@@ -591,6 +593,7 @@
         async function loadAllPhotosFromIDB() {
             try {
                 const db = await openCameraIDB();
+                if (!db.objectStoreNames.contains(IDB_STORE)) return [];
                 return new Promise((resolve) => {
                     const tx = db.transaction(IDB_STORE, 'readonly');
                     const req = tx.objectStore(IDB_STORE).getAll();
@@ -605,6 +608,7 @@
         async function clearAllPhotosIDB() {
             try {
                 const db = await openCameraIDB();
+                if (!db.objectStoreNames.contains(IDB_STORE)) return false;
                 return new Promise((resolve) => {
                     const tx = db.transaction(IDB_STORE, 'readwrite');
                     tx.objectStore(IDB_STORE).clear();
