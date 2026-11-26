@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tugas & Verifikasi Laporan — BBWS Brantas</title>
+  <meta name="theme-color" content="#1E3A8A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo-bbws.svg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brantas: {
+              blue: '#1E3A8A',
+              dark: '#172554',
+              light: '#EFF6FF',
+              gold: '#F59E0B',
+              goldLight: '#FEF3C7',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1E3A8A 0%, #172554 65%, #1E40AF 100%);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="pb-28 lg:pb-10 lg:pl-64 min-h-screen">
+
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40">
+    <div class="p-5 flex items-center gap-3 border-b border-slate-100">
+      <img src="assets/img/logo-bbws.svg" alt="BBWS Brantas" class="w-10 h-10 object-contain" />
+      <div>
+        <h1 class="font-extrabold text-brantas-blue text-base leading-tight">BBWS BRANTAS</h1>
+        <p class="text-[11px] font-semibold text-slate-500">Sistem OP Irigasi 2026</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1.5 text-sm font-semibold">
+      <a href="home.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="home" class="w-5 h-5"></i> Beranda
+      </a>
+      <a href="tugas.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brantas-blue text-white shadow-sm">
+        <i data-lucide="clipboard-list" class="w-5 h-5 text-brantas-gold"></i> Tugas & Verifikasi
+      </a>
+      <a href="kamera.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="camera" class="w-5 h-5"></i> Kamera Lapangan
+      </a>
+      <a href="laporan.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="file-plus-2" class="w-5 h-5"></i> Buat Laporan
+      </a>
+      <a href="raport.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Raport Kinerja
+      </a>
+      <a href="peta.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="map-pin" class="w-5 h-5"></i> Peta Sebaran D.I
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-slate-100">
+      <a href="profile.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition">
+        <img id="sidebarAvatar" src="assets/img/logo-bbws.svg" alt="Profil" class="w-9 h-9 rounded-full object-cover border border-slate-200 bg-slate-100" />
+        <div class="overflow-hidden">
+          <p id="sidebarName" class="text-xs font-bold text-slate-800 truncate">Memuat Petugas...</p>
+          <p id="sidebarRole" class="text-[11px] text-slate-500 truncate">-</p>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- HEADER -->
+  <header class="hero-gradient text-white pt-5 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="max-w-5xl mx-auto flex items-center justify-between relative z-10">
+      <div class="flex items-center gap-3">
+        <a href="home.html" class="lg:hidden w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-1">
+            <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> MANAJEMEN TUGAS & VERIFIKASI
+          </span>
+          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight">Penugasan & Verifikasi OP</h1>
+        </div>
+      </div>
+
+      <a href="profile.html" class="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-2xl border border-white/15 transition">
+        <div class="text-right hidden sm:block">
+          <p id="headerUserName" class="text-xs font-bold leading-tight">Memuat...</p>
+          <p id="headerUserRole" class="text-[10px] text-amber-300 font-semibold">-</p>
+        </div>
+        <img id="headerAvatar" src="assets/img/logo-bbws.svg" alt="Avatar" class="w-8 h-8 rounded-full object-cover bg-white/20 border border-white/40" />
+      </a>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 space-y-5">
+
+    <!-- TAB NAVIGASI UTAMA -->
+    <div class="glass-surface rounded-2xl p-1.5 flex flex-wrap gap-1.5">
+      <button type="button" id="tabBtnIncoming" onclick="switchMainTab('incoming')"
+        class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition bg-brantas-blue text-white shadow-sm">
+        <i data-lucide="inbox" class="w-4 h-4"></i>
+        <span>Tugas Masuk</span>
+        <span id="badgeIncomingCount" class="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-400 text-slate-950 font-extrabold">0</span>
+      </button>
+
+      <button type="button" id="tabBtnAssign" onclick="switchMainTab('assign')"
+        class="hidden flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition text-slate-600 hover:bg-slate-100">
+        <i data-lucide="send" class="w-4 h-4"></i>
+        <span>Beri & Pantau Tugas</span>
+      </button>
+
+      <button type="button" id="tabBtnVerify" onclick="switchMainTab('verify')"
+        class="hidden flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition text-slate-600 hover:bg-slate-100">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        <span>Verifikasi Laporan</span>
+        <span id="badgeVerifyCount" class="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-extrabold">0</span>
+      </button>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PANEL 1: TUGAS MASUK (UNTUK PPA, PEKARYA, & STAF PENGAMAT)            -->
+    <!-- ===================================================================== -->
+    <section id="panelIncoming" class="space-y-4">
+      <!-- Filter Status Tugas Masuk -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="filterIncomingTasks('all')" data-filter="all" class="inc-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-white">Semua</button>
+          <button type="button" onclick="filterIncomingTasks('baru')" data-filter="baru" class="inc-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200">Belum Dikerjakan</button>
+          <button type="button" onclick="filterIncomingTasks('proses')" data-filter="proses" class="inc-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200">Sedang Dikerjakan</button>
+          <button type="button" onclick="filterIncomingTasks('selesai')" data-filter="selesai" class="inc-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200">Selesai</button>
+        </div>
+        <button type="button" onclick="loadIncomingTasks()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Muat Ulang
+        </button>
+      </div>
+
+      <div id="incomingTasksList" class="space-y-3">
+        <div class="glass-surface rounded-2xl p-8 text-center text-xs text-slate-500">
+          Memuat daftar tugas masuk...
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PANEL 2: BERI & PANTAU TUGAS (STAF PENGAMAT, ADMIN, PIMPINAN)         -->
+    <!-- ===================================================================== -->
+    <section id="panelAssign" class="hidden space-y-5">
+      <!-- Form Buat Penugasan Baru -->
+      <div class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">+</span>
+              Buat Penugasan Lapangan Baru
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Kirim instruksi pekerjaan rutin atau Giat Kerja (Quick Response) kepada petugas lapangan.</p>
+          </div>
+        </div>
+
+        <form id="createTaskForm" class="space-y-4">
+          <!-- Filter Wilayah Khusus Admin & Pimpinan (OP I, OP II, OP III, OP V -> D.I) -->
+          <div id="adminScopeSelector" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-blue-50/70 border border-blue-100">
+            <div>
+              <label class="block text-[11px] font-extrabold text-brantas-blue uppercase mb-1">Pilih PPK / OP</label>
+              <select id="assignFilterOP" onchange="handleAssignOPChange()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+                <option value="">-- Pilih OP --</option>
+                <option value="OP I">OP I (D.I Bening, D.I Lodoyo)</option>
+                <option value="OP II">OP II (Delta Brantas, Kedungkandang, Molek)</option>
+                <option value="OP III">OP III (Banyuputih, Baru, Bedadung, Sampean, dll)</option>
+                <option value="OP V">OP V (D.I Menturus, D.I Padi Pomahan)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-extrabold text-brantas-blue uppercase mb-1">Pilih Daerah Irigasi (D.I)</label>
+              <select id="assignFilterDI" onchange="loadAssignableEmployees()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+                <option value="">-- Pilih Daerah Irigasi --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Judul / Instruksi Tugas <span class="text-rose-500">*</span></label>
+              <input type="text" id="taskJudul" required placeholder="Contoh: Pembersihan Sampah & Enceng Gondok Saluran Induk"
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Tugas <span class="text-rose-500">*</span></label>
+                <select id="taskJenis" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold">
+                  <option value="Rutin">Tugas Rutin</option>
+                  <option value="Giat Kerja">Giat Kerja (Quick Response)</option>
+                  <option value="Darurat">Penanganan Darurat / Banjir</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Batas Waktu <span class="text-rose-500">*</span></label>
+                <input type="date" id="taskDeadline" required
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold focus:outline-none focus:border-brantas-blue" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Lokasi Target (Saluran / Bangunan / Kejuron) <span class="text-rose-500">*</span></label>
+              <input type="text" id="taskLokasi" required placeholder="Contoh: Kejuron Bening — Pintu Bagi B.Bn 2"
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brantas-blue" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Prioritas</label>
+              <select id="taskPrioritas" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold">
+                <option value="Normal">Normal</option>
+                <option value="Tinggi">Tinggi (Segera)</option>
+                <option value="Darurat">Darurat / Quick Response</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Rincian Instruksi Pekerjaan <span class="text-rose-500">*</span></label>
+              <textarea id="taskDeskripsi" rows="2" required placeholder="Jelaskan detail pekerjaan yang harus dilakukan petugas..."
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-medium focus:outline-none focus:border-brantas-blue"></textarea>
+            </div>
+          </div>
+
+          <!-- Pemilih Petugas Penerima Tugas -->
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-xs font-extrabold text-slate-800">Pilih Petugas Penerima Tugas <span class="text-rose-500">*</span></h3>
+                <p class="text-[11px] text-slate-500">Pilih satu atau beberapa petugas (Staf Pengamat, PPA, Pekarya).</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="selectAllRecipients(true)" class="text-[11px] font-bold text-brantas-blue hover:underline">Pilih Semua</button>
+                <span class="text-slate-300">|</span>
+                <button type="button" onclick="selectAllRecipients(false)" class="text-[11px] font-bold text-slate-500 hover:underline">Reset</button>
+                <span id="recipientCountBadge" class="px-2.5 py-1 rounded-lg bg-brantas-blue text-white text-[11px] font-extrabold">0 Dipilih</span>
+              </div>
+            </div>
+
+            <input type="text" id="recipientSearchInput" oninput="filterRecipientList()" placeholder="Cari nama, ID Petugas, Jabatan, atau Kejuron..."
+              class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brantas-blue" />
+
+            <div id="recipientChecklist" class="max-h-52 overflow-y-auto custom-scrollbar grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pr-1">
+              <p class="text-xs text-slate-500 col-span-full py-3 text-center">Memuat daftar petugas...</p>
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmitTask"
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brantas-blue hover:bg-brantas-dark text-white text-xs font-extrabold shadow-md flex items-center justify-center gap-2 transition">
+            <i data-lucide="send" class="w-4 h-4 text-brantas-gold"></i>
+            <span>KIRIM PENUGASAN SEKARANG</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Riwayat Tugas yang Diberikan -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-slate-800">Monitoring Tugas yang Diberikan</h3>
+          <button type="button" onclick="loadSentTasks()" class="text-xs font-bold text-brantas-blue hover:underline flex items-center gap-1">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Segarkan
+          </button>
+        </div>
+        <div id="sentTasksList" class="space-y-3">
+          <div class="glass-surface rounded-2xl p-6 text-center text-xs text-slate-500">Memuat riwayat tugas...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PANEL 3: VERIFIKASI LAPORAN MASUK (STAF PENGAMAT, ADMIN, PIMPINAN)    -->
+    <!-- ===================================================================== -->
+    <section id="panelVerify" class="hidden space-y-4">
+      <div class="glass-surface rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-extrabold text-slate-800">Antrean Verifikasi Laporan Lapangan</h2>
+          <p id="verifyScopeLabel" class="text-xs text-slate-500">Menampilkan laporan menunggu verifikasi di wilayah kerja Anda.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id="verifyStatusFilter" onchange="loadVerificationQueue()" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+            <option value="menunggu">Menunggu Verifikasi</option>
+            <option value="diverifikasi">Sudah Diverifikasi</option>
+            <option value="ditolak">Ditolak / Revisi</option>
+          </select>
+          <button type="button" onclick="loadVerificationQueue()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="verificationQueueList" class="space-y-4">
+        <div class="glass-surface rounded-2xl p-8 text-center text-xs text-slate-500">
+          Memuat antrean laporan...
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL LIGHTBOX FOTO DRIVE -->
+  <div id="photoLightbox" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4" onclick="closePhotoLightbox()">
+    <div class="max-w-3xl w-full bg-slate-900 rounded-2xl overflow-hidden border border-white/15 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="p-3 bg-slate-950 flex items-center justify-between text-white">
+        <span id="lightboxCaption" class="text-xs font-extrabold">Pratinjau Foto Dokumentasi</span>
+        <button type="button" onclick="closePhotoLightbox()" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="p-2 bg-black flex items-center justify-center max-h-[78vh]">
+        <img id="lightboxImage" src="" alt="Foto Dokumentasi" class="max-h-[75vh] w-auto object-contain rounded-lg" />
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION MOBILE -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 px-2 py-1.5">
+    <div class="grid grid-cols-5 items-center text-[10px] font-bold text-slate-500">
+      <a href="home.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="tugas.html" class="flex flex-col items-center py-1 text-brantas-blue">
+        <i data-lucide="clipboard-list" class="w-5 h-5 mb-0.5 text-brantas-gold"></i>
+        <span class="font-extrabold">Tugas</span>
+      </a>
+      <a href="kamera.html" class="flex flex-col items-center -mt-5">
+        <div class="w-12 h-12 rounded-2xl bg-slate-800 text-white shadow-lg flex items-center justify-center border-2 border-white">
+          <i data-lucide="camera" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <span class="mt-1 text-slate-700">Kamera</span>
+      </a>
+      <a href="laporan.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="file-plus-2" class="w-5 h-5 mb-0.5"></i>
+        <span>Laporan</span>
+      </a>
+      <a href="raport.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5"></i>
+        <span>Raport</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // =========================================================================
+    // 1. KONFIGURASI SUPABASE & PEMETAAN WILAYAH OP
+    // =========================================================================
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Pemetaan Daerah Irigasi per OP sesuai data resmi BBWS Brantas 2026 (OP IV tidak memiliki petugas OP)
+    const OP_DI_MAP = {
+      'OP I': ['D.I Bening', 'D.I Lodoyo'],
+      'OP II': ['D.I Delta Brantas', 'D.I Kedungkandang', 'D.I Molek'],
+      'OP III': [
+        'D.I Banyuputih', 'D.I Baru', 'D.I Bedadung', 'D.I Bondoyudo',
+        'D.I Jatiroto', 'D.I Kali Setail', 'D.I Porolinggo',
+        'D.I Sampean', 'D.I Sampean Baru', 'D.I Setail Teknik', 'D.I Talang'
+      ],
+      'OP V': ['D.I Menturus', 'D.I Padi Pomahan']
+    };
+
+    let currentUser = null;
+    let userRoleType = 'lapangan'; // 'lapangan' (PPA/Pekarya), 'staf' (Staf Pengamat), 'admin' (Admin/Pimpinan)
+    let incomingTasksCache = [];
+    let currentIncomingFilter = 'all';
+    let assignableEmployees = [];
+    let selectedRecipientIds = new Set();
+
+    // =========================================================================
+    // 2. INISIALISASI HALAMAN & ROLE
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await initUserAndRole();
+
+      // Set default deadline besok
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('taskDeadline').value = tomorrow.toISOString().slice(0, 10);
+
+      await loadIncomingTasks();
+
+      if (userRoleType === 'staf' || userRoleType === 'admin') {
+        document.getElementById('tabBtnAssign').classList.remove('hidden');
+        document.getElementById('tabBtnVerify').classList.remove('hidden');
+
+        if (userRoleType === 'admin') {
+          document.getElementById('adminScopeSelector').classList.remove('hidden');
+          document.getElementById('verifyScopeLabel').textContent = 'Menampilkan seluruh laporan masuk lintas OP (Admin / Pimpinan).';
+          // Admin & Pimpinan default membuka tab Beri Tugas atau Verifikasi
+          switchMainTab('verify');
+        } else {
+          document.getElementById('verifyScopeLabel').textContent = `Menampilkan laporan wilayah ${currentUser.daerah_irigasi || ''}.`;
+        }
+
+        await loadAssignableEmployees();
+        await loadSentTasks();
+        await loadVerificationQueue();
+      }
+    });
+
+    async function initUserAndRole() {
+      const raw = localStorage.getItem('bbws_user') || localStorage.getItem('user_session');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = JSON.parse(raw);
+
+      try {
+        const { data } = await sb
+          .from('pegawai')
+          .select('*')
+          .eq('id_petugas', currentUser.id_petugas || currentUser.id)
+          .single();
+        if (data) {
+          currentUser = { ...currentUser, ...data };
+          localStorage.setItem('bbws_user', JSON.stringify(currentUser));
+        }
+      } catch (e) {}
+
+      const jabatan = (currentUser.jabatan || currentUser.role || '').toLowerCase();
+      if (jabatan.includes('admin') || jabatan.includes('pimpinan') || jabatan.includes('ppk')) {
+        userRoleType = 'admin';
+      } else if (jabatan.includes('staf') || jabatan.includes('pengamat')) {
+        userRoleType = 'staf';
+      } else {
+        userRoleType = 'lapangan';
+      }
+
+      document.getElementById('headerUserName').textContent = currentUser.nama || '-';
+      document.getElementById('headerUserRole').textContent = `${currentUser.jabatan || '-'} • ${currentUser.daerah_irigasi || currentUser.ppk_op || 'BBWS'}`;
+      document.getElementById('sidebarName').textContent = currentUser.nama || '-';
+      document.getElementById('sidebarRole').textContent = `${currentUser.jabatan || '-'} • ${currentUser.daerah_irigasi || '-'}`;
+
+      if (currentUser.foto_pegawai_id) {
+        const avatarUrl = `https://lh3.googleusercontent.com/d/${currentUser.foto_pegawai_id}`;
+        document.getElementById('headerAvatar').src = avatarUrl;
+        document.getElementById('sidebarAvatar').src = avatarUrl;
+      }
+    }
+
+    function switchMainTab(tabName) {
+      const tabs = {
+        incoming: { btn: 'tabBtnIncoming', panel: 'panelIncoming' },
+        assign: { btn: 'tabBtnAssign', panel: 'panelAssign' },
+        verify: { btn: 'tabBtnVerify', panel: 'panelVerify' }
+      };
+
+      Object.entries(tabs).forEach(([key, ids]) => {
+        const btn = document.getElementById(ids.btn);
+        const panel = document.getElementById(ids.panel);
+        if (key === tabName) {
+          btn.className = 'flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition bg-brantas-blue text-white shadow-sm';
+          panel.classList.remove('hidden');
+        } else {
+          btn.className = 'flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition text-slate-600 hover:bg-slate-100';
+          panel.classList.add('hidden');
+        }
+      });
+      lucide.createIcons();
+    }
+
+    // =========================================================================
+    // 3. TUGAS MASUK (PPA, PEKARYA, STAF PENGAMAT)
+    // =========================================================================
+    async function loadIncomingTasks() {
+      const myId = currentUser.id_petugas || currentUser.id;
+      const container = document.getElementById('incomingTasksList');
+
+      try {
+        const { data, error } = await sb
+          .from('tugas_penerima')
+          .select(`
+            id,
+            status_pengerjaan,
+            catatan_penyelesaian,
+            updated_at,
+            tugas:id_tugas (
+              id, judul, deskripsi, jenis_tugas, prioritas, lokasi_target, deadline, pemberi_nama, pemberi_jabatan, daerah_irigasi, created_at
+            )
+          `)
+          .eq('id_penerima', myId)
+          .order('id', { ascending: false });
+
+        if (error) throw error;
+
+        incomingTasksCache = (data || []).filter(row => row.tugas);
+        const activeCount = incomingTasksCache.filter(t => t.status_pengerjaan !== 'selesai').length;
+        document.getElementById('badgeIncomingCount').textContent = activeCount;
+
+        renderIncomingTasks();
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="glass-surface rounded-2xl p-6 text-center text-xs text-rose-600">Gagal memuat daftar tugas masuk.</div>`;
+      }
+    }
+
+    function filterIncomingTasks(status) {
+      currentIncomingFilter = status;
+      document.querySelectorAll('.inc-filter-btn').forEach(btn => {
+        if (btn.dataset.filter === status) {
+          btn.className = 'inc-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-white';
+        } else {
+          btn.className = 'inc-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200';
+        }
+      });
+      renderIncomingTasks();
+    }
+
+    function renderIncomingTasks() {
+      const container = document.getElementById('incomingTasksList');
+      const filtered = incomingTasksCache.filter(item => {
+        if (currentIncomingFilter === 'all') return true;
+        return (item.status_pengerjaan || 'baru') === currentIncomingFilter;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="glass-surface rounded-2xl p-8 text-center space-y-2">
+            <i data-lucide="check-circle" class="w-8 h-8 text-emerald-500 mx-auto"></i>
+            <p class="text-xs font-bold text-slate-700">Tidak ada tugas pada kategori ini.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(row => {
+        const t = row.tugas;
+        const st = row.status_pengerjaan || 'baru';
+
+        const statusBadge = st === 'selesai'
+          ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">SELESAI ✓</span>'
+          : st === 'proses'
+            ? '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">SEDANG DIKERJAKAN</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-brantas-blue text-[10px] font-extrabold">TUGAS BARU</span>';
+
+        const prioBadge = t.prioritas === 'Darurat' || t.jenis_tugas === 'Giat Kerja'
+          ? '<span class="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-extrabold">GIAT KERJA / DARURAT</span>'
+          : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">${t.jenis_tugas || 'Rutin'}</span>`;
+
+        return `
+          <div class="glass-surface rounded-2xl p-4 sm:p-5 space-y-3 border-l-4 ${st === 'selesai' ? 'border-emerald-500' : 'border-brantas-blue'}">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  ${prioBadge}
+                  ${statusBadge}
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-800">${t.judul}</h3>
+              </div>
+              <div class="text-right text-[11px] text-slate-500">
+                <p class="font-bold text-slate-700">Deadline: ${t.deadline || '-'}</p>
+                <p>Dari: ${t.pemberi_nama || 'Atasan'}</p>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+              ${t.deskripsi || '-'}
+            </p>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+              <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-4 h-4 text-rose-500"></i> ${t.lokasi_target || t.daerah_irigasi || '-'}
+              </span>
+
+              <div class="flex flex-wrap items-center gap-2">
+                ${st === 'baru' ? `
+                  <button type="button" onclick="updateTaskStatus('${row.id}', 'proses')"
+                    class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs transition">
+                    Mulai Kerjakan
+                  </button>
+                ` : ''}
+                ${st !== 'selesai' ? `
+                  <a href="laporan.html" class="px-3.5 py-2 rounded-xl bg-brantas-light text-brantas-blue hover:bg-blue-100 font-extrabold text-xs transition flex items-center gap-1">
+                    <i data-lucide="camera" class="w-3.5 h-3.5"></i> Lapor Foto 0-100%
+                  </a>
+                  <button type="button" onclick="updateTaskStatus('${row.id}', 'selesai')"
+                    class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition">
+                    Tandai Selesai
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    async function updateTaskStatus(penerimaRowId, newStatus) {
+      try {
+        const { error } = await sb
+          .from('tugas_penerima')
+          .update({
+            status_pengerjaan: newStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', penerimaRowId);
+
+        if (error) throw error;
+        await loadIncomingTasks();
+      } catch (err) {
+        alert('Gagal memperbarui status tugas: ' + err.message);
+      }
+    }
+
+    // =========================================================================
+    // 4. PEMBERIAN TUGAS (STAF PENGAMAT, ADMIN, PIMPINAN)
+    // =========================================================================
+    function handleAssignOPChange() {
+      const op = document.getElementById('assignFilterOP').value;
+      const diSelect = document.getElementById('assignFilterDI');
+      diSelect.innerHTML = '<option value="">-- Pilih Daerah Irigasi --</option>';
+
+      if (op && OP_DI_MAP[op]) {
+        OP_DI_MAP[op].forEach(di => {
+          const opt = document.createElement('option');
+          opt.value = di;
+          opt.textContent = di;
+          diSelect.appendChild(opt);
+        });
+      }
+      loadAssignableEmployees();
+    }
+
+    async function loadAssignableEmployees() {
+      const container = document.getElementById('recipientChecklist');
+      selectedRecipientIds.clear();
+      updateRecipientBadge();
+
+      let targetDI = currentUser.daerah_irigasi;
+      if (userRoleType === 'admin') {
+        targetDI = document.getElementById('assignFilterDI').value;
+        if (!targetDI) {
+          container.innerHTML = `<p class="text-xs text-slate-500 col-span-full py-3 text-center">Pilih OP dan Daerah Irigasi terlebih dahulu untuk memuat daftar petugas.</p>`;
+          return;
+        }
+      }
+
+      try {
+        const myId = currentUser.id_petugas || currentUser.id;
+        const { data, error } = await sb
+          .from('pegawai')
+          .select('id_petugas, nama, jabatan, kejuron, wilayah_korsda')
+          .eq('daerah_irigasi', targetDI)
+          .neq('id_petugas', myId)
+          .order('nama', { ascending: true });
+
+        if (error) throw error;
+        assignableEmployees = data || [];
+        renderRecipientChecklist(assignableEmployees);
+      } catch (err) {
+        container.innerHTML = `<p class="text-xs text-rose-600 col-span-full py-3 text-center">Gagal memuat daftar pegawai.</p>`;
+      }
+    }
+
+    function renderRecipientChecklist(list) {
+      const container = document.getElementById('recipientChecklist');
+      if (!list || list.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 col-span-full py-3 text-center">Tidak ada pegawai ditemukan di wilayah ini.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(emp => {
+        const checked = selectedRecipientIds.has(emp.id_petugas) ? 'checked' : '';
+        return `
+          <label class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200 hover:border-brantas-blue cursor-pointer transition">
+            <input type="checkbox" value="${emp.id_petugas}" ${checked} onchange="toggleRecipient('${emp.id_petugas}', this.checked)"
+              class="w-4 h-4 rounded text-brantas-blue focus:ring-brantas-blue" />
+            <div class="overflow-hidden">
+              <p class="text-xs font-bold text-slate-800 truncate">${emp.nama}</p>
+              <p class="text-[10px] text-slate-500 truncate">${emp.jabatan} • ${emp.kejuron || emp.id_petugas}</p>
+            </div>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function filterRecipientList() {
+      const q = document.getElementById('recipientSearchInput').value.toLowerCase().trim();
+      const filtered = assignableEmployees.filter(emp =>
+        (emp.nama || '').toLowerCase().includes(q) ||
+        (emp.id_petugas || '').toLowerCase().includes(q) ||
+        (emp.jabatan || '').toLowerCase().includes(q) ||
+        (emp.kejuron || '').toLowerCase().includes(q)
+      );
+      renderRecipientChecklist(filtered);
+    }
+
+    function toggleRecipient(id, isChecked) {
+      if (isChecked) selectedRecipientIds.add(id);
+      else selectedRecipientIds.delete(id);
+      updateRecipientBadge();
+    }
+
+    function selectAllRecipients(selectAll) {
+      if (selectAll) {
+        assignableEmployees.forEach(emp => selectedRecipientIds.add(emp.id_petugas));
+      } else {
+        selectedRecipientIds.clear();
+      }
+      filterRecipientList();
+      updateRecipientBadge();
+    }
+
+    function updateRecipientBadge() {
+      document.getElementById('recipientCountBadge').textContent = `${selectedRecipientIds.size} Dipilih`;
+    }
+
+    document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (selectedRecipientIds.size === 0) {
+        alert('Pilih minimal 1 petugas penerima tugas.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmitTask');
+      btn.disabled = true;
+
+      try {
+        const targetOP = userRoleType === 'admin'
+          ? (document.getElementById('assignFilterOP').value || 'BBWS')
+          : (currentUser.ppk_op || currentUser.ppk || 'OP');
+        const targetDI = userRoleType === 'admin'
+          ? (document.getElementById('assignFilterDI').value || 'Semua D.I')
+          : (currentUser.daerah_irigasi || '-');
+
+        const taskPayload = {
+          judul: document.getElementById('taskJudul').value.trim(),
+          jenis_tugas: document.getElementById('taskJenis').value,
+          prioritas: document.getElementById('taskPrioritas').value,
+          lokasi_target: document.getElementById('taskLokasi').value.trim(),
+          deskripsi: document.getElementById('taskDeskripsi').value.trim(),
+          deadline: document.getElementById('taskDeadline').value,
+          ppk_op: targetOP,
+          daerah_irigasi: targetDI,
+          dari_staf_id: currentUser.id_petugas || currentUser.id,
+          pemberi_nama: currentUser.nama,
+          pemberi_jabatan: currentUser.jabatan || currentUser.role
+        };
+
+        const { data: createdTask, error: taskErr } = await sb
+          .from('tugas')
+          .insert([taskPayload])
+          .select('id')
+          .single();
+
+        if (taskErr) throw taskErr;
+
+        const recipientRows = Array.from(selectedRecipientIds).map(empId => ({
+          id_tugas: createdTask.id,
+          id_penerima: empId,
+          status_pengerjaan: 'baru'
+        }));
+
+        const { error: recErr } = await sb.from('tugas_penerima').insert(recipientRows);
+        if (recErr) throw recErr;
+
+        alert(`Penugasan berhasil dikirim kepada ${selectedRecipientIds.size} petugas!`);
+        document.getElementById('createTaskForm').reset();
+        selectedRecipientIds.clear();
+        updateRecipientBadge();
+        renderRecipientChecklist(assignableEmployees);
+        await loadSentTasks();
+      } catch (err) {
+        alert('Gagal mengirim tugas: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function loadSentTasks() {
+      const container = document.getElementById('sentTasksList');
+      const myId = currentUser.id_petugas || currentUser.id;
+
+      try {
+        let query = sb
+          .from('tugas')
+          .select(`
+            id, judul, jenis_tugas, prioritas, lokasi_target, deadline, daerah_irigasi, created_at,
+            tugas_penerima ( id, id_penerima, status_pengerjaan )
+          `)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (userRoleType === 'staf') {
+          query = query.eq('dari_staf_id', myId);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `<div class="glass-surface rounded-2xl p-6 text-center text-xs text-slate-500">Belum ada riwayat penugasan yang dibuat.</div>`;
+          return;
+        }
+
+        container.innerHTML = data.map(t => {
+          const penerima = t.tugas_penerima || [];
+          const total = penerima.length;
+          const done = penerima.filter(p => p.status_pengerjaan === 'selesai').length;
+          const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+          return `
+            <div class="glass-surface rounded-2xl p-4 space-y-2.5">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <span class="px-2 py-0.5 rounded bg-blue-50 text-brantas-blue text-[10px] font-extrabold">${t.jenis_tugas} • ${t.daerah_irigasi}</span>
+                  <h4 class="text-sm font-extrabold text-slate-800 mt-1">${t.judul}</h4>
+                  <p class="text-[11px] text-slate-500">${t.lokasi_target} • Deadline: <strong>${t.deadline || '-'}</strong></p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-extrabold">
+                  ${done}/${total} Selesai (${pct}%)
+                </span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div class="bg-emerald-500 h-2 rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="glass-surface rounded-2xl p-6 text-center text-xs text-rose-600">Gagal memuat monitoring tugas.</div>`;
+      }
+    }
+
+    // =========================================================================
+    // 5. VERIFIKASI LAPORAN MASUK (STAF PENGAMAT, ADMIN, PIMPINAN)
+    // =========================================================================
+    async function loadVerificationQueue() {
+      const container = document.getElementById('verificationQueueList');
+      const statusFilter = document.getElementById('verifyStatusFilter').value;
+
+      try {
+        let query = sb
+          .from('laporan')
+          .select(`
+            *,
+            laporan_peserta ( id_pegawai, jenis_keikutsertaan )
+          `)
+          .eq('status_verifikasi', statusFilter)
+          .order('created_at', { ascending: false })
+          .limit(30);
+
+        // Staf Pengamat hanya memverifikasi laporan di Daerah Irigasi-nya
+        if (userRoleType === 'staf' && currentUser.daerah_irigasi) {
+          query = query.eq('daerah_irigasi', currentUser.daerah_irigasi);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        if (statusFilter === 'menunggu') {
+          document.getElementById('badgeVerifyCount').textContent = (data || []).length;
+        }
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `
+            <div class="glass-surface rounded-2xl p-8 text-center space-y-2">
+              <i data-lucide="clipboard-check" class="w-8 h-8 text-slate-400 mx-auto"></i>
+              <p class="text-xs font-bold text-slate-600">Tidak ada laporan dengan status "${statusFilter}".</p>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        container.innerHTML = data.map(lap => {
+          const thumb0 = lap.foto_0_drive_id ? `https://lh3.googleusercontent.com/d/${lap.foto_0_drive_id}` : '';
+          const thumb50 = lap.foto_50_drive_id ? `https://lh3.googleusercontent.com/d/${lap.foto_50_drive_id}` : '';
+          const thumb100 = lap.foto_100_drive_id ? `https://lh3.googleusercontent.com/d/${lap.foto_100_drive_id}` : '';
+
+          const pesertaCount = (lap.laporan_peserta || []).length;
+          const metodeBadge = lap.metode_kerja === 'Giat Kerja'
+            ? `<span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold">GIAT KERJA (${pesertaCount} Anggota)</span>`
+            : `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">${lap.metode_kerja || 'Individu'}</span>`;
+
+          const urgensiStr = Array.isArray(lap.urgensi_kegiatan)
+            ? lap.urgensi_kegiatan.join(', ')
+            : (lap.urgensi_kegiatan || '-');
+
+          return `
+            <div class="glass-surface rounded-2xl p-4 sm:p-5 space-y-3.5">
+              <div class="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                    ${metodeBadge}
+                    <span class="text-[11px] font-bold text-slate-500">${lap.tanggal} • Durasi: ${lap.durasi_kerja_menit || 0} mnt</span>
+                  </div>
+                  <h3 class="text-sm font-extrabold text-slate-800">${lap.nama_petugas} <span class="text-xs font-semibold text-slate-500">(${lap.id_petugas})</span></h3>
+                  <p class="text-xs text-slate-600">${lap.ppk_op || ''} • ${lap.daerah_irigasi} — ${lap.kejuron || '-'} (${lap.nama_saluran || '-'})</p>
+                </div>
+
+                ${statusFilter === 'menunggu' ? `
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="verifyReport('${lap.id}', 'ditolak')"
+                      class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-extrabold transition">
+                      Tolak / Revisi
+                    </button>
+                    <button type="button" onclick="verifyReport('${lap.id}', 'diverifikasi')"
+                      class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-1.5">
+                      <i data-lucide="check" class="w-4 h-4"></i> Verifikasi
+                    </button>
+                  </div>
+                ` : `
+                  <span class="px-3 py-1 rounded-xl text-xs font-extrabold ${statusFilter === 'diverifikasi' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                    ${statusFilter.toUpperCase()}
+                  </span>
+                `}
+              </div>
+
+              <!-- 3 THUMBNAIL FOTO DRIVE (0%, 50%, 100%) -->
+              <div class="grid grid-cols-3 gap-2.5">
+                ${renderDriveThumbCard('0%', thumb0, lap.nama_petugas)}
+                ${renderDriveThumbCard('50%', thumb50, lap.nama_petugas)}
+                ${renderDriveThumbCard('100%', thumb100, lap.nama_petugas)}
+              </div>
+
+              <!-- RINGKASAN URGENSI & VOLUME -->
+              <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-200/70">
+                <p><strong class="text-slate-700">Kegiatan:</strong> <span class="text-slate-600">${urgensiStr}</span></p>
+                <p><strong class="text-slate-700">Volume:</strong>
+                  <span class="text-slate-600">
+                    Babat/Luas: ${lap.luas_area_m2 || 0} m² • Saluran: ${lap.panjang_saluran_m || 0} m • Sedimen: ${lap.angkat_sedimen_m3 || 0} m³ • Sampah: ${lap.pembersihan_sampah_m3 || 0} m³
+                  </span>
+                </p>
+                <p><strong class="text-slate-700">Usulan Perbaikan:</strong> <span class="text-slate-600">${lap.usulan_perbaikan || '-'}</span></p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="glass-surface rounded-2xl p-6 text-center text-xs text-rose-600">Gagal memuat antrean verifikasi.</div>`;
+      }
+    }
+
+    function renderDriveThumbCard(label, url, nama) {
+      if (!url) {
+        return `<div class="aspect-[4/3] rounded-xl bg-slate-100 flex items-center justify-center text-[10px] text-slate-400 font-bold">Foto ${label} Kosong</div>`;
+      }
+      return `
+        <div onclick="openPhotoLightbox('${url}', 'Foto Progres ${label} — ${nama}')" class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-200 cursor-pointer border border-slate-200">
+          <img src="${url}" alt="Foto ${label}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" loading="lazy" />
+          <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-slate-900/80 text-white text-[10px] font-extrabold">${label}</span>
+        </div>
+      `;
+    }
+
+    async function verifyReport(reportId, decision) {
+      let catatan = '';
+      if (decision === 'ditolak') {
+        catatan = prompt('Tuliskan alasan penolakan / catatan revisi untuk petugas:');
+        if (catatan === null) return;
+      }
+
+      try {
+        const myId = currentUser.id_petugas || currentUser.id;
+        const { error } = await sb
+          .from('laporan')
+          .update({
+            status_verifikasi: decision,
+            verified_by: myId,
+            verified_by_nama: currentUser.nama,
+            verified_at: new Date().toISOString(),
+            catatan_verifikasi: catatan
+          })
+          .eq('id', reportId);
+
+        if (error) throw error;
+        await loadVerificationQueue();
+      } catch (err) {
+        alert('Gagal memproses verifikasi: ' + err.message);
+      }
+    }
+
+    function openPhotoLightbox(url, caption) {
+      document.getElementById('lightboxImage').src = url;
+      document.getElementById('lightboxCaption').textContent = caption;
+      document.getElementById('photoLightbox').classList.remove('hidden');
+    }
+
+    function closePhotoLightbox() {
+      document.getElementById('photoLightbox').classList.add('hidden');
+      document.getElementById('lightboxImage').src = '';
+    }
+  </script>
+</body>
+</html>
