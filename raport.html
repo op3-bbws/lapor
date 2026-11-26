@@ -1,1041 +1,708 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Raport Evaluasi Kinerja OP — BBWS Brantas</title>
-  <meta name="theme-color" content="#1E3A8A" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/svg+xml" href="assets/img/logo-bbws.svg" />
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Lucide Icons -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1E3A8A">
+  <title>Raport Kinerja - BBWS Brantas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     tailwind.config = {
+      corePlugins: { preflight: false },
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
           },
           colors: {
-            brantas: {
-              blue: '#1E3A8A',
-              dark: '#172554',
-              light: '#EFF6FF',
+            pupr: {
+              navy: '#0F172A',
+              deep: '#1E3A8A',
+              blue: '#1D4ED8',
               gold: '#F59E0B',
-              goldLight: '#FEF3C7',
+              amber: '#FBBF24'
             }
           }
         }
       }
-    };
+    }
   </script>
-
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #F1F5F9;
-      color: #0F172A;
-      -webkit-tap-highlight-color: transparent;
+      background-color: #F8FAFC;
+      background-image:
+        radial-gradient(circle at 88% 4%, rgba(29, 78, 216, 0.06), transparent 42%),
+        radial-gradient(circle at 12% 18%, rgba(245, 158, 11, 0.07), transparent 38%);
     }
     .glass-surface {
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(30, 58, 138, 0.08);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
     }
-    .hero-gradient {
-      background: linear-gradient(135deg, #1E3A8A 0%, #172554 65%, #1E40AF 100%);
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Sidebar & Footer Senada home.html */
+    .sidebar {
+      background: linear-gradient(180deg, #0F235E 0%, #1E3A8A 52%, #172554 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 10px 0 32px rgba(15, 23, 42, 0.12) !important;
     }
-    @media print {
-      aside, nav, .no-print {
-        display: none !important;
-      }
-      body {
-        padding-left: 0 !important;
-        padding-bottom: 0 !important;
-        background: #FFFFFF !important;
-      }
-      .glass-surface {
-        box-shadow: none !important;
-        border: 1px solid #CBD5E1 !important;
-      }
+    .sidebar-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 12px 13px !important;
+      border-radius: 22px !important;
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      margin-bottom: 14px !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-brand-logo {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 11px !important;
+      object-fit: cover !important;
+      border: 1.5px solid rgba(251, 191, 36, 0.65) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      padding: 2px !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar-brand-title {
+      display: block !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #FFFFFF !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-menu {
+      border-radius: 18px !important;
+      transition: all 0.2s ease !important;
+    }
+    .sidebar-menu:hover:not(.active) {
+      background: rgba(11, 19, 46, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .sidebar-menu.active {
+      background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%) !important;
+      color: #0F172A !important;
+      font-weight: 800 !important;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.28) !important;
+    }
+    .sidebar-menu.active svg {
+      fill: #0F172A !important;
+    }
+    .sidebar-footer {
+      padding: 14px 12px 18px 12px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: linear-gradient(180deg, rgba(10, 19, 51, 0.32) 0%, rgba(7, 14, 38, 0.56) 100%) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      border-bottom-left-radius: 26px !important;
+      border-bottom-right-radius: 26px !important;
+    }
+    .sidebar-clock-card {
+      background: rgba(11, 19, 46, 0.62) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 22px !important;
+      padding: 13px 15px !important;
+    }
+    .sidebar-clock-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 5px !important;
+    }
+    .sidebar-live-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      color: #6EE7B7 !important;
+    }
+    .sidebar-live-dot {
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 9999px !important;
+      background: #10B981 !important;
+      box-shadow: 0 0 8px #10B981 !important;
+    }
+    .sidebar-clock- {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      color: #FFFFFF !important;
+      letter-spacing: 0.04em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-clock-date {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: rgba(226, 232, 240, 0.82) !important;
+      margin-top: 2px !important;
+    }
+    .sidebar-logout-btn {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      padding: 11px 16px !important;
+      border-radius: 20px !important;
+      background: rgba(15, 23, 42, 0.56) !important;
+      border: 1px solid rgba(248, 113, 113, 0.34) !important;
+      color: #FECACA !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+    }
+    .sidebar-logout-btn:hover {
+      background: rgba(220, 38, 38, 0.88) !important;
+      color: #FFFFFF !important;
+    }
+
+    html, body { max-width: 100vw; overflow-x: hidden; }
+    .container { width: 100% !important; max-width: 100%; }
+    @media (min-width: 768px) { .container { max-width: 1520px !important; } }
+    @media (max-width: 640px) {
+      .container { padding-left: 16px !important; padding-right: 16px !important; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
 </head>
-<body class="pb-28 lg:pb-10 lg:pl-64 min-h-screen">
+<body>
 
-  <!-- SIDEBAR DESKTOP -->
-  <aside class="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40">
-    <div class="p-5 flex items-center gap-3 border-b border-slate-100">
-      <img src="assets/img/logo-bbws.svg" alt="BBWS Brantas" class="w-10 h-10 object-contain" />
-      <div>
-        <h1 class="font-extrabold text-brantas-blue text-base leading-tight">BBWS BRANTAS</h1>
-        <p class="text-[11px] font-semibold text-slate-500">Sistem OP Irigasi 2026</p>
+  <!-- SIDEBAR DESKTOP & TABLET -->
+  <aside class="sidebar" aria-label="Navigasi Utama">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="assets/img/logo.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Logo BBWS" class="sidebar-brand-logo">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-title">BBWS Brantas</span>
+          <span class="sidebar-brand-sub">PUPR • Pelaporan OP</span>
+        </div>
       </div>
+
+      <nav class="sidebar-nav">
+        <a href="home.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Beranda</span>
+        </a>
+        <a href="tugas.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <span>Tugas</span>
+        </a>
+        <a href="kamera.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+          <span>Kamera</span>
+        </a>
+        <a href="laporan.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          <span>Laporan</span>
+        </a>
+        <a href="raport.html" class="sidebar-menu active">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          <span>Raport</span>
+        </a>
+        <a href="peta.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>Peta D.I</span>
+        </a>
+        <a href="profile.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          <span>Profil</span>
+        </a>
+      </nav>
     </div>
 
-    <nav class="flex-1 p-4 space-y-1.5 text-sm font-semibold">
-      <a href="home.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-        <i data-lucide="home" class="w-5 h-5"></i> Beranda
-      </a>
-      <a href="tugas.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-        <i data-lucide="clipboard-list" class="w-5 h-5"></i> Tugas & Verifikasi
-      </a>
-      <a href="kamera.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-        <i data-lucide="camera" class="w-5 h-5"></i> Kamera Lapangan
-      </a>
-      <a href="laporan.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-        <i data-lucide="file-plus-2" class="w-5 h-5"></i> Buat Laporan
-      </a>
-      <a href="raport.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brantas-blue text-white shadow-sm">
-        <i data-lucide="bar-chart-3" class="w-5 h-5 text-brantas-gold"></i> Raport Kinerja
-      </a>
-      <a href="peta.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-        <i data-lucide="map-pin" class="w-5 h-5"></i> Peta Sebaran D.I
-      </a>
-    </nav>
-
-    <div class="p-4 border-t border-slate-100">
-      <a href="profile.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition">
-        <img id="sidebarAvatar" src="assets/img/logo-bbws.svg" alt="Profil" class="w-9 h-9 rounded-full object-cover border border-slate-200 bg-slate-100" />
-        <div class="overflow-hidden">
-          <p id="sidebarName" class="text-xs font-bold text-slate-800 truncate">Memuat Petugas...</p>
-          <p id="sidebarRole" class="text-[11px] text-slate-500 truncate">-</p>
+    <div class="sidebar-footer">
+      <div class="sidebar-clock-card" aria-label="Waktu Saat Ini">
+        <div class="sidebar-clock-top">
+          <span class="sidebar-live-badge">
+            <span class="sidebar-live-dot"></span>
+            WIB Aktif
+          </span>
+          <span id="sidebarPetugasCode" class="text-[10px] font-mono font-bold text-amber-300/90">O&P</span>
         </div>
-      </a>
+        <div class="sidebar-clock- tabular-nums" id="sidebarClock">--:--:--</div>
+        <div class="sidebar-clock-date" id="sidebarClockDate">Memuat tanggal...</div>
+      </div>
+
+      <button type="button" class="sidebar-logout-btn" id="btnLogout" title="Keluar dari akun">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Keluar Sesi</span>
+      </button>
     </div>
   </aside>
 
-  <!-- HEADER -->
-  <header class="hero-gradient text-white pt-5 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 relative z-10">
-      <div class="flex items-center gap-3">
-        <a href="home.html" class="lg:hidden no-print w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition">
-          <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </a>
-        <div>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-1">
-            <i data-lucide="award" class="w-3.5 h-3.5"></i> EVALUASI KINERJA & KEPATUHAN OP 2026
-          </span>
-          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight">Raport Kinerja Petugas OP</h1>
+  <main class="container">
+    <!-- HEADER -->
+    <header class="header-large flex items-start justify-between gap-3" id="headerTitle">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="px-2 py-0.5 rounded-md bg-blue-100 text-pupr-deep text-[10px] font-extrabold uppercase tracking-wider">BBWS Brantas</span>
+          <span id="raportPeriodPill" class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase tracking-wider">Rekap Kinerja</span>
         </div>
+        <p id="raportHeaderSub">Evaluasi & Riwayat Laporan OP</p>
+        <h1>Raport Kinerja</h1>
       </div>
 
-      <div class="no-print flex items-center gap-2">
-        <button type="button" onclick="exportRaportCSV()" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold flex items-center gap-1.5 border border-white/15 transition">
-          <i data-lucide="download" class="w-4 h-4 text-amber-300"></i>
-          <span class="hidden sm:inline">Ekspor CSV</span>
-        </button>
-        <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 shadow transition">
-          <i data-lucide="printer" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">Cetak Raport</span>
+      <div class="flex items-center gap-2 mt-1 shrink-0">
+        <button type="button" onclick="loadRaportData(true)" title="Sinkronkan Data Raport" class="w-11 h-11 rounded-2xl bg-white hover:bg-blue-50 text-pupr-blue flex items-center justify-center shadow-sm border border-slate-200/80 cursor-pointer transition">
+          <svg id="raportRefreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
         </button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- KONTEN UTAMA -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 space-y-5">
-
-    <!-- PANEL FILTER HIERARKI WILAYAH & PERIODE -->
-    <section class="glass-surface rounded-2xl p-4 sm:p-5 space-y-3.5 no-print">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-          <i data-lucide="filter" class="w-4 h-4 text-brantas-blue"></i> Filter Periode & Hierarki Wilayah
-        </h2>
-        <span id="scopeBadge" class="px-2.5 py-0.5 rounded-full bg-blue-50 text-brantas-blue text-[11px] font-extrabold">
-          Memuat Hak Akses...
-        </span>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
-        <!-- Periode Bulan -->
+    <!-- KARTU RINGKASAN AKTIVITAS & CAPAIAN VOLUME -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5" aria-label="Statistik Kinerja">
+      <div class="card glass-surface p-4 flex items-center justify-between gap-3">
         <div>
-          <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Periode Bulan</label>
-          <input type="month" id="filterMonth" onchange="reloadRaportData()"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-brantas-blue" />
+          <p class="text-xs font-bold text-slate-500">Total Laporan</p>
+          <h3 id="repStatTotal" class="text-2xl font-extrabold text-pupr-blue tabular-nums mt-0.5">0</h3>
+          <p id="repStatGiatSub" class="text-[11px] text-slate-400 mt-0.5">0 Giat Kerja</p>
         </div>
-
-        <!-- Filter OP (Aktif untuk Admin/Pimpinan) -->
-        <div id="wrapFilterOP">
-          <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">PPK / OP</label>
-          <select id="filterOP" onchange="onFilterOPChange()"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">
-            <option value="ALL">Semua OP (OP I - V)</option>
-            <option value="OP I">OP I</option>
-            <option value="OP II">OP II</option>
-            <option value="OP III">OP III</option>
-            <option value="OP V">OP V</option>
-          </select>
-        </div>
-
-        <!-- Filter Daerah Irigasi (D.I) -->
-        <div id="wrapFilterDI">
-          <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Daerah Irigasi (D.I)</label>
-          <select id="filterDI" onchange="onFilterDIChange()"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">
-            <option value="ALL">Semua Daerah Irigasi</option>
-          </select>
-        </div>
-
-        <!-- Filter Wilayah / KorSDA -->
-        <div id="wrapFilterKorsda">
-          <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Wilayah / KorSDA</label>
-          <select id="filterKorsda" onchange="onFilterKorsdaChange()"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">
-            <option value="ALL">Semua KorSDA</option>
-          </select>
-        </div>
-
-        <!-- Filter Kejuron -->
-        <div id="wrapFilterKejuron">
-          <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Kejuron</label>
-          <select id="filterKejuron" onchange="onFilterKejuronChange()"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">
-            <option value="ALL">Semua Kejuron</option>
-          </select>
-        </div>
-
-        <!-- Filter Pegawai Spesifik -->
-        <div id="wrapFilterPegawai">
-          <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Pilih Pegawai</label>
-          <select id="filterPegawai" onchange="applyEmployeeSelection()"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">
-            <option value="ALL">-- Ringkasan Tim / Semua --</option>
-          </select>
-        </div>
-      </div>
-    </section>
-
-    <!-- KARTU RINGKASAN SKOR RATA-RATA & GIAT KERJA WILAYAH -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <div class="glass-surface rounded-2xl p-4">
-        <p class="text-[11px] font-bold text-slate-500">Rata-Rata Skor Kinerja</p>
-        <div class="flex items-end justify-between mt-1">
-          <h3 id="statAvgScore" class="text-2xl font-extrabold text-brantas-blue">0.0</h3>
-          <span id="statAvgGrade" class="px-2 py-0.5 rounded-lg bg-blue-50 text-brantas-blue text-[11px] font-extrabold">-</span>
+        <div class="w-11 h-11 rounded-2xl bg-blue-100 text-pupr-blue flex items-center justify-center shrink-0">
+          <i data-lucide="file-check-2" class="w-5 h-5"></i>
         </div>
       </div>
 
-      <div class="glass-surface rounded-2xl p-4">
-        <p class="text-[11px] font-bold text-slate-500">Total Petugas Dievaluasi</p>
-        <div class="flex items-end justify-between mt-1">
-          <h3 id="statTotalEmp" class="text-2xl font-extrabold text-slate-800">0</h3>
-          <span class="text-[11px] font-semibold text-slate-500">Personel</span>
-        </div>
-      </div>
-
-      <div class="glass-surface rounded-2xl p-4">
-        <p class="text-[11px] font-bold text-slate-500">Giat Kerja (Quick Response)</p>
-        <div class="flex items-end justify-between mt-1">
-          <h3 id="statGiatKerjaCount" class="text-2xl font-extrabold text-amber-600">0</h3>
-          <span class="text-[11px] font-bold text-amber-700">Target ≥ 4x/bln</span>
-        </div>
-      </div>
-
-      <div class="glass-surface rounded-2xl p-4">
-        <p class="text-[11px] font-bold text-slate-500">Total Laporan Terverifikasi</p>
-        <div class="flex items-end justify-between mt-1">
-          <h3 id="statVerifiedReports" class="text-2xl font-extrabold text-emerald-600">0</h3>
-          <span class="text-[11px] font-semibold text-emerald-700">Laporan</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- DETAIL RAPORT INDIVIDU (MUNCUL SAAT PEGAWAI DIPILIH ATAU LOGIN SEBAGAI PPA/PEKARYA) -->
-    <section id="individualRaportCard" class="hidden glass-surface rounded-2xl p-5 sm:p-6 space-y-5 border-t-4 border-brantas-blue">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-        <div class="flex items-center gap-3.5">
-          <img id="indAvatar" src="assets/img/logo-bbws.svg" alt="Foto Pegawai" class="w-14 h-14 rounded-2xl object-cover border border-slate-200 bg-slate-100" />
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 id="indName" class="text-base sm:text-lg font-extrabold text-slate-800">-</h2>
-              <span id="indIdBadge" class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-extrabold">-</span>
-            </div>
-            <p id="indMeta" class="text-xs text-slate-600 mt-0.5">-</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 bg-blue-50/80 px-4 py-2.5 rounded-2xl border border-blue-100">
-          <div class="text-right">
-            <p class="text-[10px] font-extrabold text-slate-500 uppercase">Nilai Akhir Raport</p>
-            <p id="indPredikatText" class="text-xs font-extrabold text-brantas-blue">-</p>
-          </div>
-          <div id="indTotalScoreBox" class="w-14 h-14 rounded-2xl bg-brantas-blue text-white flex flex-col items-center justify-center shadow">
-            <span id="indTotalScore" class="text-lg font-extrabold leading-none">0</span>
-            <span id="indGradeLetter" class="text-[10px] font-bold text-amber-300 mt-0.5">-</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5 KRITERIA PENILAIAN KINERJA -->
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-        <!-- 1. Kehadiran -->
-        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold text-slate-700">1. Kehadiran (25%)</span>
-            <span id="crit1Score" class="text-xs font-extrabold text-brantas-blue">0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-1.5">
-            <div id="crit1Bar" class="bg-brantas-blue h-1.5 rounded-full" style="width: 0%"></div>
-          </div>
-          <p id="crit1Desc" class="text-[10px] text-slate-500">0 / 22 hari aktif (termasuk Giat Kerja)</p>
-        </div>
-
-        <!-- 2. Jam Kerja -->
-        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold text-slate-700">2. Jam Kerja (20%)</span>
-            <span id="crit2Score" class="text-xs font-extrabold text-indigo-600">0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-1.5">
-            <div id="crit2Bar" class="bg-indigo-600 h-1.5 rounded-full" style="width: 0%"></div>
-          </div>
-          <p id="crit2Desc" class="text-[10px] text-slate-500">0 jam tercatat (foto 0%–100%)</p>
-        </div>
-
-        <!-- 3. Kinerja Harian & Giat Kerja -->
-        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold text-slate-700">3. Kinerja & Giat (25%)</span>
-            <span id="crit3Score" class="text-xs font-extrabold text-amber-600">0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-1.5">
-            <div id="crit3Bar" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
-          </div>
-          <p id="crit3Desc" class="text-[10px] text-slate-500">0 laporan • 0x Giat Kerja</p>
-        </div>
-
-        <!-- 4. Penyelesaian Tugas -->
-        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold text-slate-700">4. Tugas Selesai (15%)</span>
-            <span id="crit4Score" class="text-xs font-extrabold text-emerald-600">0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-1.5">
-            <div id="crit4Bar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
-          </div>
-          <p id="crit4Desc" class="text-[10px] text-slate-500">0 / 0 tugas diselesaikan</p>
-        </div>
-
-        <!-- 5. Manajemen / Verifikasi -->
-        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span id="crit5Label" class="text-[11px] font-extrabold text-slate-700">5. Verifikasi (15%)</span>
-            <span id="crit5Score" class="text-xs font-extrabold text-teal-600">0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-1.5">
-            <div id="crit5Bar" class="bg-teal-500 h-1.5 rounded-full" style="width: 0%"></div>
-          </div>
-          <p id="crit5Desc" class="text-[10px] text-slate-500">0 laporan diverifikasi</p>
-        </div>
-      </div>
-
-      <!-- REKAP VOLUME FISIK PEKERJAAN INDIVIDU -->
-      <div class="bg-blue-50/50 rounded-2xl p-4 border border-blue-100">
-        <h3 class="text-xs font-extrabold text-brantas-blue uppercase mb-2.5">Akumulasi Volume Fisik Pekerjaan Bulan Ini</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-center">
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
-            <p class="text-[10px] text-slate-500 font-bold">Luas Area / Babat</p>
-            <p id="volSumLuas" class="text-sm font-extrabold text-slate-800 mt-0.5">0 m²</p>
-          </div>
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
-            <p class="text-[10px] text-slate-500 font-bold">Panjang Saluran</p>
-            <p id="volSumPanjang" class="text-sm font-extrabold text-slate-800 mt-0.5">0 m</p>
-          </div>
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
-            <p class="text-[10px] text-slate-500 font-bold">Tutup Bocoran</p>
-            <p id="volSumBocoran" class="text-sm font-extrabold text-slate-800 mt-0.5">0 m</p>
-          </div>
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
-            <p class="text-[10px] text-slate-500 font-bold">Angkat Sedimen</p>
-            <p id="volSumSedimen" class="text-sm font-extrabold text-slate-800 mt-0.5">0 m³</p>
-          </div>
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
-            <p class="text-[10px] text-slate-500 font-bold">Bersih Sampah</p>
-            <p id="volSumSampah" class="text-sm font-extrabold text-slate-800 mt-0.5">0 m³</p>
-          </div>
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
-            <p class="text-[10px] text-slate-500 font-bold">Potong Pohon</p>
-            <p id="volSumPohon" class="text-sm font-extrabold text-slate-800 mt-0.5">0 bh</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TABEL REKAPITULASI PERINGKAT & KINERJA TIM (UNTUK STAF PENGAMAT, ADMIN, PIMPINAN) -->
-    <section id="teamLeaderboardSection" class="glass-surface rounded-2xl overflow-hidden">
-      <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+      <div class="card glass-surface p-4 flex items-center justify-between gap-3">
         <div>
-          <h2 class="text-sm font-extrabold text-slate-800">Rekapitulasi Penilaian Kinerja Pegawai</h2>
-          <p class="text-xs text-slate-500">Klik baris pegawai untuk melihat rincian 5 kriteria dan volume fisik bulan ini.</p>
+          <p class="text-xs font-bold text-slate-500">Disetujui</p>
+          <h3 id="repStatVerif" class="text-2xl font-extrabold text-emerald-600 tabular-nums mt-0.5">0</h3>
+          <p id="repStatPendingSub" class="text-[11px] text-slate-400 mt-0.5">0 menunggu</p>
         </div>
-        <div class="relative w-full sm:w-64 no-print">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-          <input type="text" id="tableSearchInput" oninput="renderLeaderboardTable()" placeholder="Cari nama atau ID..."
-            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-brantas-blue" />
+        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+          <i data-lucide="badge-check" class="w-5 h-5"></i>
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold text-slate-500 uppercase">
-              <th class="py-3 px-4">Petugas / ID</th>
-              <th class="py-3 px-3">Wilayah (OP / D.I / Kejuron)</th>
-              <th class="py-3 px-3 text-center">Hadir</th>
-              <th class="py-3 px-3 text-center">Jam Kerja</th>
-              <th class="py-3 px-3 text-center">Giat Kerja</th>
-              <th class="py-3 px-3 text-center">Tugas</th>
-              <th class="py-3 px-3 text-center">Verifikasi</th>
-              <th class="py-3 px-4 text-right">Skor Akhir</th>
-            </tr>
-          </thead>
-          <tbody id="raportTableBody" class="divide-y divide-slate-100 text-xs">
-            <tr>
-              <td colspan="8" class="py-8 text-center text-slate-500">Menghitung evaluasi kinerja pegawai...</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="card glass-surface p-4 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold text-slate-500">Babat Rumput</p>
+          <h3 id="repStatLuas" class="text-xl sm:text-2xl font-extrabold text-amber-600 tabular-nums mt-0.5">0 m²</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">Akumulasi Luas</p>
+        </div>
+        <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+          <i data-lucide="scissors" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="card glass-surface p-4 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold text-slate-500">Sedimen & Sampah</p>
+          <h3 id="repStatSedimen" class="text-xl sm:text-2xl font-extrabold text-slate-900 tabular-nums mt-0.5">0 m³</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">Volume Angkat</p>
+        </div>
+        <div class="w-11 h-11 rounded-2xl bg-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+        </div>
       </div>
     </section>
 
+    <!-- FILTER PERIODE BULAN & STATUS VERIFIKASI -->
+    <section class="card glass-surface p-4 mb-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+          <button type="button" onclick="setRaportFilter('all')" id="rflt-all" class="px-3.5 py-2 rounded-xl bg-pupr-deep text-white text-xs font-extrabold border-0 cursor-pointer shrink-0 transition">Semua</button>
+          <button type="button" onclick="setRaportFilter('diverifikasi')" id="rflt-diverifikasi" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border-0 cursor-pointer shrink-0 transition">Disetujui</button>
+          <button type="button" onclick="setRaportFilter('menunggu')" id="rflt-menunggu" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border-0 cursor-pointer shrink-0 transition">Menunggu</button>
+          <button type="button" onclick="setRaportFilter('giat')" id="rflt-giat" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border-0 cursor-pointer shrink-0 transition">⚡ Giat Kerja</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label for="inpFilterMonth" class="text-xs font-bold text-slate-600 shrink-0">Periode:</label>
+          <input type="month" id="inpFilterMonth" onchange="renderRaportList()" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-pupr-blue">
+          <button type="button" onclick="clearMonthFilter()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border-0 cursor-pointer transition">Semua Bulan</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DAFTAR RIWAYAT LAPORAN -->
+    <section aria-label="Riwayat Laporan OP">
+      <div class="section-header">
+        <h2 class="section-title">Riwayat Laporan & Dokumentasi</h2>
+        <span id="raportCountLabel" class="text-xs font-bold text-slate-500">0 laporan</span>
+      </div>
+
+      <div id="raportListContainer" class="space-y-3">
+        <div class="card glass-surface text-center py-8 text-xs font-semibold text-slate-400">
+          Memuat data raport kinerja...
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- BOTTOM NAVIGATION MOBILE -->
-  <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 px-2 py-1.5">
-    <div class="grid grid-cols-5 items-center text-[10px] font-bold text-slate-500">
-      <a href="home.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
-        <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
-        <span>Beranda</span>
-      </a>
-      <a href="tugas.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
-        <i data-lucide="clipboard-list" class="w-5 h-5 mb-0.5"></i>
-        <span>Tugas</span>
-      </a>
-      <a href="kamera.html" class="flex flex-col items-center -mt-5">
-        <div class="w-12 h-12 rounded-2xl bg-slate-800 text-white shadow-lg flex items-center justify-center border-2 border-white">
-          <i data-lucide="camera" class="w-5 h-5 text-amber-400"></i>
+  <!-- MODAL DETAIL RAPORT -->
+  <div id="raportDetailModal" class="hidden fixed inset-0 z-[1100] bg-slate-950/75 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this) closeRaportModal()">
+    <div class="bg-white text-slate-900 rounded-t-[28px] sm:rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto hide-scrollbar">
+      <div class="flex items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
+        <div>
+          <span id="repModalStatusBadge" class="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700">MENUNGGU</span>
+          <h3 id="repModalTitle" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Detail Laporan OP</h3>
+          <p id="repModalSub" class="text-xs text-slate-500 mt-0.5">-</p>
         </div>
-        <span class="mt-1 text-slate-700">Kamera</span>
-      </a>
-      <a href="laporan.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
-        <i data-lucide="file-plus-2" class="w-5 h-5 mb-0.5"></i>
-        <span>Laporan</span>
-      </a>
-      <a href="raport.html" class="flex flex-col items-center py-1 text-brantas-blue">
-        <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5 text-brantas-gold"></i>
-        <span class="font-extrabold">Raport</span>
-      </a>
+        <button type="button" onclick="closeRaportModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 border-0 cursor-pointer shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs">
+        <div>
+          <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">Dokumentasi Progres (0% • 50% • 100%)</p>
+          <div class="grid grid-cols-3 gap-2.5" id="repModalPhotosGrid"></div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Daerah Irigasi / Kejuron</span>
+            <span id="repModalLokasi" class="font-bold text-slate-900 text-right">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Metode & Tanggal</span>
+            <span id="repModalWaktu" class="font-bold text-slate-900 tabular-nums">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Volume Pekerjaan</span>
+            <span id="repModalVolume" class="font-bold text-pupr-blue text-right">-</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200/70">
+            <span class="text-slate-500 block mb-0.5">Uraian & Catatan Lapangan</span>
+            <p id="repModalCatatan" class="font-medium text-slate-800 leading-relaxed">-</p>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeRaportModal()" class="w-full py-3 rounded-2xl bg-pupr-deep hover:bg-blue-800 text-white font-bold text-xs border-0 cursor-pointer transition">
+          Tutup Rincian
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="raportToastBox" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[1200] bg-slate-900/95 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 max-w-[90vw]">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="raportToastText">Notifikasi</span>
+  </div>
+
+  <!-- FLOATING NAV MOBILE -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi Mobile">
+    <a href="home.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Beranda</span>
+    </a>
+    <a href="tugas.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      <span>Tugas</span>
+    </a>
+    <a href="kamera.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+      <span>Kamera</span>
+    </a>
+    <a href="laporan.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      <span>Laporan</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <span>Profil</span>
+    </a>
   </nav>
 
   <script>
-    // =========================================================================
-    // 1. KONFIGURASI SUPABASE & PEMETAAN WILAYAH OP
-    // =========================================================================
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let userProfile = null;
+    let reportsCache = [];
+    let currentRaportFilter = 'all';
+    let raportToastTimer = null;
 
-    const OP_DI_MAP = {
-      'OP I': ['D.I Bening', 'D.I Lodoyo'],
-      'OP II': ['D.I Delta Brantas', 'D.I Kedungkandang', 'D.I Molek'],
-      'OP III': [
-        'D.I Banyuputih', 'D.I Baru', 'D.I Bedadung', 'D.I Bondoyudo',
-        'D.I Jatiroto', 'D.I Kali Setail', 'D.I Porolinggo',
-        'D.I Sampean', 'D.I Sampean Baru', 'D.I Setail Teknik', 'D.I Talang'
-      ],
-      'OP V': ['D.I Menturus', 'D.I Padi Pomahan']
-    };
+    function showRaportToast(msg) {
+      const box = document.getElementById('raportToastBox');
+      const text = document.getElementById('raportToastText');
+      if (!box || !text) return;
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(raportToastTimer);
+      raportToastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
+    }
 
-    let currentUser = null;
-    let userRoleType = 'lapangan'; // 'lapangan', 'staf', 'admin'
-    let allEvaluatedEmployees = [];
-    let filteredEvaluatedEmployees = [];
+    function getDriveImg(idOrUrl, fallback = 'assets/img/pegawai.png') {
+      if (!idOrUrl || String(idOrUrl).trim() === '') return fallback;
+      const val = String(idOrUrl).trim();
+      if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+      if (typeof getDriveImageUrl === 'function') return getDriveImageUrl(val, fallback);
+      return `https://lh3.googleusercontent.com/d/${val}`;
+    }
 
-    // =========================================================================
-    // 2. INISIALISASI HALAMAN
-    // =========================================================================
+    function toIsoDate(d) {
+      if (!d) return '';
+      if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.trim())) return d.trim();
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return '';
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
 
-      // Default periode bulan ini (YYYY-MM)
-      const now = new Date();
-      document.getElementById('filterMonth').value = now.toISOString().slice(0, 7);
+      if (typeof refreshUserProfile === 'function') {
+        userProfile = await refreshUserProfile();
+      } else if (typeof checkSession === 'function') {
+        const s = await checkSession();
+        userProfile = s?.profile || null;
+      }
 
-      await initUserAndScope();
-      await reloadRaportData();
+      if (userProfile) {
+        document.getElementById('sidebarPetugasCode').textContent = userProfile.id_petugas || 'O&P';
+        document.getElementById('raportHeaderSub').textContent = `${userProfile.nama} (${userProfile.id_petugas}) • ${userProfile.daerah_irigasi || 'BBWS Brantas'}`;
+      }
+
+      await loadRaportData(false);
     });
 
-    async function initUserAndScope() {
-      const raw = localStorage.getItem('bbws_user') || localStorage.getItem('user_session');
-      if (!raw) {
-        window.location.href = 'index.html';
+    async function loadRaportData(isManual) {
+      if (isManual) {
+        const icon = document.getElementById('raportRefreshIcon');
+        icon?.classList.remove('animate-spin');
+        void icon?.offsetWidth;
+        icon?.classList.add('animate-spin');
+        setTimeout(() => icon?.classList.remove('animate-spin'), 650);
+      }
+
+      const client = typeof initSupabase === 'function' ? initSupabase() : null;
+      const userId = userProfile?.id_petugas;
+
+      if (client && userId) {
+        try {
+          const { data: ownReports, error } = await client
+            .from('laporan')
+            .select('*')
+            .eq('id_petugas', userId)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+
+          const { data: teamLinks } = await client
+            .from('laporan_peserta')
+            .select('id, laporan!inner(*)')
+            .eq('id_pegawai', userId);
+
+          const map = new Map();
+          (ownReports || []).forEach(r => map.set(r.id, r));
+          (teamLinks || []).forEach(p => {
+            if (p.laporan) map.set(p.laporan.id, p.laporan);
+          });
+
+          reportsCache = Array.from(map.values()).sort((a, b) =>
+            new Date(b.created_at || b.tanggal) - new Date(a.created_at || a.tanggal)
+          );
+
+          if (isManual) showRaportToast('Data raport berhasil disinkronkan.');
+        } catch (err) {
+          console.warn('Error load raport:', err);
+          reportsCache = [];
+        }
+      }
+
+      renderRaportList();
+    }
+
+    function setRaportFilter(key) {
+      currentRaportFilter = key;
+      ['all', 'diverifikasi', 'menunggu', 'giat'].forEach(k => {
+        const btn = document.getElementById('rflt-' + k);
+        if (btn) {
+          btn.className = (k === key)
+            ? 'px-3.5 py-2 rounded-xl bg-pupr-deep text-white text-xs font-extrabold border-0 cursor-pointer shrink-0 transition'
+            : 'px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border-0 cursor-pointer shrink-0 transition';
+        }
+      });
+      renderRaportList();
+    }
+
+    function clearMonthFilter() {
+      document.getElementById('inpFilterMonth').value = '';
+      renderRaportList();
+    }
+
+    function renderRaportList() {
+      const monthVal = document.getElementById('inpFilterMonth')?.value || '';
+      const filtered = reportsCache.filter(r => {
+        const st = (r.status_verifikasi || r.status || 'menunggu').toLowerCase();
+        if (currentRaportFilter === 'diverifikasi' && st !== 'diverifikasi') return false;
+        if (currentRaportFilter === 'menunggu' && st !== 'menunggu') return false;
+        if (currentRaportFilter === 'giat' && r.metode_kerja !== 'Giat Kerja') return false;
+        if (monthVal) {
+          const iso = toIsoDate(r.tanggal || r.created_at);
+          if (!iso.startsWith(monthVal)) return false;
+        }
+        return true;
+      });
+
+      // Hitung statistik sesuai filter periode bulan
+      const total = filtered.length;
+      const verif = filtered.filter(r => (r.status_verifikasi || r.status) === 'diverifikasi').length;
+      const pending = filtered.filter(r => (r.status_verifikasi || r.status || 'menunggu') === 'menunggu').length;
+      const giat = filtered.filter(r => r.metode_kerja === 'Giat Kerja').length;
+      const sumLuas = filtered.reduce((acc, r) => acc + (parseFloat(r.luas_area_m2) || 0), 0);
+      const sumSedimenSampah = filtered.reduce((acc, r) => acc + (parseFloat(r.angkat_sedimen_m3) || 0) + (parseFloat(r.pembersihan_sampah_m3) || 0), 0);
+
+      document.getElementById('repStatTotal').textContent = total;
+      document.getElementById('repStatGiatSub').textContent = `${giat} Giat Kerja`;
+      document.getElementById('repStatVerif').textContent = verif;
+      document.getElementById('repStatPendingSub').textContent = `${pending} menunggu`;
+      document.getElementById('repStatLuas').textContent = `${sumLuas.toLocaleString('id-ID')} m²`;
+      document.getElementById('repStatSedimen').textContent = `${sumSedimenSampah.toLocaleString('id-ID')} m³`;
+      document.getElementById('raportCountLabel').textContent = `${total} laporan`;
+
+      const container = document.getElementById('raportListContainer');
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="card glass-surface text-center py-8">
+            <p class="text-sm font-extrabold text-slate-700">Belum ada laporan pada periode ini</p>
+            <p class="text-xs text-slate-400 mt-1">Gunakan menu Kamera dan Buat Laporan untuk mencatat kegiatan lapangan.</p>
+          </div>`;
         return;
       }
-      currentUser = JSON.parse(raw);
 
-      try {
-        const { data } = await sb
-          .from('pegawai')
-          .select('*')
-          .eq('id_petugas', currentUser.id_petugas || currentUser.id)
-          .single();
-        if (data) {
-          currentUser = { ...currentUser, ...data };
-          localStorage.setItem('bbws_user', JSON.stringify(currentUser));
-        }
-      } catch (e) {}
+      container.innerHTML = filtered.map((item, idx) => {
+        const st = (item.status_verifikasi || item.status || 'menunggu').toLowerCase();
+        let badgeHtml = `<span class="badge badge-yellow">MENUNGGU</span>`;
+        if (st === 'diverifikasi') badgeHtml = `<span class="badge bg-emerald-100 text-emerald-700">DISETUJUI</span>`;
+        else if (st === 'ditolak') badgeHtml = `<span class="badge bg-red-100 text-red-700">PERLU REVISI</span>`;
 
-      document.getElementById('sidebarName').textContent = currentUser.nama || '-';
-      document.getElementById('sidebarRole').textContent = `${currentUser.jabatan || '-'} • ${currentUser.daerah_irigasi || '-'}`;
-      if (currentUser.foto_pegawai_id) {
-        document.getElementById('sidebarAvatar').src = `https://lh3.googleusercontent.com/d/${currentUser.foto_pegawai_id}`;
-      }
-
-      const jabatan = (currentUser.jabatan || currentUser.role || '').toLowerCase();
-      if (jabatan.includes('admin') || jabatan.includes('pimpinan') || jabatan.includes('ppk')) {
-        userRoleType = 'admin';
-        document.getElementById('scopeBadge').textContent = 'Akses Pimpinan / Admin (Lintas OP)';
-        populateDISelect('ALL');
-      } else if (jabatan.includes('staf') || jabatan.includes('pengamat')) {
-        userRoleType = 'staf';
-        document.getElementById('scopeBadge').textContent = `Staf Pengamat • ${currentUser.daerah_irigasi || '-'}`;
-        // Kunci filter OP dan D.I sesuai wilayah Staf Pengamat
-        document.getElementById('filterOP').value = currentUser.ppk_op || 'ALL';
-        document.getElementById('filterOP').disabled = true;
-        populateDISelect(currentUser.ppk_op || 'ALL');
-        document.getElementById('filterDI').value = currentUser.daerah_irigasi || 'ALL';
-        document.getElementById('filterDI').disabled = true;
-      } else {
-        userRoleType = 'lapangan';
-        document.getElementById('scopeBadge').textContent = `Raport Pribadi • ${currentUser.nama}`;
-        // Sembunyikan filter wilayah lintas tim untuk PPA/Pekarya
-        ['wrapFilterOP', 'wrapFilterDI', 'wrapFilterKorsda', 'wrapFilterKejuron', 'wrapFilterPegawai'].forEach(id => {
-          document.getElementById(id).classList.add('hidden');
+        const thumbUrl = getDriveImg(item.foto_100_drive_id || item.foto_0_drive_id, 'assets/img/pegawai.png');
+        const tglStr = new Date(item.created_at || item.tanggal).toLocaleDateString('id-ID', {
+          weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
         });
-        document.getElementById('teamLeaderboardSection').classList.add('hidden');
-      }
-    }
-
-    function populateDISelect(opValue) {
-      const diSelect = document.getElementById('filterDI');
-      diSelect.innerHTML = '<option value="ALL">Semua Daerah Irigasi</option>';
-      const list = opValue === 'ALL'
-        ? Object.values(OP_DI_MAP).flat()
-        : (OP_DI_MAP[opValue] || []);
-      list.forEach(di => {
-        const opt = document.createElement('option');
-        opt.value = di;
-        opt.textContent = di;
-        diSelect.appendChild(opt);
-      });
-    }
-
-    // =========================================================================
-    // 3. MUAT DATA PEGAWAI, LAPORAN, GIAT KERJA, & TUGAS BULAN TERPILIH
-    // =========================================================================
-    async function reloadRaportData() {
-      const monthVal = document.getElementById('filterMonth').value; // YYYY-MM
-      if (!monthVal) return;
-
-      const [yearStr, monthStr] = monthVal.split('-');
-      const year = parseInt(yearStr, 10);
-      const month = parseInt(monthStr, 10);
-      const startDate = `${monthVal}-01`;
-      const lastDay = new Date(year, month, 0).getDate();
-      const endDate = `${monthVal}-${String(lastDay).padStart(2, '0')}`;
-
-      // Hitung jumlah hari kerja (Senin - Sabtu / hari efektif) dalam bulan terpilih
-      const workingDaysInMonth = countWorkingDays(year, month - 1);
-
-      try {
-        // A. Ambil daftar pegawai sesuai scope
-        let empQuery = sb.from('pegawai').select('*').order('nama', { ascending: true });
-        if (userRoleType === 'lapangan') {
-          empQuery = empQuery.eq('id_petugas', currentUser.id_petugas || currentUser.id);
-        } else if (userRoleType === 'staf' && currentUser.daerah_irigasi) {
-          empQuery = empQuery.eq('daerah_irigasi', currentUser.daerah_irigasi);
-        }
-        const { data: employees, error: empErr } = await empQuery;
-        if (empErr) throw empErr;
-
-        // B. Ambil seluruh laporan dalam rentang tanggal bulan ini
-        let lapQuery = sb
-          .from('laporan')
-          .select(`
-            id, tanggal, id_petugas, ppk_op, daerah_irigasi, wilayah_korsda, kejuron,
-            metode_kerja, durasi_kerja_menit, status_verifikasi, verified_by,
-            foto_0_drive_id, foto_50_drive_id, foto_100_drive_id,
-            luas_area_m2, panjang_saluran_m, menutup_bocoran_m, angkat_sedimen_m3, pembersihan_sampah_m3, potong_pohon_bh,
-            laporan_peserta ( id_pegawai, jenis_keikutsertaan )
-          `)
-          .gte('tanggal', startDate)
-          .lte('tanggal', endDate);
-
-        if (userRoleType === 'staf' && currentUser.daerah_irigasi) {
-          lapQuery = lapQuery.eq('daerah_irigasi', currentUser.daerah_irigasi);
-        }
-        const { data: reports, error: lapErr } = await lapQuery;
-        if (lapErr) throw lapErr;
-
-        // C. Ambil data penyelesaian tugas bulan ini
-        const { data: tasksData } = await sb
-          .from('tugas_penerima')
-          .select('id_penerima, status_pengerjaan, tugas!inner(deadline)')
-          .gte('tugas.deadline', startDate)
-          .lte('tugas.deadline', endDate);
-
-        // D. Kalkulasi skor 5 kriteria per pegawai
-        allEvaluatedEmployees = (employees || []).map(emp =>
-          computeEmployeeEvaluation(emp, reports || [], tasksData || [], workingDaysInMonth)
-        );
-
-        populateDynamicHierarchyFilters();
-        applyHierarchyFilters();
-      } catch (err) {
-        console.error('Gagal memuat data raport:', err);
-      }
-    }
-
-    function countWorkingDays(year, monthIndex) {
-      let count = 0;
-      const date = new Date(year, monthIndex, 1);
-      while (date.getMonth() === monthIndex) {
-        const day = date.getDay();
-        if (day !== 0) count++; // Senin - Sabtu dihitung hari kerja OP irigasi
-        date.setDate(date.getDate() + 1);
-      }
-      return Math.max(count, 1);
-    }
-
-    function computeEmployeeEvaluation(emp, allReports, allTasks, workingDays) {
-      const empId = emp.id_petugas;
-
-      // 1. Laporan yang dikirim langsung oleh pegawai ini
-      const ownReports = allReports.filter(r => r.id_petugas === empId);
-
-      // 2. Laporan kelompok / Giat Kerja di mana pegawai ini tercatat sebagai peserta
-      const teamReports = allReports.filter(r =>
-        r.id_petugas !== empId &&
-        Array.isArray(r.laporan_peserta) &&
-        r.laporan_peserta.some(p => p.id_pegawai === empId)
-      );
-
-      // Gabungan tanggal hadir unik (mandiri + keikutsertaan Giat Kerja/Kelompok)
-      const uniqueDates = new Set([
-        ...ownReports.map(r => r.tanggal),
-        ...teamReports.map(r => r.tanggal)
-      ]);
-      const hadirDays = uniqueDates.size;
-
-      // Kriteria 1: Kehadiran (25%)
-      const skorKehadiran = Math.min(100, Math.round((hadirDays / workingDays) * 100));
-
-      // Kriteria 2: Jam Kerja Efektif (20%) — target 7 jam (420 menit) per hari hadir
-      let totalMenit = ownReports.reduce((acc, r) => acc + (Number(r.durasi_kerja_menit) || 0), 0);
-      // Kredit otomatis 360 menit (6 jam) jika hadir melalui Giat Kerja / Kelompok tim
-      teamReports.forEach(tr => {
-        totalMenit += (Number(tr.durasi_kerja_menit) || 360);
-      });
-      const totalJam = +(totalMenit / 60).toFixed(1);
-      const targetMenit = Math.max(hadirDays * 360, 360);
-      const skorJamKerja = hadirDays === 0 ? 0 : Math.min(100, Math.round((totalMenit / targetMenit) * 100));
-
-      // Kriteria 3: Kinerja Harian & Giat Kerja Mingguan (25%)
-      // Target Giat Kerja (Quick Response) minimal 1x seminggu = 4x sebulan
-      const giatKerjaCount = [
-        ...ownReports.filter(r => r.metode_kerja === 'Giat Kerja'),
-        ...teamReports.filter(r => r.metode_kerja === 'Giat Kerja')
-      ].length;
-      const totalAktivitas = ownReports.length + teamReports.length;
-      const rasioHarian = Math.min(1, totalAktivitas / workingDays);
-      const rasioGiat = Math.min(1, giatKerjaCount / 4);
-      const skorKinerja = Math.round((rasioHarian * 70) + (rasioGiat * 30));
-
-      // Kriteria 4: Penyelesaian Tugas (15%)
-      const empTasks = allTasks.filter(t => t.id_penerima === empId);
-      const doneTasks = empTasks.filter(t => t.status_pengerjaan === 'selesai').length;
-      const skorTugas = empTasks.length === 0
-        ? (hadirDays > 0 ? 85 : 0) // Jika belum ada tugas khusus namun aktif bekerja, beri baseline 85
-        : Math.round((doneTasks / empTasks.length) * 100);
-
-      // Kriteria 5: Manajemen & Verifikasi Laporan (15%)
-      const isStaf = (emp.jabatan || '').toLowerCase().includes('staf') || (emp.jabatan || '').toLowerCase().includes('pengamat');
-      let skorManajemen = 0;
-      let ketManajemen = '';
-
-      if (isStaf) {
-        // Staf Pengamat dinilai dari keaktifan memverifikasi laporan di D.I-nya
-        const diReports = allReports.filter(r => r.daerah_irigasi === emp.daerah_irigasi);
-        const verifiedByStaf = diReports.filter(r => r.status_verifikasi === 'diverifikasi').length;
-        skorManajemen = diReports.length === 0 ? 80 : Math.round((verifiedByStaf / diReports.length) * 100);
-        ketManajemen = `${verifiedByStaf}/${diReports.length} laporan D.I diverifikasi`;
-      } else {
-        // PPA/Pekarya dinilai dari kelengkapan 3 foto & status verifikasi laporannya
-        const verifiedOwn = ownReports.filter(r => r.status_verifikasi === 'diverifikasi').length + teamReports.length;
-        skorManajemen = totalAktivitas === 0 ? 0 : Math.round((verifiedOwn / totalAktivitas) * 100);
-        ketManajemen = `${verifiedOwn}/${totalAktivitas} laporan terverifikasi`;
-      }
-
-      // Total Skor Tertimbang (25% + 20% + 25% + 15% + 15% = 100%)
-      const totalSkor = +(
-        skorKehadiran * 0.25 +
-        skorJamKerja * 0.20 +
-        skorKinerja * 0.25 +
-        skorTugas * 0.15 +
-        skorManajemen * 0.15
-      ).toFixed(1);
-
-      const { grade, predikat } = getGradeInfo(totalSkor);
-
-      // Rekap Volume Fisik
-      const volume = {
-        luas: ownReports.reduce((s, r) => s + (Number(r.luas_area_m2) || 0), 0),
-        panjang: ownReports.reduce((s, r) => s + (Number(r.panjang_saluran_m) || 0), 0),
-        bocoran: ownReports.reduce((s, r) => s + (Number(r.menutup_bocoran_m) || 0), 0),
-        sedimen: ownReports.reduce((s, r) => s + (Number(r.angkat_sedimen_m3) || 0), 0),
-        sampah: ownReports.reduce((s, r) => s + (Number(r.pembersihan_sampah_m3) || 0), 0),
-        pohon: ownReports.reduce((s, r) => s + (Number(r.potong_pohon_bh) || 0), 0)
-      };
-
-      return {
-        ...emp,
-        metrics: {
-          hadirDays,
-          workingDays,
-          skorKehadiran,
-          totalJam,
-          skorJamKerja,
-          totalAktivitas,
-          giatKerjaCount,
-          skorKinerja,
-          totalTasks: empTasks.length,
-          doneTasks,
-          skorTugas,
-          isStaf,
-          skorManajemen,
-          ketManajemen,
-          totalSkor,
-          grade,
-          predikat,
-          volume
-        }
-      };
-    }
-
-    function getGradeInfo(score) {
-      if (score >= 90) return { grade: 'A', predikat: 'Sangat Baik' };
-      if (score >= 80) return { grade: 'B', predikat: 'Baik' };
-      if (score >= 70) return { grade: 'C', predikat: 'Cukup' };
-      if (score >= 55) return { grade: 'D', predikat: 'Kurang' };
-      return { grade: 'E', predikat: 'Perlu Pembinaan' };
-    }
-
-    // =========================================================================
-    // 4. FILTER BERJENJANG (OP -> D.I -> KORSDA -> KEJURON -> PEGAWAI)
-    // =========================================================================
-    function onFilterOPChange() {
-      const opVal = document.getElementById('filterOP').value;
-      populateDISelect(opVal);
-      populateDynamicHierarchyFilters();
-      applyHierarchyFilters();
-    }
-
-    function onFilterDIChange() {
-      populateDynamicHierarchyFilters();
-      applyHierarchyFilters();
-    }
-
-    function onFilterKorsdaChange() {
-      populateDynamicHierarchyFilters();
-      applyHierarchyFilters();
-    }
-
-    function onFilterKejuronChange() {
-      populateDynamicHierarchyFilters();
-      applyHierarchyFilters();
-    }
-
-    function populateDynamicHierarchyFilters() {
-      const opVal = document.getElementById('filterOP').value;
-      const diVal = document.getElementById('filterDI').value;
-      const korsdaSelect = document.getElementById('filterKorsda');
-      const kejuronSelect = document.getElementById('filterKejuron');
-      const empSelect = document.getElementById('filterPegawai');
-
-      const prevKorsda = korsdaSelect.value;
-      const prevKejuron = kejuronSelect.value;
-
-      // Filter kandidat berdasarkan OP & D.I terlebih dahulu
-      const byOpDi = allEvaluatedEmployees.filter(e => {
-        if (opVal !== 'ALL' && e.ppk_op !== opVal) return false;
-        if (diVal !== 'ALL' && e.daerah_irigasi !== diVal) return false;
-        return true;
-      });
-
-      // Isi opsi Wilayah/KorSDA unik
-      const korsdaSet = [...new Set(byOpDi.map(e => e.wilayah_korsda).filter(Boolean))].sort();
-      korsdaSelect.innerHTML = '<option value="ALL">Semua KorSDA</option>';
-      korsdaSet.forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k;
-        opt.textContent = k;
-        korsdaSelect.appendChild(opt);
-      });
-      if (korsdaSet.includes(prevKorsda)) korsdaSelect.value = prevKorsda;
-
-      // Isi opsi Kejuron unik berdasarkan KorSDA terpilih
-      const byKorsda = byOpDi.filter(e => korsdaSelect.value === 'ALL' || e.wilayah_korsda === korsdaSelect.value);
-      const kejuronSet = [...new Set(byKorsda.map(e => e.kejuron).filter(Boolean))].sort();
-      kejuronSelect.innerHTML = '<option value="ALL">Semua Kejuron</option>';
-      kejuronSet.forEach(kj => {
-        const opt = document.createElement('option');
-        opt.value = kj;
-        opt.textContent = kj;
-        kejuronSelect.appendChild(opt);
-      });
-      if (kejuronSet.includes(prevKejuron)) kejuronSelect.value = prevKejuron;
-
-      // Isi opsi Pegawai spesifik
-      const byKejuron = byKorsda.filter(e => kejuronSelect.value === 'ALL' || e.kejuron === kejuronSelect.value);
-      empSelect.innerHTML = '<option value="ALL">-- Ringkasan Tim / Semua --</option>';
-      byKejuron.forEach(emp => {
-        const opt = document.createElement('option');
-        opt.value = emp.id_petugas;
-        opt.textContent = `${emp.nama} (${emp.jabatan})`;
-        empSelect.appendChild(opt);
-      });
-    }
-
-    function applyHierarchyFilters() {
-      const opVal = document.getElementById('filterOP').value;
-      const diVal = document.getElementById('filterDI').value;
-      const korsdaVal = document.getElementById('filterKorsda').value;
-      const kejuronVal = document.getElementById('filterKejuron').value;
-
-      filteredEvaluatedEmployees = allEvaluatedEmployees.filter(e => {
-        if (opVal !== 'ALL' && e.ppk_op !== opVal) return false;
-        if (diVal !== 'ALL' && e.daerah_irigasi !== diVal) return false;
-        if (korsdaVal !== 'ALL' && e.wilayah_korsda !== korsdaVal) return false;
-        if (kejuronVal !== 'ALL' && e.kejuron !== kejuronVal) return false;
-        return true;
-      });
-
-      updateSummaryStats(filteredEvaluatedEmployees);
-      renderLeaderboardTable();
-
-      // Jika PPA/Pekarya, otomatis tampilkan raport pribadinya
-      if (userRoleType === 'lapangan' && filteredEvaluatedEmployees.length > 0) {
-        showIndividualRaport(filteredEvaluatedEmployees[0]);
-      } else {
-        applyEmployeeSelection();
-      }
-    }
-
-    function applyEmployeeSelection() {
-      const selectedId = document.getElementById('filterPegawai').value;
-      if (selectedId === 'ALL') {
-        document.getElementById('individualRaportCard').classList.add('hidden');
-        return;
-      }
-      const emp = filteredEvaluatedEmployees.find(e => e.id_petugas === selectedId);
-      if (emp) showIndividualRaport(emp);
-    }
-
-    function updateSummaryStats(list) {
-      const total = list.length;
-      const avg = total === 0
-        ? 0
-        : +(list.reduce((s, e) => s + e.metrics.totalSkor, 0) / total).toFixed(1);
-      const { grade } = getGradeInfo(avg);
-
-      const totalGiat = list.reduce((s, e) => s + e.metrics.giatKerjaCount, 0);
-      const totalAktivitas = list.reduce((s, e) => s + e.metrics.totalAktivitas, 0);
-
-      document.getElementById('statAvgScore').textContent = avg;
-      document.getElementById('statAvgGrade').textContent = `Grade ${grade}`;
-      document.getElementById('statTotalEmp').textContent = total;
-      document.getElementById('statGiatKerjaCount').textContent = totalGiat;
-      document.getElementById('statVerifiedReports').textContent = totalAktivitas;
-    }
-
-    // =========================================================================
-    // 5. TAMPILAN DETAIL RAPORT INDIVIDU & TABEL TIM
-    // =========================================================================
-    function showIndividualRaport(emp) {
-      const m = emp.metrics;
-      const card = document.getElementById('individualRaportCard');
-      card.classList.remove('hidden');
-
-      document.getElementById('indAvatar').src = emp.foto_pegawai_id
-        ? `https://lh3.googleusercontent.com/d/${emp.foto_pegawai_id}`
-        : 'assets/img/logo-bbws.svg';
-      document.getElementById('indName').textContent = emp.nama;
-      document.getElementById('indIdBadge').textContent = emp.id_petugas;
-      document.getElementById('indMeta').textContent =
-        `${emp.jabatan} • ${emp.ppk_op || '-'} — ${emp.daerah_irigasi || '-'} ${emp.wilayah_korsda ? '• ' + emp.wilayah_korsda : ''} ${emp.kejuron ? '• ' + emp.kejuron : ''}`;
-
-      document.getElementById('indTotalScore').textContent = m.totalSkor;
-      document.getElementById('indGradeLetter').textContent = `GRADE ${m.grade}`;
-      document.getElementById('indPredikatText').textContent = m.predikat;
-
-      // 5 Kriteria
-      document.getElementById('crit1Score').textContent = `${m.skorKehadiran}%`;
-      document.getElementById('crit1Bar').style.width = `${m.skorKehadiran}%`;
-      document.getElementById('crit1Desc').textContent = `${m.hadirDays} / ${m.workingDays} hari kerja (termasuk Giat Kerja)`;
-
-      document.getElementById('crit2Score').textContent = `${m.skorJamKerja}%`;
-      document.getElementById('crit2Bar').style.width = `${m.skorJamKerja}%`;
-      document.getElementById('crit2Desc').textContent = `${m.totalJam} jam tercatat dari progres foto`;
-
-      document.getElementById('crit3Score').textContent = `${m.skorKinerja}%`;
-      document.getElementById('crit3Bar').style.width = `${m.skorKinerja}%`;
-      document.getElementById('crit3Desc').textContent = `${m.totalAktivitas} kegiatan • ${m.giatKerjaCount}x Giat Kerja`;
-
-      document.getElementById('crit4Score').textContent = `${m.skorTugas}%`;
-      document.getElementById('crit4Bar').style.width = `${m.skorTugas}%`;
-      document.getElementById('crit4Desc').textContent = m.totalTasks > 0
-        ? `${m.doneTasks} / ${m.totalTasks} tugas selesai`
-        : 'Aktif bekerja rutin (baseline)';
-
-      document.getElementById('crit5Label').textContent = m.isStaf ? '5. Manajemen Verifikasi (15%)' : '5. Kelengkapan & Verifikasi (15%)';
-      document.getElementById('crit5Score').textContent = `${m.skorManajemen}%`;
-      document.getElementById('crit5Bar').style.width = `${m.skorManajemen}%`;
-      document.getElementById('crit5Desc').textContent = m.ketManajemen;
-
-      // Volume Fisik
-      document.getElementById('volSumLuas').textContent = `${m.volume.luas.toFixed(1)} m²`;
-      document.getElementById('volSumPanjang').textContent = `${m.volume.panjang.toFixed(1)} m`;
-      document.getElementById('volSumBocoran').textContent = `${m.volume.bocoran.toFixed(1)} m`;
-      document.getElementById('volSumSedimen').textContent = `${m.volume.sedimen.toFixed(1)} m³`;
-      document.getElementById('volSumSampah').textContent = `${m.volume.sampah.toFixed(1)} m³`;
-      document.getElementById('volSumPohon').textContent = `${m.volume.pohon.toFixed(0)} bh`;
-
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function renderLeaderboardTable() {
-      const tbody = document.getElementById('raportTableBody');
-      const q = (document.getElementById('tableSearchInput').value || '').toLowerCase().trim();
-
-      const rows = filteredEvaluatedEmployees
-        .filter(e =>
-          (e.nama || '').toLowerCase().includes(q) ||
-          (e.id_petugas || '').toLowerCase().includes(q) ||
-          (e.kejuron || '').toLowerCase().includes(q)
-        )
-        .sort((a, b) => b.metrics.totalSkor - a.metrics.totalSkor);
-
-      if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-500">Tidak ada data pegawai yang sesuai filter.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = rows.map(emp => {
-        const m = emp.metrics;
-        const badgeColor = m.totalSkor >= 80
-          ? 'bg-emerald-100 text-emerald-800'
-          : m.totalSkor >= 70
-            ? 'bg-amber-100 text-amber-800'
-            : 'bg-rose-100 text-rose-800';
+        const judul = item.nama_saluran || item.jenis_pekerjaan || 'Laporan Harian OP';
+        const metodePrefix = item.metode_kerja === 'Giat Kerja' ? '⚡ Giat Kerja • ' : '';
 
         return `
-          <tr onclick="selectEmployeeFromTable('${emp.id_petugas}')" class="hover:bg-blue-50/60 cursor-pointer transition">
-            <td class="py-3 px-4">
-              <p class="font-extrabold text-slate-800">${emp.nama}</p>
-              <p class="text-[10px] text-slate-500">${emp.id_petugas} • ${emp.jabatan}</p>
-            </td>
-            <td class="py-3 px-3">
-              <p class="font-bold text-slate-700">${emp.ppk_op || '-'} — ${emp.daerah_irigasi || '-'}</p>
-              <p class="text-[10px] text-slate-500">${emp.wilayah_korsda || '-'} ${emp.kejuron ? '• ' + emp.kejuron : ''}</p>
-            </td>
-            <td class="py-3 px-3 text-center font-bold">${m.hadirDays}/${m.workingDays} hr</td>
-            <td class="py-3 px-3 text-center font-bold">${m.totalJam} jam</td>
-            <td class="py-3 px-3 text-center">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${m.giatKerjaCount >= 4 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
-                ${m.giatKerjaCount}x
-              </span>
-            </td>
-            <td class="py-3 px-3 text-center font-bold">${m.skorTugas}%</td>
-            <td class="py-3 px-3 text-center font-bold">${m.skorManajemen}%</td>
-            <td class="py-3 px-4 text-right">
-              <span class="px-2.5 py-1 rounded-xl font-extrabold text-xs ${badgeColor}">
-                ${m.totalSkor} (${m.grade})
-              </span>
-            </td>
-          </tr>
+          <div onclick="openRaportDetail(${idx}, '${monthVal}')" class="card card-interactive glass-surface cursor-pointer flex items-center justify-between gap-3.5 p-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-slate-200 bg-blue-50">
+                <img src="${thumbUrl}" onerror="this.src='assets/img/pegawai.png'" alt="Dokumentasi" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0">
+                <h4 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">${metodePrefix}${judul}</h4>
+                <p class="text-xs text-slate-600 truncate mt-0.5">${item.jenis_pekerjaan || '-'}</p>
+                <p class="text-[11px] font-semibold text-slate-400 mt-1">${item.daerah_irigasi || 'BBWS Brantas'} • ${tglStr}</p>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-1.5 shrink-0">
+              ${badgeHtml}
+              <span class="text-[11px] font-bold text-pupr-blue">Detail &rarr;</span>
+            </div>
+          </div>
         `;
       }).join('');
     }
 
-    function selectEmployeeFromTable(empId) {
-      document.getElementById('filterPegawai').value = empId;
-      applyEmployeeSelection();
-    }
-
-    // =========================================================================
-    // 6. EKSPOR REKAP RAPORT KE CSV
-    // =========================================================================
-    function exportRaportCSV() {
-      if (!filteredEvaluatedEmployees.length) {
-        alert('Tidak ada data raport untuk diekspor.');
-        return;
-      }
-
-      const monthVal = document.getElementById('filterMonth').value;
-      const headers = [
-        'ID Petugas', 'Nama', 'Jabatan', 'PPK OP', 'Daerah Irigasi', 'Wilayah KorSDA', 'Kejuron',
-        'Hari Hadir', 'Skor Kehadiran (%)', 'Total Jam Kerja', 'Skor Jam Kerja (%)',
-        'Jumlah Giat Kerja', 'Skor Kinerja (%)', 'Skor Tugas (%)', 'Skor Verifikasi (%)',
-        'Skor Akhir', 'Grade', 'Predikat'
-      ];
-
-      const csvRows = [headers.join(',')];
-      filteredEvaluatedEmployees.forEach(emp => {
-        const m = emp.metrics;
-        const row = [
-          `"${emp.id_petugas || ''}"`,
-          `"${emp.nama || ''}"`,
-          `"${emp.jabatan || ''}"`,
-          `"${emp.ppk_op || ''}"`,
-          `"${emp.daerah_irigasi || ''}"`,
-          `"${emp.wilayah_korsda || ''}"`,
-          `"${emp.kejuron || ''}"`,
-          m.hadirDays,
-          m.skorKehadiran,
-          m.totalJam,
-          m.skorJamKerja,
-          m.giatKerjaCount,
-          m.skorKinerja,
-          m.skorTugas,
-          m.skorManajemen,
-          m.totalSkor,
-          `"${m.grade}"`,
-          `"${m.predikat}"`
-        ];
-        csvRows.push(row.join(','));
+    function openRaportDetail(filteredIdx, monthVal) {
+      const filtered = reportsCache.filter(r => {
+        const st = (r.status_verifikasi || r.status || 'menunggu').toLowerCase();
+        if (currentRaportFilter === 'diverifikasi' && st !== 'diverifikasi') return false;
+        if (currentRaportFilter === 'menunggu' && st !== 'menunggu') return false;
+        if (currentRaportFilter === 'giat' && r.metode_kerja !== 'Giat Kerja') return false;
+        if (monthVal && !toIsoDate(r.tanggal || r.created_at).startsWith(monthVal)) return false;
+        return true;
       });
 
-      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Raport_Kinerja_OP_BBWS_Brantas_${monthVal}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const item = filtered[filteredIdx];
+      if (!item) return;
+
+      const st = (item.status_verifikasi || item.status || 'menunggu').toLowerCase();
+      const badge = document.getElementById('repModalStatusBadge');
+      if (st === 'diverifikasi') {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-700';
+        badge.textContent = 'DISETUJUI';
+      } else if (st === 'ditolak') {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-red-100 text-red-700';
+        badge.textContent = 'PERLU REVISI';
+      } else {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700';
+        badge.textContent = 'MENUNGGU VERIFIKASI';
+      }
+
+      document.getElementById('repModalTitle').textContent = item.nama_saluran || item.jenis_pekerjaan || 'Laporan OP';
+      document.getElementById('repModalSub').textContent = item.jenis_pekerjaan || '-';
+      document.getElementById('repModalLokasi').textContent = `${item.daerah_irigasi || '-'} • ${item.kejuron || '-'}`;
+      document.getElementById('repModalWaktu').textContent = `${item.metode_kerja || 'Individu'} • ${item.tanggal || toIsoDate(item.created_at)}`;
+      document.getElementById('repModalVolume').textContent = `Luas ${item.luas_area_m2 || 0} m² • Sedimen ${item.angkat_sedimen_m3 || 0} m³ • Sampah ${item.pembersihan_sampah_m3 || 0} m³`;
+      document.getElementById('repModalCatatan').textContent = item.catatan_lapangan || item.catatan || 'Tidak ada catatan tambahan.';
+
+      const photos = [
+        { label: '0% Awal', id: item.foto_0_drive_id },
+        { label: '50% Proses', id: item.foto_50_drive_id },
+        { label: '100% Selesai', id: item.foto_100_drive_id }
+      ];
+
+      document.getElementById('repModalPhotosGrid').innerHTML = photos.map(p => {
+        const url = p.id ? getDriveImg(p.id, '') : '';
+        return `
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-1.5 text-center">
+            <div class="w-full h-24 rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center">
+              ${url
+                ? `<img src="${url}" onerror="this.src='assets/img/pegawai.png'" alt="${p.label}" class="w-full h-full object-cover">`
+                : `<span class="text-[10px] text-slate-400 font-semibold">Tidak ada</span>`}
+            </div>
+            <span class="block text-[10px] font-bold text-slate-700 mt-1.5">${p.label}</span>
+          </div>
+        `;
+      }).join('');
+
+      const modal = document.getElementById('raportDetailModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
     }
+
+    function closeRaportModal() {
+      const modal = document.getElementById('raportDetailModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Jam Sidebar & Logout
+    function updateSidebarClock() {
+      const now = new Date();
+      const cTime = document.getElementById('sidebarClock');
+      const cDate = document.getElementById('sidebarClockDate');
+      if (cTime) cTime.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (cDate) cDate.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+
+    document.getElementById('btnLogout')?.addEventListener('click', async () => {
+      if (confirm('Keluar dari sesi BBWS Brantas?')) {
+        if (typeof logout === 'function') await logout();
+        else { localStorage.removeItem('bbws_session'); window.location.href = 'index.html'; }
+      }
+    });
   </script>
 </body>
 </html>
