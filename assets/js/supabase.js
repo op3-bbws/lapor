@@ -1,10 +1,9 @@
 // assets/js/supabase.js
 const SUPABASE_URL = "https://mgpnpbexvkoujtgmhksj.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_k4jCWy6fgE_qk8B6C3Hahg_JFwYJ1ht";
-const GAS_WEBAPP_URL = "https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec";
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec";
 
 const DEFAULT_PEGAWAI_IMG = "assets/img/pegawai.png";
-
 let supabaseClient = null;
 
 function initSupabase() {
@@ -19,7 +18,11 @@ function initSupabase() {
 
 function getDriveImageUrl(fileId, fallback = DEFAULT_PEGAWAI_IMG) {
   if (!fileId || String(fileId).trim() === "") return fallback;
-  return `https://lh3.googleusercontent.com/d/${String(fileId).trim()}`;
+  const clean = String(fileId).trim();
+  if (clean.startsWith("http://") || clean.startsWith("https://") || clean.startsWith("data:image/")) {
+    return clean;
+  }
+  return `https://lh3.googleusercontent.com/d/${clean}`;
 }
 
 async function login(idPetugas, password) {
