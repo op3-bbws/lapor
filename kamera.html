@@ -557,68 +557,483 @@
         function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
 const IDB_NAME = 'BBWS_Kamera_DB';
-        const IDB_VERSION = 2; // Naikkan versi untuk memperbaiki object store yang hilang
-        const IDB_STORE = 'captured_photos';
+    const IDB_VERSION = 2; // Disamakan dengan kamera.html agar tidak VersionError
+    const IDB_STORE = 'captured_photos';
+    const SESSION_META_KEY = 'bbws_session_photos_v2';
+    const DRAFT_FORM_KEY = 'bbws_laporan_draft_v1';
+    const GAS_DRIVE_UPLOAD_URL = (typeof GAS_WEBAPP_URL !== 'undefined' && !GAS_WEBAPP_URL.includes('YOUR_GAS'))
+      ? GAS_WEBAPP_URL
+      : 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
 
-        function openCameraIDB() {
-            return new Promise((resolve, reject) => {
-                if (!window.indexedDB) return reject(new Error('IndexedDB tidak didukung'));
-                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(IDB_STORE)) {
-                        db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
-                    }
-                };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
+    let userProfile = null;
+    let metodeKerja = 'Individu';
+    let sessionPhotos = { '0': null, '50': null, '100': null };
+    let sessionMeta = { '0': null, '50': null, '100': null };
+    let lapToastTimer = null;
+
+    const URAIAN_LIST = [
+      'Pembersihan Saluran Irigasi',
+      'Babat Rumput & Semak Tanggul',
+      'Pengangkatan Endapan Sedimen',
+      'Pembersihan Sampah Pintu Air',
+      'Pelumasan & Operasi Pintu Air',
+      'Perbaikan Ringan Tanggul / Lining',
+      'Patroli Keamanan & Pencatatan Debit',
+      'Penanganan Darurat / Longsoran'
+    ];
+
+    function showLapToast(msg) {
+      const box = document.getElementById('lapToastBox');
+      const text = document.getElementById('lapToastText');
+      if (!box || !text) return;
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(lapToastTimer);
+      lapToastTimer = setTimeout(() => box.classList.add('hidden'), 3400);
+    }
+
+    function openCameraIDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) return reject(new Error('IndexedDB tidak tersedia'));
+        const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadPhotosFromIDB() {
+      try {
+        const db = await openCameraIDB();
+        if (!db.objectStoreNames.contains(IDB_STORE)) return [];
+        return new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const req = tx.objectStore(IDB_STORE).getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async function clearCameraIDB() {
+      try {
+        const db = await openCameraIDB();
+        if (!db.objectStoreNames.contains(IDB_STORE)) return false;
+        return new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).clear();
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      } catch (e) {
+        return false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.lucide) lucide.createIcons();
+
+      renderUraianChecklist();
+
+      if (typeof checkSession === 'function') {
+        const s = await checkSession();
+        userProfile = s?.profile || null;
+      } else if (typeof refreshUserProfile === 'function') {
+        userProfile = await refreshUserProfile();
+      }
+
+      if (userProfile) {
+        document.getElementById('lapIdPetugas').value = userProfile.id_petugas || 'OPI-SP-1';
+        document.getElementById('lapNamaPetugas').value = userProfile.nama || 'Petugas Lapangan';
+        document.getElementById('lapDaerahIrigasi').value = userProfile.daerah_irigasi || 'D.I Bening';
+        document.getElementById('lapKejuron').value = userProfile.kejuron || '';
+        document.getElementById('sidebarPetugasCode').textContent = userProfile.id_petugas || 'O&P';
+      }
+
+      await loadCapturedSession();
+      restoreDraftFields();
+      await loadRekanPetugas();
+
+      document.querySelectorAll('#laporanMainForm input, #laporanMainForm textarea').forEach(el => {
+        el.addEventListener('input', saveDraftFields);
+        el.addEventListener('change', saveDraftFields);
+      });
+    });
+
+    function renderUraianChecklist() {
+      const grid = document.getElementById('uraianChecklistGrid');
+      grid.innerHTML = URAIAN_LIST.map(item => `
+        <label class="flex items-center gap-2.5 p-2.5 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50/50 cursor-pointer transition">
+          <input type="checkbox" name="chkUraian" value="${item}" onchange="saveDraftFields()" class="w-4 h-4 accent-pupr-blue shrink-0">
+          <span class="text-xs font-semibold text-slate-800">${item}</span>
+        </label>
+      `).join('');
+    }
+
+    function toggleUraianLain() {
+      const chk = document.getElementById('chkUraianLain');
+      const inp = document.getElementById('inpUraianLain');
+      inp.disabled = !chk.checked;
+      if (!chk.checked) inp.value = '';
+      saveDraftFields();
+    }
+
+    function setMetodeKerja(mode) {
+      metodeKerja = mode;
+      const btnInd = document.getElementById('btnMetodeIndividu');
+      const btnGiat = document.getElementById('btnMetodeGiat');
+      const box = document.getElementById('giatPesertaBox');
+
+      if (mode === 'Giat Kerja') {
+        btnGiat.className = 'py-3 px-3 rounded-2xl border-2 border-amber-500 bg-amber-50 text-amber-950 font-extrabold text-xs cursor-pointer transition flex items-center justify-center gap-2';
+        btnInd.className = 'py-3 px-3 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold text-xs cursor-pointer transition flex items-center justify-center gap-2';
+        box.classList.remove('hidden');
+      } else {
+        btnInd.className = 'py-3 px-3 rounded-2xl border-2 border-pupr-blue bg-blue-50 text-pupr-deep font-extrabold text-xs cursor-pointer transition flex items-center justify-center gap-2';
+        btnGiat.className = 'py-3 px-3 rounded-2xl border border-slate-200 bg-white text-slate-600 font-bold text-xs cursor-pointer transition flex items-center justify-center gap-2';
+        box.classList.add('hidden');
+      }
+      saveDraftFields();
+    }
+
+    async function loadRekanPetugas() {
+      const container = document.getElementById('pesertaListContainer');
+      const client = typeof initSupabase === 'function' ? initSupabase() : null;
+      if (!client || !userProfile) {
+        container.innerHTML = '<p class="text-[11px] text-slate-500">Daftar rekan tidak tersedia dalam mode offline.</p>';
+        return;
+      }
+      try {
+        let query = client
+          .from('users')
+          .select('id_petugas, nama, jabatan, daerah_irigasi')
+          .neq('id_petugas', userProfile.id_petugas)
+          .limit(30);
+
+        if (userProfile.daerah_irigasi) {
+          query = query.eq('daerah_irigasi', userProfile.daerah_irigasi);
+        }
+        const { data, error } = await query;
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p class="text-[11px] text-slate-500">Belum ada data rekan petugas pada Daerah Irigasi ini.</p>';
+          return;
         }
 
-        async function savePhotoToIDB(mode, imageData, meta) {
-            try {
-                const db = await openCameraIDB();
-                if (!db.objectStoreNames.contains(IDB_STORE)) return false;
-                return new Promise((resolve) => {
-                    const tx = db.transaction(IDB_STORE, 'readwrite');
-                    tx.objectStore(IDB_STORE).put({ mode: String(mode), imageData, meta, updatedAt: Date.now() });
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => resolve(false);
-                });
-            } catch (e) {
-                return false;
-            }
+        container.innerHTML = data.map(u => `
+          <label class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-amber-200/80 cursor-pointer">
+            <div class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" name="chkPesertaGiat" value="${u.id_petugas}" data-nama="${u.nama}" onchange="updatePesertaCount()" class="w-4 h-4 accent-amber-500">
+              <span class="font-bold text-slate-800 truncate">${u.nama}</span>
+            </div>
+            <span class="font-mono text-[10px] text-slate-500 shrink-0">${u.id_petugas}</span>
+          </label>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = '<p class="text-[11px] text-slate-500">Gagal memuat daftar rekan petugas.</p>';
+      }
+    }
+
+    function updatePesertaCount() {
+      const cnt = document.querySelectorAll('input[name="chkPesertaGiat"]:checked').length;
+      document.getElementById('pesertaCountChip').textContent = `${cnt} rekan dipilih`;
+    }
+
+    async function loadCapturedSession() {
+      const idbRows = await loadPhotosFromIDB();
+      idbRows.forEach(r => {
+        if (r && (r.mode === '0' || r.mode === '50' || r.mode === '100')) {
+          sessionPhotos[r.mode] = r.imageData;
+          if (r.meta) sessionMeta[r.mode] = r.meta;
+        }
+      });
+
+      try {
+        const metaRaw = localStorage.getItem(SESSION_META_KEY);
+        if (metaRaw) {
+          const parsed = JSON.parse(metaRaw);
+          if (parsed.meta) sessionMeta = { ...sessionMeta, ...parsed.meta };
+          if (parsed.form && parsed.form.note && !document.getElementById('lapCatatan').value) {
+            document.getElementById('lapCatatan').value = parsed.form.note;
+          }
+        }
+      } catch (e) {}
+
+      let count = 0;
+      ['0', '50', '100'].forEach(m => {
+        const slot = document.getElementById('lapSlot' + m);
+        const metaEl = document.getElementById('lapMeta' + m);
+        const imgSource = sessionPhotos[m] || sessionMeta[m]?.drive_url;
+        if (imgSource) {
+          sessionPhotos[m] = imgSource;
+          slot.innerHTML = `<img src="${imgSource}" alt="Foto ${m}%" class="w-full h-full object-cover rounded-xl">`;
+          const isDrive = sessionMeta[m]?.drive_status === 'uploaded' || String(imgSource).startsWith('http');
+          const timeText = sessionMeta[m]?.time_label ? `Jam ${sessionMeta[m].time_label}` : 'Tersimpan';
+          metaEl.textContent = isDrive ? `${timeText} • ☁ Drive` : timeText;
+          metaEl.className = isDrive
+            ? 'text-[10px] font-bold text-sky-600 mb-1.5'
+            : 'text-[10px] font-bold text-emerald-600 mb-1.5';
+          count++;
+        }
+      });
+
+      const pill = document.getElementById('lapPhotoLockPill');
+      pill.textContent = `${count}/3 Foto Sesi`;
+      if (count === 3) {
+        pill.className = 'px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider';
+      }
+
+      const att = document.getElementById('attendanceChip');
+      if (sessionMeta['0'] && sessionMeta['100']) {
+        att.textContent = `${sessionMeta['0'].time_label} - ${sessionMeta['100'].time_label}`;
+        att.className = 'badge bg-emerald-100 text-emerald-700';
+      } else if (sessionMeta['0']) {
+        att.textContent = `Masuk ${sessionMeta['0'].time_label}`;
+        att.className = 'badge badge-blue';
+      }
+
+      const gpsMeta = sessionMeta['0'] || sessionMeta['50'] || sessionMeta['100'];
+      if (gpsMeta && gpsMeta.lat && gpsMeta.lng) {
+        document.getElementById('gpsCoordChip').textContent = `${Number(gpsMeta.lat).toFixed(5)}, ${Number(gpsMeta.lng).toFixed(5)}`;
+      }
+    }
+
+    function previewPhotoSlot(mode) {
+      if (!sessionPhotos[mode]) {
+        window.location.href = `kamera.html?mode=${mode}`;
+        return;
+      }
+      document.getElementById('lapPreviewBadge').textContent = `Progres ${mode}%`;
+      document.getElementById('lapPreviewImg').src = sessionPhotos[mode];
+      const modal = document.getElementById('lapPreviewModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLapPreview() {
+      const modal = document.getElementById('lapPreviewModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveDraftFields() {
+      const checked = Array.from(document.querySelectorAll('input[name="chkUraian"]:checked')).map(c => c.value);
+      const draft = {
+        metodeKerja,
+        saluran: document.getElementById('lapSaluran').value,
+        bangunan: document.getElementById('lapBangunan').value,
+        kejuron: document.getElementById('lapKejuron').value,
+        desa: document.getElementById('lapDesa').value,
+        kecamatan: document.getElementById('lapKecamatan').value,
+        luas: document.getElementById('inpLuasM2').value,
+        panjang: document.getElementById('inpPanjangM').value,
+        sedimen: document.getElementById('inpSedimenM3').value,
+        sampah: document.getElementById('inpSampahM3').value,
+        checked,
+        lainChecked: document.getElementById('chkUraianLain').checked,
+        lainText: document.getElementById('inpUraianLain').value,
+        catatan: document.getElementById('lapCatatan').value
+      };
+      try { localStorage.setItem(DRAFT_FORM_KEY, JSON.stringify(draft)); } catch (e) {}
+    }
+
+    function restoreDraftFields() {
+      try {
+        const raw = localStorage.getItem(DRAFT_FORM_KEY);
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d.metodeKerja) setMetodeKerja(d.metodeKerja);
+        if (d.saluran) document.getElementById('lapSaluran').value = d.saluran;
+        if (d.bangunan) document.getElementById('lapBangunan').value = d.bangunan;
+        if (d.kejuron) document.getElementById('lapKejuron').value = d.kejuron;
+        if (d.desa) document.getElementById('lapDesa').value = d.desa;
+        if (d.kecamatan) document.getElementById('lapKecamatan').value = d.kecamatan;
+        if (d.luas) document.getElementById('inpLuasM2').value = d.luas;
+        if (d.panjang) document.getElementById('inpPanjangM').value = d.panjang;
+        if (d.sedimen) document.getElementById('inpSedimenM3').value = d.sedimen;
+        if (d.sampah) document.getElementById('inpSampahM3').value = d.sampah;
+        if (Array.isArray(d.checked)) {
+          document.querySelectorAll('input[name="chkUraian"]').forEach(cb => {
+            cb.checked = d.checked.includes(cb.value);
+          });
+        }
+        if (d.lainChecked) {
+          document.getElementById('chkUraianLain').checked = true;
+          document.getElementById('inpUraianLain').disabled = false;
+          document.getElementById('inpUraianLain').value = d.lainText || '';
+        }
+        if (d.catatan) document.getElementById('lapCatatan').value = d.catatan;
+      } catch (e) {}
+    }
+
+    async function openResetConfirm() {
+      if (!confirm('Kosongkan semua foto sesi (0%, 50%, 100%) dan draf formulir ini?')) return;
+      await clearCameraIDB();
+      localStorage.removeItem(SESSION_META_KEY);
+      localStorage.removeItem(DRAFT_FORM_KEY);
+      showLapToast('Draf dan foto sesi telah dikosongkan.');
+      setTimeout(() => window.location.reload(), 600);
+    }
+
+    // Pastikan foto sudah punya URL Google Drive sebelum kirim ke Supabase
+    async function ensureDrivePhotoRef(mode, idPetugas, namaPetugas, daerahIrigasi) {
+      const meta = sessionMeta[mode] || {};
+      if (meta.drive_url) return meta.drive_url;
+      if (meta.drive_file_id) return `https://lh3.googleusercontent.com/d/${meta.drive_file_id}`;
+
+      const rawImg = sessionPhotos[mode];
+      if (!rawImg) return null;
+      if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) return rawImg;
+
+      try {
+        const base64Clean = rawImg.includes(',') ? rawImg.split(',')[1] : rawImg;
+        const dateCompact = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const fileName = `${idPetugas}_${dateCompact}_${mode}pct_${Date.now().toString().slice(-4)}.jpg`;
+        const res = await fetch(GAS_DRIVE_UPLOAD_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'upload_foto_sesi',
+            filename: fileName,
+            mimeType: 'image/jpeg',
+            base64: base64Clean,
+            id_petugas: idPetugas,
+            nama_petugas: namaPetugas,
+            daerah_irigasi: daerahIrigasi,
+            progres: mode,
+            lat: meta.lat || null,
+            lng: meta.lng || null,
+            address: meta.address || ''
+          })
+        });
+        const json = await res.json();
+        if (json && (json.fileUrl || json.url)) return json.fileUrl || json.url;
+        if (json && json.fileId) return `https://lh3.googleusercontent.com/d/${json.fileId}`;
+      } catch (e) {
+        console.warn(`Fallback ke Base64 lokal untuk foto ${mode}%:`, e);
+      }
+      return rawImg;
+    }
+
+    async function submitLaporanHarian(e) {
+      e.preventDefault();
+      if (!sessionPhotos['0'] || !sessionPhotos['50'] || !sessionPhotos['100']) {
+        showLapToast('Foto 0%, 50%, dan 100% wajib lengkap dari Kamera!');
+        return;
+      }
+
+      const selectedTasks = Array.from(document.querySelectorAll('input[name="chkUraian"]:checked')).map(c => c.value);
+      if (document.getElementById('chkUraianLain').checked && document.getElementById('inpUraianLain').value.trim()) {
+        selectedTasks.push(document.getElementById('inpUraianLain').value.trim());
+      }
+      if (selectedTasks.length === 0) {
+        showLapToast('Pilih minimal 1 uraian jenis pekerjaan!');
+        return;
+      }
+
+      const btn = document.getElementById('btnKirimLaporan');
+      btn.disabled = true;
+      btn.textContent = 'Menyinkronkan Foto Drive & Mengirim...';
+
+      const idPetugas = userProfile?.id_petugas || document.getElementById('lapIdPetugas').value;
+      const namaPetugas = userProfile?.nama || document.getElementById('lapNamaPetugas').value;
+      const daerahIrigasi = document.getElementById('lapDaerahIrigasi').value.trim();
+
+      const [foto0Ref, foto50Ref, foto100Ref] = await Promise.all([
+        ensureDrivePhotoRef('0', idPetugas, namaPetugas, daerahIrigasi),
+        ensureDrivePhotoRef('50', idPetugas, namaPetugas, daerahIrigasi),
+        ensureDrivePhotoRef('100', idPetugas, namaPetugas, daerahIrigasi)
+      ]);
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const meta0 = sessionMeta['0'] || {};
+      const meta100 = sessionMeta['100'] || {};
+
+      const payload = {
+        id_petugas: idPetugas,
+        nama_petugas: namaPetugas,
+        daerah_irigasi: daerahIrigasi,
+        kejuron: document.getElementById('lapKejuron').value.trim(),
+        desa_kelurahan: document.getElementById('lapDesa').value.trim(),
+        kecamatan: document.getElementById('lapKecamatan').value.trim(),
+        nama_saluran: document.getElementById('lapSaluran').value.trim(),
+        nama_bangunan: document.getElementById('lapBangunan').value.trim(),
+        jenis_pekerjaan: selectedTasks.join(', '),
+        metode_kerja: metodeKerja,
+        tanggal: todayStr,
+        jam_mulai: meta0.time_label || null,
+        jam_selesai: meta100.time_label || null,
+        lokasi_lat: meta0.lat || null,
+        lokasi_lng: meta0.lng || null,
+        luas_area_m2: parseFloat(document.getElementById('inpLuasM2').value) || 0,
+        panjang_saluran_m: parseFloat(document.getElementById('inpPanjangM').value) || 0,
+        angkat_sedimen_m3: parseFloat(document.getElementById('inpSedimenM3').value) || 0,
+        pembersihan_sampah_m3: parseFloat(document.getElementById('inpSampahM3').value) || 0,
+        catatan_lapangan: document.getElementById('lapCatatan').value.trim(),
+        status_verifikasi: 'menunggu',
+        foto_0_drive_id: foto0Ref,
+        foto_50_drive_id: foto50Ref,
+        foto_100_drive_id: foto100Ref
+      };
+
+      try {
+        const client = typeof initSupabase === 'function' ? initSupabase() : null;
+        if (!client) throw new Error('Koneksi Supabase tidak tersedia');
+
+        const { data: insertedRows, error } = await client
+          .from('laporan')
+          .insert([payload])
+          .select();
+
+        if (error) throw error;
+
+        const insertedId = insertedRows && insertedRows[0]?.id;
+        const selectedPeers = Array.from(document.querySelectorAll('input[name="chkPesertaGiat"]:checked'));
+        if (insertedId && metodeKerja === 'Giat Kerja' && selectedPeers.length > 0) {
+          const peerPayloads = selectedPeers.map(cb => ({
+            laporan_id: insertedId,
+            id_pegawai: cb.value,
+            nama_pegawai: cb.getAttribute('data-nama') || cb.value
+          }));
+          await client.from('laporan_peserta').insert(peerPayloads);
         }
 
-        async function loadAllPhotosFromIDB() {
-            try {
-                const db = await openCameraIDB();
-                if (!db.objectStoreNames.contains(IDB_STORE)) return [];
-                return new Promise((resolve) => {
-                    const tx = db.transaction(IDB_STORE, 'readonly');
-                    const req = tx.objectStore(IDB_STORE).getAll();
-                    req.onsuccess = () => resolve(req.result || []);
-                    req.onerror = () => resolve([]);
-                });
-            } catch (e) {
-                return [];
-            }
-        }
+        await clearCameraIDB();
+        localStorage.removeItem(SESSION_META_KEY);
+        localStorage.removeItem(DRAFT_FORM_KEY);
 
-        async function clearAllPhotosIDB() {
-            try {
-                const db = await openCameraIDB();
-                if (!db.objectStoreNames.contains(IDB_STORE)) return false;
-                return new Promise((resolve) => {
-                    const tx = db.transaction(IDB_STORE, 'readwrite');
-                    tx.objectStore(IDB_STORE).clear();
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => resolve(false);
-                });
-            } catch (e) {
-                return false;
-            }
-        }
+        showLapToast('Laporan berhasil dikirim ke Server BBWS Brantas!');
+        setTimeout(() => { window.location.href = 'home.html'; }, 1200);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Kirim Laporan Harian OP';
+        showLapToast('Gagal mengirim: ' + (err.message || 'Periksa koneksi internet'));
+      }
+    }
+
+    function updateSidebarClock() {
+      const now = new Date();
+      const cTime = document.getElementById('sidebarClock');
+      const cDate = document.getElementById('sidebarClockDate');
+      if (cTime) cTime.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (cDate) cDate.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+
+    document.getElementById('btnLogout')?.addEventListener('click', async () => {
+      if (confirm('Keluar dari sesi BBWS Brantas?')) {
+        if (typeof logout === 'function') await logout();
+        else { localStorage.removeItem('bbws_session'); window.location.href = 'index.html'; }
+      }
+    });
 
         // 2. User Context & State Aplikasi
         let user = { id_pegawai: 'OPI-SP-1', nama: 'Petugas Lapangan', jabatan: 'PPA / Pekarya', daerah_irigasi: 'D.I Bening' };
@@ -1262,9 +1677,12 @@ const IDB_NAME = 'BBWS_Kamera_DB';
         }
 
         // 11. Capture & Render Canvas
-        function triggerCapture() {
+function triggerCapture() {
             if (countdownTimer) return;
-            if (timerSeconds === 0) return captureFromVideo();
+            if (timerSeconds === 0) {
+                captureFromVideo();
+                return;
+            }
             const overlay = document.getElementById('countdownOverlay');
             const text = document.getElementById('countdownText');
             let count = timerSeconds;
@@ -1287,12 +1705,18 @@ const IDB_NAME = 'BBWS_Kamera_DB';
 
         async function captureFromVideo() {
             const video = document.getElementById('cameraStream');
-            if (!video.videoWidth) return simulateCameraCapture();
+            if (!video || !video.srcObject || video.videoWidth === 0 || video.readyState < 2) {
+                showToast('Kamera belum siap — menggunakan mode pratinjau...');
+                simulateCameraCapture();
+                return;
+            }
             if (flashMode === 'auto') await applyFlashConstraint(true);
             const flash = document.getElementById('flashEffect');
-            flash.classList.remove('flash-animate');
-            void flash.offsetWidth;
-            flash.classList.add('flash-animate');
+            if (flash) {
+                flash.classList.remove('flash-animate');
+                void flash.offsetWidth;
+                flash.classList.add('flash-animate');
+            }
             renderWatermarkedImage(video, video.videoWidth, video.videoHeight, facingMode === 'user');
             if (flashMode === 'auto') setTimeout(() => applyFlashConstraint(false), 350);
         }
