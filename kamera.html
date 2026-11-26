@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Kamera Inspeksi Lapangan — BBWS Brantas</title>
+  <meta name="theme-color" content="#0F172A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo-bbws.svg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #090D16;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #F8FAFC;
+    }
+
+    /* Layout utama adaptif Portrait vs Landscape */
+    .camera-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100dvh;
+      position: relative;
+    }
+
+    .viewfinder-area {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+    }
+
+    /* Mirror HANYA untuk video kamera depan, TIDAK untuk logo atau watermark */
+    #cameraVideo.mirror-front {
+      transform: scaleX(-1);
+    }
+
+    /* Bilah Kontrol Portrait (Bawah) */
+    .control-dock {
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 30;
+    }
+
+    .shutter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Penyesuaian Otomatis Saat HP Diputar LANDSCAPE */
+    @media (orientation: landscape) {
+      .camera-shell {
+        flex-direction: row;
+      }
+      .top-bar-hud {
+        right: 175px !important;
+      }
+      .live-watermark-hud {
+        right: 185px !important;
+        bottom: 12px !important;
+        max-width: 420px;
+      }
+      .control-dock {
+        width: 170px;
+        height: 100dvh;
+        border-top: none;
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 14px 12px;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .slot-pills {
+        flex-direction: column !important;
+      }
+      .shutter-row {
+        flex-direction: column-reverse;
+        gap: 16px;
+        height: auto;
+      }
+    }
+
+    /* Tombol Shutter */
+    .shutter-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 9999px;
+      border: 4px solid #FFFFFF;
+      padding: 4px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease;
+    }
+    .shutter-btn:active {
+      transform: scale(0.92);
+    }
+    .shutter-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 9999px;
+      background: #F59E0B;
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.55);
+    }
+
+    .mono-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="camera-shell">
+
+    <!-- AREA VIEWFINDER + HUD LIVE WATERMARK -->
+    <div class="viewfinder-area">
+      <video id="cameraVideo" autoplay playsinline muted></video>
+
+      <!-- TOP BAR HUD (Kembali & Info Status GPS/Flash) -->
+      <div class="top-bar-hud fixed top-0 left-0 right-0 p-3 sm:p-4 flex items-center justify-between z-20 bg-gradient-to-b from-black/75 via-black/35 to-transparent">
+        <a href="laporan.html" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 border border-white/15 text-xs font-bold text-white hover:bg-slate-800 transition">
+          <i data-lucide="arrow-left" class="w-4 h-4 text-amber-400"></i>
+          <span>Ke Laporan</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <!-- Indikator Akurasi GPS -->
+          <div id="gpsStatusPill" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 border border-white/15 flex items-center gap-1.5 text-[11px] font-bold">
+            <span id="gpsDot" class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <span id="gpsAccuracyText">Mencari GPS...</span>
+          </div>
+
+          <!-- Tombol Flash / Torch (jika didukung HP) -->
+          <button type="button" id="torchBtn" onclick="toggleTorch()" class="hidden w-9 h-9 rounded-xl bg-slate-900/80 border border-white/15 flex items-center justify-center text-white">
+            <i data-lucide="zap-off" id="torchIcon" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- LIVE WATERMARK HUD (TERLIHAT JELAS DI LAYAR & LOGO TIDAK TERBALIK) -->
+      <div class="live-watermark-hud absolute bottom-3 left-3 right-3 z-20 pointer-events-none">
+        <div class="inline-flex items-stretch gap-2.5 bg-slate-950/75 backdrop-blur-md border border-white/20 rounded-2xl p-2.5 shadow-xl max-w-full">
+          <!-- Logo BBWS / PU Tegak Lurus (Tidak Pernah Mirror) -->
+          <div class="w-11 h-11 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0">
+            <img id="hudLogoImg" src="assets/img/logo-bbws.svg" alt="Logo PU" class="w-full h-full object-contain" />
+          </div>
+
+          <!-- Informasi Watermark Live -->
+          <div class="text-[10px] sm:text-[11px] leading-tight space-y-0.5 overflow-hidden">
+            <div class="flex items-center gap-1.5">
+              <span id="hudSlotBadge" class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-extrabold text-[9px]">PROGRES 0%</span>
+              <span class="font-extrabold text-amber-300 truncate">BBWS BRANTAS • OP IRIGASI</span>
+            </div>
+            <p id="hudPetugas" class="font-bold text-white truncate">Memuat Petugas...</p>
+            <p id="hudWilayah" class="text-slate-300 truncate">-</p>
+            <p id="hudDateTime" class="mono-font text-emerald-300 font-semibold">--/--/2026 --:--:-- WIB</p>
+            <p id="hudCoords" class="mono-font text-slate-200 truncate">Lat: -, Lng: -</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL KONTROL (BAWAH SAAT PORTRAIT, SAMPING KANAN SAAT LANDSCAPE) -->
+    <div class="control-dock">
+      <!-- Pemilih Slot Progres 0%, 50%, 100% -->
+      <div class="slot-pills flex items-center justify-center gap-1.5">
+        <button type="button" onclick="selectSlot('0')" id="btnSlot0"
+          class="slot-btn flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-extrabold border transition text-center">
+          0% <span id="check0" class="hidden">✓</span>
+        </button>
+        <button type="button" onclick="selectSlot('50')" id="btnSlot50"
+          class="slot-btn flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-extrabold border transition text-center">
+          50% <span id="check50" class="hidden">✓</span>
+        </button>
+        <button type="button" onclick="selectSlot('100')" id="btnSlot100"
+          class="slot-btn flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-extrabold border transition text-center">
+          100% <span id="check100" class="hidden">✓</span>
+        </button>
+      </div>
+
+      <!-- Baris Utama Shutter, Ganti Kamera, & Pintasan Form Laporan -->
+      <div class="shutter-row">
+        <!-- Thumbnail Foto Terakhir / Kembali ke Form Laporan -->
+        <a href="laporan.html" class="relative w-12 h-12 rounded-2xl bg-slate-800 border border-white/20 flex flex-col items-center justify-center overflow-hidden hover:border-amber-400 transition" title="Lihat & Kirim Laporan">
+          <img id="lastThumbImg" src="" alt="Hasil" class="hidden w-full h-full object-cover" />
+          <div id="lastThumbBadge" class="text-center">
+            <span id="savedCountText" class="text-xs font-extrabold text-amber-400 block leading-none">0/3</span>
+            <span class="text-[8px] font-bold text-slate-300 uppercase">Form</span>
+          </div>
+        </a>
+
+        <!-- Tombol Jepret Foto -->
+        <button type="button" id="captureBtn" onclick="capturePhoto()" class="shutter-btn" aria-label="Ambil Foto">
+          <div class="shutter-inner"></div>
+        </button>
+
+        <!-- Tombol Putar Kamera Depan / Belakang -->
+        <button type="button" onclick="switchCamera()" class="w-12 h-12 rounded-2xl bg-slate-800 border border-white/20 flex items-center justify-center text-white hover:bg-slate-700 active:scale-95 transition" title="Ganti Kamera">
+          <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRATINJAU HASIL FOTO BER-WATERMARK -->
+  <div id="previewModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col justify-between p-4">
+    <div class="flex items-center justify-between">
+      <span id="previewModalTitle" class="px-3 py-1 rounded-xl bg-amber-500 text-slate-950 text-xs font-extrabold">
+        HASIL FOTO PROGRES 0%
+      </span>
+      <button type="button" onclick="closePreviewModal()" class="p-2 rounded-xl bg-white/10 text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 my-3 flex items-center justify-center overflow-hidden">
+      <img id="capturedPreviewImg" src="" alt="Preview Watermark" class="max-h-full max-w-full rounded-2xl border border-white/20 shadow-2xl object-contain" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 max-w-md w-full mx-auto pb-2">
+      <button type="button" onclick="closePreviewModal()" class="py-3 px-4 rounded-2xl bg-slate-800 border border-white/15 text-white text-xs font-extrabold flex items-center justify-center gap-2">
+        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Foto Ulang
+      </button>
+      <button type="button" onclick="confirmAndSavePhoto()" class="py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg">
+        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Gunakan & Lanjut
+      </button>
+    </div>
+  </div>
+
+  <!-- Canvas Tersembunyi untuk Merender Foto + Watermark Tajam -->
+  <canvas id="renderCanvas" class="hidden"></canvas>
+
+  <script>
+    // =========================================================================
+    // STATE APLIKASI KAMERA
+    // =========================================================================
+    let currentUser = null;
+    let activeSlot = '0';
+    let facingMode = 'environment'; // Default kamera belakang
+    let currentStream = null;
+    let torchEnabled = false;
+    let currentCoords = { lat: null, lng: null, accuracy: null };
+    let pendingCaptureObj = null;
+    let savedSlotsMap = { '0': false, '50': false, '100': false };
+
+    const logoImageObj = new Image();
+    logoImageObj.crossOrigin = 'anonymous';
+    logoImageObj.src = 'assets/img/logo-bbws.svg';
+
+    // =========================================================================
+    // INISIALISASI
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+
+      // Cek parameter URL ?slot=0 / 50 / 100 dari laporan.html
+      const params = new URLSearchParams(window.location.search);
+      const requestedSlot = params.get('slot');
+      if (['0', '50', '100'].includes(requestedSlot)) {
+        activeSlot = requestedSlot;
+      }
+
+      loadUserSession();
+      await refreshSavedSlotsBadge();
+      selectSlot(activeSlot);
+      startClockHUD();
+      initGeolocation();
+      await startCameraStream();
+    });
+
+    function loadUserSession() {
+      const raw = localStorage.getItem('bbws_user') || localStorage.getItem('user_session');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = JSON.parse(raw);
+      const idPetugas = currentUser.id_petugas || currentUser.id || '-';
+      const nama = currentUser.nama || 'Petugas OP';
+      const ppk = currentUser.ppk_op || currentUser.ppk || '';
+      const di = currentUser.daerah_irigasi || '';
+      const kejuron = currentUser.kejuron ? ` • ${currentUser.kejuron}` : '';
+
+      document.getElementById('hudPetugas').textContent = `${nama} (${idPetugas})`;
+      document.getElementById('hudWilayah').textContent = `${ppk} — ${di}${kejuron}`;
+    }
+
+    // =========================================================================
+    // PEMILIH SLOT PROGRES (0%, 50%, 100%)
+    // =========================================================================
+    function selectSlot(slot) {
+      activeSlot = String(slot);
+      document.getElementById('hudSlotBadge').textContent = `PROGRES ${activeSlot}%`;
+
+      ['0', '50', '100'].forEach(s => {
+        const btn = document.getElementById(`btnSlot${s}`);
+        if (s === activeSlot) {
+          btn.className = 'slot-btn flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-extrabold border border-amber-400 bg-amber-500 text-slate-950 shadow transition text-center';
+        } else {
+          btn.className = 'slot-btn flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-extrabold border border-white/15 bg-slate-800/80 text-slate-300 hover:bg-slate-700 transition text-center';
+        }
+      });
+    }
+
+    // =========================================================================
+    // JAM REAL-TIME & GPS LIVE TRACKER
+    // =========================================================================
+    function getFormattedDateTime(dateObj = new Date()) {
+      const pad = (n) => String(n).padStart(2, '0');
+      const d = pad(dateObj.getDate());
+      const m = pad(dateObj.getMonth() + 1);
+      const y = dateObj.getFullYear();
+      const hh = pad(dateObj.getHours());
+      const mm = pad(dateObj.getMinutes());
+      const ss = pad(dateObj.getSeconds());
+      return `${d}/${m}/${y} ${hh}:${mm}:${ss} WIB`;
+    }
+
+    function startClockHUD() {
+      const update = () => {
+        document.getElementById('hudDateTime').textContent = getFormattedDateTime(new Date());
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
+    function initGeolocation() {
+      if (!('geolocation' in navigator)) {
+        document.getElementById('gpsAccuracyText').textContent = 'GPS Tidak Didukung';
+        return;
+      }
+
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          currentCoords.lat = pos.coords.latitude.toFixed(6);
+          currentCoords.lng = pos.coords.longitude.toFixed(6);
+          currentCoords.accuracy = Math.round(pos.coords.accuracy);
+
+          const dot = document.getElementById('gpsDot');
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          document.getElementById('gpsAccuracyText').textContent = `GPS ±${currentCoords.accuracy}m`;
+          document.getElementById('hudCoords').textContent = `Lat: ${currentCoords.lat}, Lng: ${currentCoords.lng}`;
+        },
+        (err) => {
+          document.getElementById('gpsDot').className = 'w-2 h-2 rounded-full bg-rose-500';
+          document.getElementById('gpsAccuracyText').textContent = 'Aktifkan Lokasi GPS';
+        },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+      );
+    }
+
+    // =========================================================================
+    // KONTROL KAMERA & ORIENTASI
+    // =========================================================================
+    async function startCameraStream() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+      }
+
+      const video = document.getElementById('cameraVideo');
+      // Mirror hanya berlaku pada tampilan preview kamera depan
+      if (facingMode === 'user') {
+        video.classList.add('mirror-front');
+      } else {
+        video.classList.remove('mirror-front');
+      }
+
+      try {
+        const constraints = {
+          audio: false,
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 1600 },
+            height: { ideal: 1200 }
+          }
+        };
+
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+
+        // Cek apakah perangkat mendukung lampu flash (torch)
+        const track = currentStream.getVideoTracks()[0];
+        const caps = track.getCapabilities ? track.getCapabilities() : {};
+        const torchBtn = document.getElementById('torchBtn');
+        if (caps.torch) {
+          torchBtn.classList.remove('hidden');
+        } else {
+          torchBtn.classList.add('hidden');
+        }
+      } catch (err) {
+        alert('Izin kamera ditolak atau kamera tidak tersedia. Pastikan izin kamera diaktifkan di browser.');
+      }
+    }
+
+    async function switchCamera() {
+      facingMode = facingMode === 'environment' ? 'user' : 'environment';
+      torchEnabled = false;
+      await startCameraStream();
+    }
+
+    async function toggleTorch() {
+      if (!currentStream) return;
+      const track = currentStream.getVideoTracks()[0];
+      try {
+        torchEnabled = !torchEnabled;
+        await track.applyConstraints({ advanced: [{ torch: torchEnabled }] });
+        const icon = document.getElementById('torchIcon');
+        icon.setAttribute('data-lucide', torchEnabled ? 'zap' : 'zap-off');
+        lucide.createIcons();
+      } catch (e) {
+        console.warn('Torch tidak didukung:', e);
+      }
+    }
+
+    // =========================================================================
+    // AMBIL FOTO & RENDER WATERMARK KE CANVAS (ANTI-MIRROR LOGO)
+    // =========================================================================
+    function capturePhoto() {
+      const video = document.getElementById('cameraVideo');
+      if (!video.videoWidth || !video.videoHeight) {
+        alert('Kamera belum siap, tunggu sebentar.');
+        return;
+      }
+
+      const canvas = document.getElementById('renderCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Gunakan resolusi asli video (otomatis mengikuti Portrait atau Landscape HP)
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      canvas.width = vw;
+      canvas.height = vh;
+
+      // 1. Gambar frame video (jika kamera depan, un-mirror agar hasil foto alami)
+      ctx.save();
+      if (facingMode === 'user') {
+        ctx.translate(vw, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, vw, vh);
+      ctx.restore();
+
+      // 2. Gambar Kotak Watermark & Logo PU (Selalu tegak lurus & tidak terbalik)
+      const now = new Date();
+      const formattedTime = getFormattedDateTime(now);
+      const coordsStr = currentCoords.lat
+        ? `Lat: ${currentCoords.lat}, Lng: ${currentCoords.lng}`
+        : 'GPS: Koordinat Belum Terkunci';
+
+      const idPetugas = currentUser?.id_petugas || currentUser?.id || '-';
+      const nama = currentUser?.nama || 'Petugas OP';
+      const ppk = currentUser?.ppk_op || currentUser?.ppk || '';
+      const di = currentUser?.daerah_irigasi || '';
+      const kejuron = currentUser?.kejuron ? ` • ${currentUser.kejuron}` : '';
+
+      const scale = Math.max(vw, vh) / 1280;
+      const pad = Math.round(22 * scale);
+      const boxHeight = Math.round(165 * scale);
+      const boxWidth = Math.min(vw - pad * 2, Math.round(780 * scale));
+      const boxX = pad;
+      const boxY = vh - boxHeight - pad;
+
+      // Background kotak watermark semi-transparan
+      ctx.fillStyle = 'rgba(9, 13, 22, 0.78)';
+      roundRect(ctx, boxX, boxY, boxWidth, boxHeight, Math.round(18 * scale));
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.75)';
+      ctx.lineWidth = Math.max(2, Math.round(2.5 * scale));
+      ctx.stroke();
+
+      // Kotak putih & Logo PU / BBWS
+      const logoBoxSize = Math.round(115 * scale);
+      const logoX = boxX + Math.round(18 * scale);
+      const logoY = boxY + Math.round((boxHeight - logoBoxSize) / 2);
+      ctx.fillStyle = '#FFFFFF';
+      roundRect(ctx, logoX, logoY, logoBoxSize, logoBoxSize, Math.round(14 * scale));
+      ctx.fill();
+
+      if (logoImageObj.complete && logoImageObj.naturalWidth > 0) {
+        const innerPad = Math.round(12 * scale);
+        ctx.drawImage(
+          logoImageObj,
+          logoX + innerPad,
+          logoY + innerPad,
+          logoBoxSize - innerPad * 2,
+          logoBoxSize - innerPad * 2
+        );
+      }
+
+      // Teks Watermark
+      const textX = logoX + logoBoxSize + Math.round(18 * scale);
+      let textY = boxY + Math.round(34 * scale);
+      const lineGap = Math.round(28 * scale);
+
+      ctx.fillStyle = '#FBBF24';
+      ctx.font = `800 ${Math.round(21 * scale)}px "Plus Jakarta Sans", sans-serif`;
+      ctx.fillText(`[PROGRES ${activeSlot}%] BBWS BRANTAS • OP IRIGASI`, textX, textY);
+
+      textY += lineGap;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `700 ${Math.round(20 * scale)}px "Plus Jakarta Sans", sans-serif`;
+      ctx.fillText(`${nama} (${idPetugas})`, textX, textY);
+
+      textY += lineGap;
+      ctx.fillStyle = '#E2E8F0';
+      ctx.font = `600 ${Math.round(18 * scale)}px "Plus Jakarta Sans", sans-serif`;
+      ctx.fillText(`${ppk} — ${di}${kejuron}`, textX, textY);
+
+      textY += lineGap;
+      ctx.fillStyle = '#6EE7B7';
+      ctx.font = `700 ${Math.round(18 * scale)}px "JetBrains Mono", monospace`;
+      ctx.fillText(`${formattedTime}  |  ${coordsStr}`, textX, textY);
+
+      // Kompresi JPEG kualitas 0.85 agar tajam namun ringan diunggah ke Drive
+      const imageData = canvas.toDataURL('image/jpeg', 0.85);
+
+      pendingCaptureObj = {
+        slot: activeSlot,
+        imageData: imageData,
+        timestamp: formattedTime,
+        isoTime: now.toISOString(),
+        coords: coordsStr,
+        lat: currentCoords.lat,
+        lng: currentCoords.lng,
+        orientation: vw >= vh ? 'landscape' : 'portrait'
+      };
+
+      // Tampilkan modal pratinjau hasil foto
+      document.getElementById('previewModalTitle').textContent = `HASIL FOTO PROGRES ${activeSlot}%`;
+      document.getElementById('capturedPreviewImg').src = imageData;
+      document.getElementById('previewModal').classList.remove('hidden');
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModal').classList.add('hidden');
+      pendingCaptureObj = null;
+    }
+
+    // =========================================================================
+    // SIMPAN KE INDEXEDDB & SINKRON DENGAN LAPORAN.HTML
+    // =========================================================================
+    function openPhotoDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('BBWS_Kamera_DB', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('captured_photos')) {
+            db.createObjectStore('captured_photos', { keyPath: 'slot' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function confirmAndSavePhoto() {
+      if (!pendingCaptureObj) return;
+
+      try {
+        const db = await openPhotoDB();
+        const tx = db.transaction('captured_photos', 'readwrite');
+        tx.objectStore('captured_photos').put(pendingCaptureObj);
+        await new Promise((res, rej) => {
+          tx.oncomplete = res;
+          tx.onerror = () => rej(tx.error);
+        });
+      } catch (err) {
+        console.warn('Fallback ke localStorage:', err);
+        try {
+          const existing = JSON.parse(localStorage.getItem('bbws_session_photos') || '{}');
+          existing[pendingCaptureObj.slot] = pendingCaptureObj;
+          localStorage.setItem('bbws_session_photos', JSON.stringify(existing));
+        } catch (e) {}
+      }
+
+      document.getElementById('lastThumbImg').src = pendingCaptureObj.imageData;
+      document.getElementById('lastThumbImg').classList.remove('hidden');
+      document.getElementById('lastThumbBadge').classList.add('hidden');
+
+      closePreviewModal();
+      await refreshSavedSlotsBadge();
+
+      // Jika masuk dari parameter ?slot= di laporan.html, langsung kembali ke laporan.html
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('slot')) {
+        window.location.href = 'laporan.html';
+        return;
+      }
+
+      // Jika membuka kamera langsung, otomatis geser ke slot berikutnya yang belum terisi
+      if (!savedSlotsMap['0']) selectSlot('0');
+      else if (!savedSlotsMap['50']) selectSlot('50');
+      else if (!savedSlotsMap['100']) selectSlot('100');
+      else {
+        if (confirm('Seluruh foto 0%, 50%, dan 100% sudah lengkap! Buka formulir Laporan sekarang?')) {
+          window.location.href = 'laporan.html';
+        }
+      }
+    }
+
+    async function refreshSavedSlotsBadge() {
+      savedSlotsMap = { '0': false, '50': false, '100': false };
+      try {
+        const db = await openPhotoDB();
+        const tx = db.transaction('captured_photos', 'readonly');
+        const req = tx.objectStore('captured_photos').getAll();
+        await new Promise((res) => {
+          req.onsuccess = () => {
+            (req.result || []).forEach(item => {
+              if (item && item.imageData) savedSlotsMap[String(item.slot)] = true;
+            });
+            res();
+          };
+          req.onerror = () => res();
+        });
+      } catch (e) {}
+
+      let count = 0;
+      ['0', '50', '100'].forEach(s => {
+        const checkEl = document.getElementById(`check${s}`);
+        if (savedSlotsMap[s]) {
+          count++;
+          checkEl.classList.remove('hidden');
+        } else {
+          checkEl.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('savedCountText').textContent = `${count}/3`;
+    }
+  </script>
+</body>
+</html>
