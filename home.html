@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1E3A8A">
+  <title>Beranda - BBWS Brantas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            pupr: {
+              navy: '#0F172A',
+              deep: '#1E3A8A',
+              blue: '#1D4ED8',
+              gold: '#F59E0B',
+              amber: '#FBBF24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Penyelarasan estetika dengan raport.html & kamera.html */
+    body {
+      background-color: #F8FAFC;
+      background-image:
+        radial-gradient(circle at 88% 4%, rgba(29, 78, 216, 0.06), transparent 42%),
+        radial-gradient(circle at 12% 18%, rgba(245, 158, 11, 0.07), transparent 38%);
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(30, 58, 138, 0.08);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Penyempurnaan Sidebar & Footer Profesional */
+    .sidebar {
+      background: linear-gradient(180deg, #0F235E 0%, #1E3A8A 52%, #172554 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 10px 0 32px rgba(15, 23, 42, 0.12) !important;
+    }
+    .sidebar-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 12px 13px !important;
+      border-radius: 22px !important;
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      margin-bottom: 14px !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-brand-logo {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 11px !important;
+      object-fit: cover !important;
+      border: 1.5px solid rgba(251, 191, 36, 0.65) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      padding: 2px !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22) !important;
+    }
+    .sidebar-brand-title {
+      display: block !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #FFFFFF !important;
+      letter-spacing: -0.01em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-menu {
+      border-radius: 18px !important;
+      transition: all 0.2s ease !important;
+    }
+    .sidebar-menu:hover:not(.active) {
+      background: rgba(11, 19, 46, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .sidebar-menu.active {
+      background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%) !important;
+      color: #0F172A !important;
+      font-weight: 800 !important;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.28) !important;
+    }
+    .sidebar-menu.active svg {
+      fill: #0F172A !important;
+    }
+    .sidebar-footer {
+      padding: 14px 12px 18px 12px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: linear-gradient(180deg, rgba(10, 19, 51, 0.32) 0%, rgba(7, 14, 38, 0.56) 100%) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      border-bottom-left-radius: 26px !important;
+      border-bottom-right-radius: 26px !important;
+    }
+    .sidebar-clock-card {
+      background: rgba(11, 19, 46, 0.62) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 22px !important;
+      padding: 13px 15px !important;
+      text-align: left !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(4, 9, 24, 0.28) !important;
+    }
+    .sidebar-clock-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 5px !important;
+    }
+    .sidebar-live-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      color: #6EE7B7 !important;
+    }
+    .sidebar-live-dot {
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 9999px !important;
+      background: #10B981 !important;
+      box-shadow: 0 0 8px #10B981 !important;
+    }
+    .sidebar-clock-time {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      color: #FFFFFF !important;
+      letter-spacing: 0.04em !important;
+      line-height: 1.2 !important;
+    }
+    .sidebar-clock-date {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: rgba(226, 232, 240, 0.82) !important;
+      margin-top: 2px !important;
+    }
+    .sidebar-logout-btn {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      padding: 11px 16px !important;
+      border-radius: 20px !important;
+      background: rgba(15, 23, 42, 0.56) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border: 1px solid rgba(248, 113, 113, 0.34) !important;
+      color: #FECACA !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(4, 9, 24, 0.22) !important;
+    }
+    .sidebar-logout-btn:hover {
+      background: rgba(220, 38, 38, 0.88) !important;
+      border-color: rgba(254, 202, 202, 0.45) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.34) !important;
+    }
+
+    /* Perbaikan Anti-Overflow & Hero Pop-out agar kepala gambar tidak terpotong */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 100% !important;
+      max-width: 100%;
+      overflow: visible;
+    }
+    @media (min-width: 768px) {
+      .container {
+        max-width: 1520px !important;
+      }
+    }
+    .bento-grid,
+    .bento-grid > div,
+    .right-column {
+      min-width: 0;
+      max-width: 100%;
+    }
+    .hero-section {
+      position: relative;
+      overflow: visible;
+      max-width: 100%;
+    }
+    .hero-content {
+      width: 68%;
+      max-width: 68%;
+      z-index: 2;
+    }
+    .hero-img {
+      position: absolute;
+      right: 8px;
+      bottom: 0;
+      width: 31%;
+      max-width: 31%;
+      max-height: 120%;
+      height: auto;
+      object-fit: contain;
+      object-position: bottom center;
+      pointer-events: none;
+      z-index: 3;
+      filter: drop-shadow(0 10px 18px rgba(15, 23, 42, 0.28));
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      .hero-section {
+        padding: 20px 14px 20px 16px !important;
+        margin-top: 24px !important;
+        min-height: 154px;
+        display: flex;
+        align-items: center;
+      }
+      .hero-content {
+        width: 67% !important;
+        max-width: 67% !important;
+        padding-right: 6px;
+      }
+      .hero-img {
+        right: 4px !important;
+        width: 34% !important;
+        max-width: 34% !important;
+        max-height: 176px !important;
+      }
+      .action-grid {
+        gap: 8px !important;
+      }
+      .action-item {
+        min-width: 0;
+      }
+      .stats-grid {
+        gap: 10px !important;
+      }
+      .stat-card {
+        padding: 14px 12px !important;
+        gap: 8px !important;
+        min-width: 0;
+      }
+      .stat-card > div:first-child {
+        gap: 8px !important;
+        min-width: 0;
+      }
+      .stat-card > div:first-child > div:first-child {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 12px !important;
+      }
+      .stat-card p:first-child {
+        font-size: 12px !important;
+      }
+      .stat-card p:last-child {
+        font-size: 10.5px !important;
+      }
+      .stat-value {
+        font-size: 20px !important;
+      }
+      .calendar-top {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .calendar-month-pill {
+        font-size: 11px !important;
+        padding: 4px 10px !important;
+      }
+      .week-strip {
+        gap: 4px !important;
+      }
+      .day-pill {
+        min-width: 0 !important;
+        padding: 8px 2px !important;
+      }
+      .day-name {
+        font-size: 10px !important;
+      }
+      .day-num {
+        font-size: 13px !important;
+      }
+    }
+
+    @media (max-width: 375px) {
+      .stats-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR DESKTOP & TABLET -->
+  <aside class="sidebar" aria-label="Navigasi Utama">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="assets/img/logo.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=PU'" alt="Logo BBWS" class="sidebar-brand-logo">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-title">BBWS Brantas</span>
+          <span class="sidebar-brand-sub">PUPR • Pelaporan</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="home.html" class="sidebar-menu active">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Beranda</span>
+        </a>
+        <a href="peta.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>Peta D.I</span>
+        </a>
+        <a href="kamera.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>Laporan</span>
+        </a>
+        <a href="raport.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          <span>Raport</span>
+        </a>
+        <a href="profile.html" class="sidebar-menu">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          <span>Profil</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-clock-card" aria-label="Waktu Saat Ini">
+        <div class="sidebar-clock-top">
+          <span class="sidebar-live-badge">
+            <span class="sidebar-live-dot"></span>
+            WIB Aktif
+          </span>
+          <span id="sidebarPetugasCode" class="text-[10px] font-mono font-bold text-amber-300/90">O&P</span>
+        </div>
+        <div class="sidebar-clock-time tabular-nums" id="sidebarClockTime">--:--:--</div>
+        <div class="sidebar-clock-date" id="sidebarClockDate">Memuat tanggal...</div>
+      </div>
+
+      <button type="button" class="sidebar-logout-btn" id="btnLogout" title="Keluar dari akun">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>Keluar Sesi</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="container">
+    <!-- HEADER -->
+    <header class="header-large flex items-start justify-between gap-3" id="headerTitle">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="px-2 py-0.5 rounded-md bg-blue-100 text-pupr-deep text-[10px] font-extrabold uppercase tracking-wider">BBWS Brantas</span>
+          <span id="homeDataSourcePill" title="Status Koneksi Server BBWS" class="w-6 h-6 rounded-md bg-slate-200/80 text-slate-600 inline-flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </span>
+        </div>
+        <p id="greeting">Selamat Pagi,</p>
+        <h1 id="userName">Memuat...</h1>
+        <p id="userMetaSub" class="text-xs font-medium text-slate-500 mt-1">Petugas Operasi & Pemeliharaan Irigasi</p>
+      </div>
+
+      <button type="button" onclick="loadHomeDashboardData(true)" title="Sinkronkan Data Server BBWS" class="w-11 h-11 rounded-2xl bg-white hover:bg-blue-50 text-pupr-blue flex items-center justify-center shadow-sm border border-slate-200/80 active:scale-95 transition shrink-0 mt-1 cursor-pointer">
+        <svg id="homeRefreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="bento-grid">
+      <div>
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+          <div class="hero-content">
+            <h2>Siap Bekerja?</h2>
+            <p>Laporkan kondisi lapangan hari ini dengan TimeMark presisi 0%, 50%, dan 100%.</p>
+            <a href="kamera.html" class="btn-hero">Buat Laporan &rarr;</a>
+          </div>
+          <img src="assets/img/pegawai.png" onerror="this.src='https://placehold.co/240x300/1E3A8A/FBBF24?text=Petugas+PUPR'" class="hero-img" alt="Petugas Lapangan PUPR">
+        </section>
+
+        <!-- AKSES CEPAT 3D & FOLDER ALA XIAOMI -->
+        <section class="quick-access-section" aria-label="Akses Cepat">
+          <div class="section-header">
+            <h2 class="section-title">Akses Cepat</h2>
+            <span class="badge badge-blue">Menu Utama</span>
+          </div>
+
+          <div class="action-grid">
+            <!-- 1. Absen -->
+            <a href="kamera.html" class="action-item">
+              <div class="action-icon-3d icon-3d-amber">
+                <i data-lucide="user-check"></i>
+              </div>
+              <span class="action-label">Absen Harian</span>
+            </a>
+
+            <!-- 2. Lapkin Baru -->
+            <a href="kamera.html" class="action-item">
+              <div class="action-icon-3d icon-3d-royal">
+                <i data-lucide="file-pen-line"></i>
+              </div>
+              <span class="action-label">Lapkin Baru</span>
+            </a>
+
+            <!-- 3. Cek Raport -->
+            <a href="raport.html" class="action-item">
+              <div class="action-icon-3d icon-3d-emerald">
+                <i data-lucide="bar-chart-3"></i>
+              </div>
+              <span class="action-label">Cek Raport</span>
+            </a>
+
+            <!-- 4. Folder Ala Xiaomi (Gabungan beberapa menu) -->
+            <button type="button" class="action-item" onclick="openXiaomiFolder('folder-layanan')" aria-label="Buka Folder Layanan Lainnya">
+              <div class="xiaomi-folder-icon">
+                <div class="folder-mini-tile icon-3d-sky">
+                  <i data-lucide="map-pin"></i>
+                </div>
+                <div class="folder-mini-tile icon-3d-amber">
+                  <i data-lucide="clipboard-list"></i>
+                </div>
+                <div class="folder-mini-tile icon-3d-blue">
+                  <i data-lucide="calendar-clock"></i>
+                </div>
+                <div class="folder-mini-tile icon-3d-emerald">
+                  <i data-lucide="user-cog"></i>
+                </div>
+              </div>
+              <span class="action-label">Lainnya (4)</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- RINGKASAN HARI INI -->
+        <section aria-label="Ringkasan Hari Ini">
+          <div class="section-header">
+            <h2 class="section-title">Ringkasan Kinerja</h2>
+            <a href="raport.html" class="section-link">Buka Raport &rarr;</a>
+          </div>
+
+          <div class="stats-grid">
+            <a href="raport.html" class="card stat-card glass-surface no-underline hover:border-blue-300 transition" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 16px; background: var(--pupr-blue-soft); color: var(--pupr-blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div>
+                  <p style="font-size: 13.5px; color: var(--text-main); font-weight: 700;">Total Laporan</p>
+                  <p id="statKirimSub" style="font-size: 12px; color: var(--text-sec); margin-top: 2px;">0 hari ini</p>
+                </div>
+              </div>
+              <h3 class="tabular-nums stat-value" style="font-size: 24px; font-weight: 800; color: var(--pupr-blue-light);" id="statKirim">0</h3>
+            </a>
+
+            <a href="raport.html" class="card stat-card glass-surface no-underline hover:border-emerald-300 transition" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(16, 185, 129, 0.12); color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <p style="font-size: 13.5px; color: var(--text-main); font-weight: 700;">Terverifikasi</p>
+                  <p id="statVerifSub" style="font-size: 12px; color: var(--text-sec); margin-top: 2px;">0% disetujui</p>
+                </div>
+              </div>
+              <h3 class="tabular-nums stat-value" style="font-size: 24px; font-weight: 800; color: #059669;" id="statVerif">0</h3>
+            </a>
+          </div>
+        </section>
+      </div>
+
+      <!-- KOLOM KANAN: KALENDER & RIWAYAT TERAKHIR -->
+      <div class="right-column">
+        <section class="card glass-surface" aria-label="Kalender Kegiatan">
+          <div class="calendar-top">
+            <div>
+              <h2 class="section-title" style="margin-bottom: 2px;">Kalender Lapangan</h2>
+              <p style="font-size: 12px; color: var(--text-sec);" id="selectedDateLabel">Pilih tanggal</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="calendar-month-pill" id="calendarMonthLabel">-</span>
+              <div class="calendar-nav-btns">
+                <button type="button" class="cal-nav-btn" id="prevWeekBtn" aria-label="Minggu Sebelumnya">&lsaquo;</button>
+                <button type="button" class="cal-nav-btn" id="nextWeekBtn" aria-label="Minggu Berikutnya">&rsaquo;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="week-strip" id="weekStrip"></div>
+          <div class="agenda-list" id="agendaList"></div>
+        </section>
+
+        <section aria-label="Riwayat Terakhir">
+          <div class="section-header">
+            <h2 class="section-title">Riwayat Terakhir</h2>
+            <a href="raport.html" class="section-link">Lihat Semua</a>
+          </div>
+
+          <div id="riwayatList">
+            <div class="card glass-surface text-center text-slate-400 text-xs font-semibold py-6">
+              Memuat riwayat terbaru...
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL FOLDER ALA XIAOMI -->
+  <div id="xiaomiFolderModal" class="xiaomi-folder-backdrop" onclick="if(event.target===this) closeXiaomiFolder()">
+    <div class="xiaomi-folder-box" role="dialog" aria-modal="true" aria-labelledby="xiaomiFolderTitle">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-pupr-blue bg-blue-100 px-2 py-0.5 rounded-md">Folder Menu</span>
+          <h3 id="xiaomiFolderTitle" class="text-lg font-extrabold text-slate-900 mt-1">Layanan & Data D.I</h3>
+        </div>
+        <button type="button" onclick="closeXiaomiFolder()" class="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-700 border-0 cursor-pointer transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Isi Folder (Gaya Xiaomi Grid 3 Kolom) -->
+      <div id="xiaomiFolderGrid" class="xiaomi-folder-grid"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL LAPORAN -->
+  <div id="homeDetailModal" class="hidden fixed inset-0 z-[1100] bg-slate-950/75 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this) closeHomeDetailModal()">
+    <div class="bg-white text-slate-900 rounded-t-[28px] sm:rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto hide-scrollbar">
+      <div class="flex items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
+        <div>
+          <span id="homeModalStatusBadge" class="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700">MENUNGGU</span>
+          <h3 id="homeModalTitle" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Detail Pekerjaan</h3>
+          <p id="homeModalSub" class="text-xs text-slate-500 mt-0.5">-</p>
+        </div>
+        <button type="button" onclick="closeHomeDetailModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 shrink-0 border-0 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs">
+        <div>
+          <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">Dokumentasi Progres (0% • 50% • 100%)</p>
+          <div class="grid grid-cols-3 gap-2.5" id="homeModalPhotosGrid"></div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Daerah Irigasi / Lokasi</span>
+            <span id="homeModalLokasi" class="font-bold text-slate-900 text-right">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Waktu Pengiriman</span>
+            <span id="homeModalWaktu" class="font-bold text-slate-900 tabular-nums">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Volume Pekerjaan</span>
+            <span id="homeModalVolume" class="font-bold text-pupr-blue text-right">-</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200/70">
+            <span class="text-slate-500 block mb-0.5">Catatan / Usulan</span>
+            <p id="homeModalCatatan" class="font-medium text-slate-800">-</p>
+          </div>
+        </div>
+
+        <a href="raport.html" class="block w-full py-3 rounded-2xl bg-pupr-deep hover:bg-blue-800 text-white text-center font-bold text-xs no-underline transition">
+          Buka Halaman Raport Lengkap &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="homeToastBox" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[1200] bg-slate-900/95 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 max-w-[90vw]">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="homeToastText">Notifikasi</span>
+  </div>
+
+  <!-- FLOATING NAV MOBILE -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi Mobile">
+    <a href="home.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Beranda</span>
+    </a>
+    <a href="peta.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span>Peta</span>
+    </a>
+    <a href="kamera.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span>Laporan</span>
+    </a>
+    <a href="raport.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      <span>Raport</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <span>Profil</span>
+    </a>
+  </nav>
+
+  <script>
+    // ==========================================
+    // DATA & LOGIKA FOLDER XIAOMI + LUCIDE 3D
+    // ==========================================
+    const XIAOMI_FOLDERS = {
+      'folder-layanan': {
+        title: 'Layanan & Data D.I',
+        items: [
+          { label: 'Peta D.I', href: 'peta.html', icon: 'map-pin', theme: 'icon-3d-sky' },
+          { label: 'Cek PPA Baru', href: 'raport.html', icon: 'clipboard-list', theme: 'icon-3d-amber' },
+          { label: 'Jadwal Piket', href: 'home.html#weekStrip', icon: 'calendar-clock', theme: 'icon-3d-blue' },
+          { label: 'Profil Petugas', href: 'profile.html', icon: 'user-cog', theme: 'icon-3d-emerald' }
+        ]
+      }
+    };
+
+    function openXiaomiFolder(folderKey) {
+      const folder = XIAOMI_FOLDERS[folderKey];
+      if (!folder) return;
+
+      document.getElementById('xiaomiFolderTitle').textContent = folder.title;
+      const grid = document.getElementById('xiaomiFolderGrid');
+
+      grid.innerHTML = folder.items.map(item => `
+        <a href="${item.href}" onclick="closeXiaomiFolder()" class="flex flex-col items-center gap-2 no-underline group cursor-pointer">
+          <div class="action-icon-3d ${item.theme} group-hover:-translate-y-1">
+            <i data-lucide="${item.icon}"></i>
+          </div>
+          <span class="text-[11.5px] font-bold text-slate-800 text-center leading-tight">${item.label}</span>
+        </a>
+      `).join('');
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+      const modal = document.getElementById('xiaomiFolderModal');
+      modal.classList.add('open');
+    }
+
+    function closeXiaomiFolder() {
+      const modal = document.getElementById('xiaomiFolderModal');
+      modal.classList.remove('open');
+    }
+
+    // ==========================================
+    // LOGIKA DASHBOARD UTAMA
+    // ==========================================
+    let currentUserProfile = null;
+    let homeReportsCache = [];
+    let homeToastTimer = null;
+
+    function showHomeToast(msg) {
+      const box = document.getElementById('homeToastBox');
+      const text = document.getElementById('homeToastText');
+      if (!box || !text) return;
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(homeToastTimer);
+      homeToastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
+    }
+
+    function toIsoDate(dateInput) {
+      const d = new Date(dateInput);
+      if (isNaN(d.getTime())) return '';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function getHomeDemoReports(profile) {
+      const now = Date.now();
+      const dayMs = 86400000;
+      const di = profile?.daerah_irigasi || 'D.I Bening • Saluran Sekunder';
+      return [
+        {
+          id: 'demo-1',
+          jenis_pekerjaan: 'Pembersihan Saluran & Babat Rumput',
+          daerah_irigasi: di,
+          status: 'diverifikasi',
+          created_at: new Date(now - 3600 * 1000 * 2).toISOString(),
+          volume_ringkas: 'Luas 120 m² • Panjang 85 m',
+          catatan: 'Kondisi aliran lancar, sampah plastik telah diangkat.',
+          foto_0_url: 'https://placehold.co/320x240/1E3A8A/FBBF24?text=Foto+0%25+Awal',
+          foto_50_url: 'https://placehold.co/320x240/1D4ED8/FFFFFF?text=Foto+50%25+Proses',
+          foto_100_url: 'https://placehold.co/320x240/059669/FFFFFF?text=Foto+100%25+Selesai'
+        },
+        {
+          id: 'demo-2',
+          jenis_pekerjaan: 'Pengangkatan Sedimen Pintu Air B.Kr.4',
+          daerah_irigasi: di,
+          status: 'terkirim',
+          created_at: new Date(now - dayMs * 1).toISOString(),
+          volume_ringkas: 'Sedimen 2.5 m³ • Sampah 0.8 m³',
+          catatan: 'Menunggu verifikasi pengamat pengairan.',
+          foto_0_url: 'https://placehold.co/320x240/1E3A8A/FBBF24?text=Foto+0%25+Awal',
+          foto_50_url: 'https://placehold.co/320x240/1D4ED8/FFFFFF?text=Foto+50%25+Proses',
+          foto_100_url: 'https://placehold.co/320x240/059669/FFFFFF?text=Foto+100%25+Selesai'
+        },
+        {
+          id: 'demo-3',
+          jenis_pekerjaan: 'Patroli Keamanan & Pelumasan Pintu',
+          daerah_irigasi: di,
+          status: 'diverifikasi',
+          created_at: new Date(now - dayMs * 2).toISOString(),
+          volume_ringkas: 'Panjang 450 m • 2 Pintu Air',
+          catatan: 'Roda gigi pintu air berfungsi baik.',
+          foto_0_url: 'https://placehold.co/320x240/1E3A8A/FBBF24?text=Foto+0%25+Awal',
+          foto_50_url: 'https://placehold.co/320x240/1D4ED8/FFFFFF?text=Foto+50%25+Proses',
+          foto_100_url: 'https://placehold.co/320x240/059669/FFFFFF?text=Foto+100%25+Selesai'
+        }
+      ];
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+      if (typeof initSupabase === 'function') {
+        initSupabase();
+      }
+
+      let session = null;
+      if (typeof checkSession === 'function') {
+        try {
+          session = await checkSession();
+        } catch (e) {
+          console.warn('checkSession fallback:', e);
+        }
+      }
+
+      if (session && session.profile) {
+        currentUserProfile = session.profile;
+      } else {
+        try {
+          const saved = localStorage.getItem('user_bbws');
+          currentUserProfile = saved
+            ? JSON.parse(saved)
+            : { id_petugas: 'OPI-SP-1', id_pegawai: 'OPI-SP-1', nama: 'Petugas Lapangan', jabatan: 'PPA / Pekarya', daerah_irigasi: 'BBWS Brantas', foto_apps: '' };
+        } catch (e) {
+          currentUserProfile = { id_petugas: 'OPI-SP-1', nama: 'Petugas Lapangan', daerah_irigasi: 'BBWS Brantas' };
+        }
+      }
+
+      // Render Sapaan & Identitas Header
+      const userNameEl = document.getElementById('userName');
+      const greetingEl = document.getElementById('greeting');
+      const userMetaSubEl = document.getElementById('userMetaSub');
+      const heroImg = document.querySelector('.hero-img');
+
+      if (userNameEl) {
+        userNameEl.textContent = currentUserProfile?.nama || 'Petugas Lapangan';
+      }
+      if (userMetaSubEl) {
+        const kode = currentUserProfile?.id_petugas || currentUserProfile?.id_pegawai || '';
+        const jabatan = currentUserProfile?.jabatan || 'Petugas O&P';
+        userMetaSubEl.textContent = `${jabatan}${kode ? ' • ' + kode : ''}`;
+      }
+      const sideCodeEl = document.getElementById('sidebarPetugasCode');
+      if (sideCodeEl) {
+        sideCodeEl.textContent = currentUserProfile?.id_petugas || currentUserProfile?.id_pegawai || 'O&P';
+      }
+      if (heroImg) {
+        heroImg.src = currentUserProfile?.foto_apps || 'assets/img/pegawai.png';
+      }
+
+      const hour = new Date().getHours();
+      let greet = 'Selamat Pagi,';
+      if (hour >= 11 && hour < 15) greet = 'Selamat Siang,';
+      else if (hour >= 15 && hour < 18) greet = 'Selamat Sore,';
+      else if (hour >= 18) greet = 'Selamat Malam,';
+      if (greetingEl) greetingEl.textContent = greet;
+
+      await loadHomeDashboardData(false);
+    });
+
+    async function loadHomeDashboardData(isManual) {
+      if (isManual) {
+        const icon = document.getElementById('homeRefreshIcon');
+        icon?.classList.remove('animate-spin');
+        void icon?.offsetWidth;
+        icon?.classList.add('animate-spin');
+        setTimeout(() => icon?.classList.remove('animate-spin'), 650);
+      }
+
+      const pill = document.getElementById('homeDataSourcePill');
+      const userId = currentUserProfile?.id_petugas || currentUserProfile?.id_pegawai;
+
+      const setSourceIcon = (mode) => {
+        if (!pill) return;
+        if (mode === 'live') {
+          pill.title = 'Terhubung ke Server BBWS Brantas';
+          pill.setAttribute('aria-label', 'Terhubung ke Server BBWS Brantas');
+          pill.className = 'w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 inline-flex items-center justify-center';
+          pill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M5 13l4 4L19 7"/></svg>`;
+        } else {
+          pill.title = 'Mode Sinkronisasi Offline BBWS';
+          pill.setAttribute('aria-label', 'Mode Sinkronisasi Offline BBWS');
+          pill.className = 'w-6 h-6 rounded-md bg-amber-100 text-amber-700 inline-flex items-center justify-center';
+          pill.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>`;
+        }
+      };
+
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && userId) {
+        try {
+          const { data: laporan, error } = await supabaseClient
+            .from('laporan')
+            .select('*')
+            .eq('id_petugas', userId)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          homeReportsCache = Array.isArray(laporan) ? laporan : [];
+          setSourceIcon('live');
+          if (isManual) showHomeToast('Data berhasil diperbarui dari Server BBWS Brantas.');
+        } catch (err) {
+          console.warn('Fallback sinkronisasi server BBWS:', err);
+          homeReportsCache = getHomeDemoReports(currentUserProfile);
+          setSourceIcon('demo');
+          if (isManual) showHomeToast('Data disinkronkan dari cache lokal Server BBWS.');
+        }
+      } else {
+        homeReportsCache = getHomeDemoReports(currentUserProfile);
+        setSourceIcon('demo');
+        if (isManual) showHomeToast('Data disinkronkan dari cache lokal Server BBWS.');
+      }
+
+      renderHomeSummaryAndRecent();
+      renderWeek();
+    }
+
+    function renderHomeSummaryAndRecent() {
+      const todayIso = toIsoDate(new Date());
+      const total = homeReportsCache.length;
+      const todayCount = homeReportsCache.filter(r => toIsoDate(r.created_at) === todayIso).length;
+      const verif = homeReportsCache.filter(r => r.status === 'diverifikasi').length;
+      const pct = total > 0 ? Math.round((verif / total) * 100) : 0;
+
+      document.getElementById('statKirim').textContent = total;
+      document.getElementById('statKirimSub').textContent = `${todayCount} laporan hari ini`;
+      document.getElementById('statVerif').textContent = verif;
+      document.getElementById('statVerifSub').textContent = `${pct}% disetujui`;
+
+      const listEl = document.getElementById('riwayatList');
+      const recentThree = homeReportsCache.slice(0, 3);
+
+      if (recentThree.length === 0) {
+        listEl.innerHTML = `
+          <div class="card glass-surface text-center py-6">
+            <p class="text-sm font-bold text-slate-700">Belum ada laporan</p>
+            <p class="text-xs text-slate-400 mt-1">Tekan "Buat Laporan" untuk mulai mendokumentasikan pekerjaan.</p>
+          </div>`;
+        return;
+      }
+
+      listEl.innerHTML = recentThree.map((item, idx) => {
+        let badgeClass = 'badge-yellow';
+        let badgeText = 'MENUNGGU';
+        if (item.status === 'diverifikasi') {
+          badgeClass = 'bg-emerald-100 text-emerald-700';
+          badgeText = 'DISETUJUI';
+        } else if (item.status === 'ditolak') {
+          badgeClass = 'bg-red-100 text-red-700';
+          badgeText = 'DITOLAK';
+        }
+
+        const tgl = new Date(item.created_at).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const thumbUrl = item.foto_100_url || item.foto_0_url || 'https://placehold.co/120x120/1E3A8A/FBBF24?text=PUPR';
+
+        return `
+          <div onclick="openHomeReportDetail(${idx})" class="card card-interactive glass-surface cursor-pointer" style="display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+              <div style="width: 50px; height: 50px; border-radius: 16px; overflow: hidden; flex-shrink: 0; border: 1px solid rgba(30, 58, 138, 0.12); background: #EFF6FF;">
+                <img src="${thumbUrl}" onerror="this.src='https://placehold.co/120x120/1E3A8A/FBBF24?text=PUPR'" alt="Foto Laporan" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="min-width: 0;">
+                <h4 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.jenis_pekerjaan || 'Laporan Harian Lapangan'}</h4>
+                <p style="font-size: 12px; color: var(--text-sec); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.daerah_irigasi || item.saluran || 'BBWS Brantas'} • ${tgl}</p>
+              </div>
+            </div>
+            <span class="badge ${badgeClass}">${badgeText}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openHomeReportDetail(idx) {
+      const item = homeReportsCache[idx];
+      if (!item) return;
+
+      const badge = document.getElementById('homeModalStatusBadge');
+      if (item.status === 'diverifikasi') {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-700';
+        badge.textContent = 'DISETUJUI';
+      } else if (item.status === 'ditolak') {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-red-100 text-red-700';
+        badge.textContent = 'DITOLAK';
+      } else {
+        badge.className = 'inline-block px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-700';
+        badge.textContent = 'MENUNGGU VERIFIKASI';
+      }
+
+      document.getElementById('homeModalTitle').textContent = item.jenis_pekerjaan || 'Laporan Harian';
+      document.getElementById('homeModalSub').textContent = item.daerah_irigasi || 'BBWS Brantas';
+      document.getElementById('homeModalLokasi').textContent = item.daerah_irigasi || item.saluran || '-';
+      document.getElementById('homeModalWaktu').textContent = new Date(item.created_at).toLocaleString('id-ID');
+      document.getElementById('homeModalVolume').textContent = item.volume_ringkas || `${item.vol_luas || 0} m² • ${item.vol_panjang || 0} m`;
+      document.getElementById('homeModalCatatan').textContent = item.catatan || item.usulan_perbaikan || 'Tidak ada catatan tambahan.';
+
+      const photos = [
+        { label: '0% Awal', url: item.foto_0_url },
+        { label: '50% Proses', url: item.foto_50_url },
+        { label: '100% Selesai', url: item.foto_100_url }
+      ];
+
+      document.getElementById('homeModalPhotosGrid').innerHTML = photos.map(p => `
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-1.5 text-center">
+          <div class="w-full h-24 rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center">
+            ${p.url
+              ? `<img src="${p.url}" onerror="this.src='https://placehold.co/240x180/1E3A8A/FBBF24?text=Foto'" alt="${p.label}" class="w-full h-full object-cover">`
+              : `<span class="text-[10px] text-slate-400 font-semibold">Tidak ada</span>`}
+          </div>
+          <span class="block text-[10px] font-bold text-slate-700 mt-1.5">${p.label}</span>
+        </div>
+      `).join('');
+
+      const modal = document.getElementById('homeDetailModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeHomeDetailModal() {
+      const modal = document.getElementById('homeDetailModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Jam Sidebar
+    const clockTimeEl = document.getElementById('sidebarClockTime');
+    const clockDateEl = document.getElementById('sidebarClockDate');
+
+    function updateSidebarClock() {
+      const now = new Date();
+      if (clockTimeEl) clockTimeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (clockDateEl) clockDateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    updateSidebarClock();
+    setInterval(updateSidebarClock, 1000);
+
+    // Logout
+    document.getElementById('btnLogout')?.addEventListener('click', async () => {
+      if (typeof logout === 'function') {
+        await logout();
+      } else {
+        try { localStorage.removeItem('user_bbws'); } catch (e) {}
+        showHomeToast('Sesi diakhiri.');
+      }
+    });
+
+    // KALENDER LAPANGAN
+    const weekStrip = document.getElementById('weekStrip');
+    const agendaList = document.getElementById('agendaList');
+    const monthLabel = document.getElementById('calendarMonthLabel');
+    const selectedDateLabel = document.getElementById('selectedDateLabel');
+
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    const defaultAgenda = [
+      { time: '08:00', title: 'Inspeksi Saluran & Pintu Air', sub: 'Patok Lapangan • Dokumentasi TimeMark 0%' },
+      { time: '14:00', title: 'Finalisasi Progres & Absen Pulang', sub: 'Dokumentasi TimeMark 100%' }
+    ];
+
+    let anchorDate = new Date();
+    let selectedIso = toIsoDate(anchorDate);
+
+    function getStartOfWeek(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - d.getDay());
+      return d;
+    }
+
+    function renderAgenda(dateObj) {
+      const iso = toIsoDate(dateObj);
+      const formatted = `${dayNames[dateObj.getDay()]}, ${dateObj.getDate()} ${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+      selectedDateLabel.textContent = `Agenda • ${formatted}`;
+
+      const reportsOnDate = homeReportsCache.filter(r => toIsoDate(r.created_at) === iso);
+      const items = reportsOnDate.length > 0
+        ? reportsOnDate.map(r => ({
+            time: new Date(r.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+            title: r.jenis_pekerjaan || 'Laporan Lapangan',
+            sub: `${r.daerah_irigasi || 'BBWS Brantas'} • Status: ${(r.status || 'terkirim').toUpperCase()}`
+          }))
+        : defaultAgenda;
+
+      agendaList.innerHTML = items.map(item => `
+        <div class="agenda-item">
+          <span class="agenda-time tabular-nums">${item.time}</span>
+          <div>
+            <div class="agenda-title">${item.title}</div>
+            <div class="agenda-sub">${item.sub}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderWeek() {
+      const start = getStartOfWeek(anchorDate);
+      const midWeekDate = new Date(start);
+      midWeekDate.setDate(start.getDate() + 3);
+      monthLabel.textContent = `${monthNames[midWeekDate.getMonth()]} ${midWeekDate.getFullYear()}`;
+
+      weekStrip.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const iso = toIsoDate(d);
+        const isActive = iso === selectedIso;
+        const hasReport = homeReportsCache.some(r => toIsoDate(r.created_at) === iso);
+        const hasEvent = hasReport || iso === toIsoDate(new Date());
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `day-pill ${isActive ? 'active' : ''} ${hasEvent ? 'has-event' : ''}`;
+        btn.innerHTML = `
+          <span class="day-name">${dayNames[d.getDay()]}</span>
+          <span class="day-num tabular-nums">${d.getDate()}</span>
+          <span class="day-dot"></span>
+        `;
+        btn.addEventListener('click', () => {
+          selectedIso = iso;
+          renderWeek();
+          renderAgenda(d);
+        });
+        weekStrip.appendChild(btn);
+      }
+
+      const activeDate = new Date(`${selectedIso}T00:00:00`);
+      renderAgenda(isNaN(activeDate) ? new Date() : activeDate);
+    }
+
+    document.getElementById('prevWeekBtn')?.addEventListener('click', () => {
+      anchorDate.setDate(anchorDate.getDate() - 7);
+      renderWeek();
+    });
+
+    document.getElementById('nextWeekBtn')?.addEventListener('click', () => {
+      anchorDate.setDate(anchorDate.getDate() + 7);
+      renderWeek();
+    });
+
+    // Auto-Hide Bottom Nav pada layar mobile
+    let lastScrollY = window.scrollY;
+    const nav = document.getElementById('bottomNav');
+    const header = document.getElementById('headerTitle');
+
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      if (currentY > lastScrollY && currentY > 56) {
+        nav?.classList.add('hidden');
+        header?.classList.add('collapsed');
+      } else if (currentY < lastScrollY) {
+        nav?.classList.remove('hidden');
+        header?.classList.remove('collapsed');
+      }
+      lastScrollY = Math.max(currentY, 0);
+    }, { passive: true });
+  </script>
+</body>
+</html>
