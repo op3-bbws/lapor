@@ -4,6 +4,8 @@ const SUPABASE_ANON_KEY = "sb_publishable_k4jCWy6fgE_qk8B6C3Hahg_JFwYJ1ht";
 const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec";
 
 const DEFAULT_PEGAWAI_IMG = "assets/img/pegawai.png";
+const LAST_PROFILE_CACHE_KEY = "bbws_last_valid_profile_v1";
+
 let supabaseClient = null;
 
 function initSupabase() {
@@ -52,42 +54,48 @@ async function login(idPetugas, password) {
     user: data.user,
     profile
   }));
+  localStorage.setItem(LAST_PROFILE_CACHE_KEY, JSON.stringify(profile));
 
   return { user: data.user, profile };
 }
 
 async function checkSession() {
-    try {
-        if (typeof supabaseClient === 'undefined' && typeof initSupabase === 'function') {
-            initSupabase();
-        }
-        const { data, error } = await supabaseClient.auth.getSession();
-
-        if (error || !data || !data.session) {
-            // Bersihkan token Supabase kedaluwarsa agar tidak muncul error 400 lagi
-            Object.keys(localStorage).forEach((k) => {
-                if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
-                    localStorage.removeItem(k);
-                }
-            });
-            const cached = localStorage.getItem('bbws_last_valid_profile_v1');
-            return cached ? { session: null, profile: JSON.parse(cached), isCached: true } : null;
-        }
-
-        const { data: profile } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('auth_id', data.session.user.id)
-            .single();
-
-        if (profile) {
-            localStorage.setItem('bbws_last_valid_profile_v1', JSON.stringify(profile));
-            return { session: data.session, profile, isCached: false };
-        }
-        return null;
-    } catch (e) {
-        return null;
+  try {
+    const client = initSupabase();
+    if (!client) {
+      const cached = localStorage.getItem(LAST_PROFILE_CACHE_KEY);
+      return cached ? { session: null, profile: JSON.parse(cached), isCached: true } : null;
     }
+
+    const { data, error } = await client.auth.getSession();
+
+    if (error || !data || !data.session) {
+      Object.keys(localStorage).forEach((k) => {
+        if (k.startsWith("sb-") && k.endsWith("-auth-token")) {
+          localStorage.removeItem(k);
+        }
+      });
+      const cached = localStorage.getItem(LAST_PROFILE_CACHE_KEY);
+      return cached ? { session: null, profile: JSON.parse(cached), isCached: true } : null;
+    }
+
+    const { data: profile } = await client
+      .from("users")
+      .select("*")
+      .eq("auth_id", data.session.user.id)
+      .single();
+
+    if (profile) {
+      localStorage.setItem(LAST_PROFILE_CACHE_KEY, JSON.stringify(profile));
+      return { session: data.session, profile, isCached: false };
+    }
+
+    const cached = localStorage.getItem(LAST_PROFILE_CACHE_KEY);
+    return cached ? { session: data.session, profile: JSON.parse(cached), isCached: true } : null;
+  } catch (e) {
+    const cached = localStorage.getItem(LAST_PROFILE_CACHE_KEY);
+    return cached ? { session: null, profile: JSON.parse(cached), isCached: true } : null;
+  }
 }
 
 async function refreshUserProfile() {
@@ -98,17 +106,17 @@ async function refreshUserProfile() {
   let profile = sessionData.profile || {};
 
   try {
-    if (client && sessionData.user?.id) {
+    const userId = sessionData.session?.user?.id || sessionData.user?.id;
+    if (client && userId) {
       const { data, error } = await client
         .from("users")
         .select("*")
-        .eq("auth_id", sessionData.user.id)
+        .eq("auth_id", userId)
         .single();
 
       if (!error && data) {
         profile = { ...profile, ...data };
-        sessionData.profile = profile;
-        localStorage.setItem("bbws_session", JSON.stringify(sessionData));
+        localStorage.setItem(LAST_PROFILE_CACHE_KEY, JSON.stringify(profile));
       }
     }
   } catch (e) {
@@ -124,5 +132,6 @@ async function logout() {
     await client.auth.signOut();
   }
   localStorage.removeItem("bbws_session");
+  localStorage.removeItem(LAST_PROFILE_CACHE_KEY);
   window.location.href = "index.html";
 }
