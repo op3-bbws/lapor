@@ -66,12 +66,8 @@
       z-index: 1;
       transition: transform 0.2s ease;
     }
-    #cameraVideo.is-front {
-      transform: scaleX(-1);
-    }
-    #cameraVideo.is-back {
-      transform: scaleX(1);
-    }
+    #cameraVideo.is-front { transform: scaleX(-1); }
+    #cameraVideo.is-back { transform: scaleX(1); }
 
     /* Garis Bantu Grid 3x3 (#) */
     #gridOverlay {
@@ -126,19 +122,20 @@
       font-weight: 700;
     }
 
-    /* Overlay Watermark & Logo (Mendukung Portrait & Landscape Tanpa Menabrak Tengah) */
+    /* Overlay Watermark & Logo */
     #watermarkOverlay {
       position: absolute;
       z-index: 25;
       pointer-events: none;
-      white-space: nowrap;
-      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.25s, bottom 0.25s, left 0.25s, right 0.25s;
+      width: max-content;
+      max-width: 310px;
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.22s, bottom 0.22s, left 0.22s, right 0.22s;
     }
     #logoOverlay {
       position: absolute;
       z-index: 25;
       pointer-events: none;
-      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.25s, bottom 0.25s, left 0.25s, right 0.25s;
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.22s, bottom 0.22s, left 0.22s, right 0.22s;
     }
 
     /* Toolbar Atas */
@@ -180,7 +177,7 @@
     .right-rail {
       position: absolute;
       right: 14px;
-      top: 54%;
+      top: 52%;
       transform: translateY(-50%);
       z-index: 40;
       display: flex;
@@ -291,9 +288,7 @@
       padding: 4px 8px;
       position: relative;
     }
-    .bottom-link.active {
-      color: #FFFFFF;
-    }
+    .bottom-link.active { color: #FFFFFF; }
     .bottom-link.active::after {
       content: '';
       position: absolute;
@@ -305,7 +300,6 @@
       background: #FBBF24;
     }
 
-    /* Flash Effect */
     #flashScreen {
       position: absolute;
       inset: 0;
@@ -315,8 +309,6 @@
       pointer-events: none;
       transition: opacity 0.18s ease;
     }
-
-    /* Countdown Overlay */
     #countdownOverlay {
       position: absolute;
       inset: 0;
@@ -372,11 +364,11 @@
         </button>
       </div>
 
-      <a href="laporan.html" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-emerald-500/40 text-white no-underline shadow-lg">
+      <button type="button" onclick="goToLaporanForm()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/85 border border-emerald-500/40 text-white cursor-pointer shadow-lg">
         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
         <span class="text-[11px] font-extrabold">Buat Laporan</span>
         <span id="topSessionCountPill" class="px-1.5 py-0.5 rounded-md bg-amber-400 text-slate-950 font-mono text-[10px] font-black">0/3</span>
-      </a>
+      </button>
 
       <button type="button" onclick="switchCameraFacing()" title="Ganti Kamera Depan / Belakang" class="tool-btn">
         <i data-lucide="switch-camera" class="w-4 h-4"></i>
@@ -385,12 +377,12 @@
 
     <!-- LOGO PUPR / KUSTOM OVERLAY -->
     <div id="logoOverlay">
-      <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white p-1 shadow-xl border border-white/40 overflow-hidden flex items-center justify-center">
+      <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-xl border border-white/40 overflow-hidden flex items-center justify-center">
         <img id="wmLogoImg" src="assets/img/logo.png" onerror="this.src='https://placehold.co/96x96/1E3A8A/FBBF24?text=PU'" alt="Logo PUPR" class="w-full h-full object-contain rounded-xl">
       </div>
     </div>
 
-    <!-- WATERMARK TIMEMARK OVERLAY (OTOMATIS MENYESUAIKAN PORTRAIT & LANDSCAPE) -->
+    <!-- WATERMARK TIMEMARK OVERLAY -->
     <div id="watermarkOverlay">
       <div class="flex items-center gap-1.5 mb-1.5">
         <span id="wmIdBadge" class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-mono text-[11px] font-black shadow">OPI-SP-1</span>
@@ -398,13 +390,13 @@
         <span id="wmProgressBadge" class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-mono text-[11px] font-extrabold shadow">0%</span>
       </div>
 
-      <div class="pl-2.5 border-l-[3px] border-amber-400 space-y-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+      <div class="pl-2.5 border-l-[3px] border-amber-400 space-y-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.92)]">
         <div id="wmDateLine" class="text-xs font-extrabold text-white tracking-tight">Memuat tanggal...</div>
-        <div id="wmAddressLine" class="text-[11px] font-semibold text-slate-100">Mencari lokasi GPS...</div>
+        <div id="wmAddressLine" class="text-[11px] font-semibold text-slate-100 leading-snug">Mencari lokasi GPS...</div>
         <div id="wmCoordLine" class="font-mono text-[10.5px] font-bold text-amber-300">0.000000°S, 0.000000°E</div>
       </div>
 
-      <div id="wmNoteLine" class="hidden mt-1 text-[10.5px] font-semibold text-amber-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"></div>
+      <div id="wmNoteLine" class="hidden mt-1 text-[10.5px] font-semibold text-amber-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.92)]"></div>
 
       <div class="flex items-center gap-1 mt-1 text-[9.5px] font-bold text-emerald-300 drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]">
         <i data-lucide="shield-check" class="w-3 h-3 shrink-0"></i>
@@ -426,16 +418,13 @@
 
     <!-- DOCK KONTROL BAWAH -->
     <div class="bottom-dock">
-      <!-- Pilihan Progres 0%, 50%, 100% -->
       <div class="mode-pills">
         <button type="button" id="pillMode0" onclick="selectProgressMode('0')" class="mode-pill active">0% Awal</button>
         <button type="button" id="pillMode50" onclick="selectProgressMode('50')" class="mode-pill">50% Proses</button>
         <button type="button" id="pillMode100" onclick="selectProgressMode('100')" class="mode-pill">100% Selesai</button>
       </div>
 
-      <!-- Baris Shutter -->
       <div class="shutter-row">
-        <!-- Thumbnail Sesi Foto -->
         <button type="button" onclick="openSessionModal()" class="flex flex-col items-center gap-1 bg-transparent border-0 cursor-pointer text-white">
           <div class="w-11 h-11 rounded-xl overflow-hidden border-2 border-white/60 bg-slate-800 flex items-center justify-center">
             <img id="sessionThumbPreview" src="assets/img/pegawai.png" onerror="this.src='https://placehold.co/80x80/1E3A8A/FBBF24?text=0%25'" alt="Sesi Foto" class="w-full h-full object-cover">
@@ -443,12 +432,10 @@
           <span class="text-[10px] font-bold text-slate-200">Sesi Foto</span>
         </button>
 
-        <!-- Tombol Jepret Utama -->
         <button type="button" id="btnShutter" onclick="triggerShutter()" aria-label="Ambil Foto" class="shutter-outer">
           <div class="shutter-inner"></div>
         </button>
 
-        <!-- Tombol Templat & Logo -->
         <button type="button" onclick="openModal('templateModal')" class="flex flex-col items-center gap-1 bg-transparent border-0 cursor-pointer text-white">
           <div class="w-11 h-11 rounded-xl bg-slate-800/90 border border-white/25 flex items-center justify-center">
             <i data-lucide="layout-template" class="w-5 h-5 text-amber-400"></i>
@@ -457,9 +444,8 @@
         </button>
       </div>
 
-      <!-- Navigasi Bawah -->
       <div class="bottom-links">
-        <a href="laporan.html" class="bottom-link">Laporan</a>
+        <a href="laporan.html" onclick="syncSessionStorageOnly()" class="bottom-link">Laporan</a>
         <span class="bottom-link active">Kamera</span>
         <a href="home.html" class="bottom-link">Beranda</a>
         <button type="button" onclick="openModal('settingsModal')" class="bottom-link">Setelan</button>
@@ -473,7 +459,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div>
           <h3 class="text-sm font-extrabold">Dokumentasi Sesi Lapangan</h3>
-          <p class="text-[11px] text-slate-400">Tersimpan otomatis untuk dikirim di menu Laporan</p>
+          <p class="text-[11px] text-slate-400">Otomatis terpasang di kolom 0%, 50%, 100% Form Laporan</p>
         </div>
         <button type="button" onclick="closeModal('sessionModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 border-0 cursor-pointer flex items-center justify-center">
           <i data-lucide="x" class="w-4 h-4"></i>
@@ -486,9 +472,9 @@
         <button type="button" onclick="clearAllSessionPhotos()" class="py-2.5 px-3.5 rounded-xl bg-red-950/70 border border-red-700/50 text-red-200 text-xs font-bold cursor-pointer">
           Reset Sesi
         </button>
-        <a href="laporan.html" class="flex-1 py-2.5 px-4 rounded-xl bg-amber-400 text-slate-950 text-center text-xs font-extrabold no-underline">
-          Lanjut Buat Laporan &rarr;
-        </a>
+        <button type="button" onclick="goToLaporanForm()" class="flex-1 py-2.5 px-4 rounded-xl bg-amber-400 text-slate-950 text-center text-xs font-extrabold border-0 cursor-pointer">
+          Kirim ke Form Laporan &rarr;
+        </button>
       </div>
     </div>
   </div>
@@ -578,8 +564,8 @@
 
     let userProfile = null;
     let currentStream = null;
-    let facingMode = 'environment'; // 'environment' atau 'user'
-    let currentMode = '0'; // '0', '50', '100'
+    let facingMode = 'environment';
+    let currentMode = '0';
     let currentUiAngle = 0; // 0 = Portrait, 90 = Landscape Kiri, -90 = Landscape Kanan
     let torchOn = false;
     let timerSeconds = 0;
@@ -604,7 +590,9 @@
       toastTimer = setTimeout(() => box.classList.add('hidden'), 2800);
     }
 
-    // IndexedDB untuk menyimpan foto resolusi tinggi tanpa penuh di localStorage
+    // =========================================================
+    // INDEXEDDB & PENYIMPANAN SESI UNTUK FORM LAPORAN (0, 50, 100)
+    // =========================================================
     function openCameraIDB() {
       return new Promise((resolve, reject) => {
         if (!window.indexedDB) return reject(new Error('IndexedDB tidak didukung'));
@@ -625,7 +613,13 @@
         const db = await openCameraIDB();
         return new Promise((resolve) => {
           const tx = db.transaction(IDB_STORE, 'readwrite');
-          tx.objectStore(IDB_STORE).put({ mode, imageData, meta, updatedAt: Date.now() });
+          tx.objectStore(IDB_STORE).put({
+            mode: String(mode),
+            imageData,
+            dataUrl: imageData, // Kompatibilitas alias dengan laporan.html
+            meta,
+            updatedAt: Date.now()
+          });
           tx.oncomplete = () => resolve(true);
           tx.onerror = () => resolve(false);
         });
@@ -662,20 +656,79 @@
       }
     }
 
+    function syncSessionStorageOnly() {
+      try {
+        const activeMeta = capturedMeta['100'] || capturedMeta['50'] || capturedMeta['0'] || {};
+        const payload = {
+          photos: {
+            '0': capturedPhotos['0'] || null,
+            '50': capturedPhotos['50'] || null,
+            '100': capturedPhotos['100'] || null
+          },
+          meta: capturedMeta,
+          gps: {
+            lat: activeMeta.lat || gpsState.lat,
+            lng: activeMeta.lng || gpsState.lng,
+            address: activeMeta.address || gpsState.address
+          },
+          form: {
+            note: wmNote || activeMeta.note || '',
+            tanggal: new Date().toISOString().split('T')[0],
+            lat: activeMeta.lat || gpsState.lat,
+            lng: activeMeta.lng || gpsState.lng,
+            alamat: activeMeta.address || gpsState.address
+          },
+          updatedAt: Date.now()
+        };
+        localStorage.setItem(SESSION_META_KEY, JSON.stringify(payload));
+      } catch (e) {
+        // Jika quota localStorage terbatas pada device lama, simpan metadata + pointer IDB
+        try {
+          const activeMeta = capturedMeta['100'] || capturedMeta['50'] || capturedMeta['0'] || {};
+          localStorage.setItem(SESSION_META_KEY, JSON.stringify({
+            useIDB: true,
+            meta: capturedMeta,
+            gps: {
+              lat: activeMeta.lat || gpsState.lat,
+              lng: activeMeta.lng || gpsState.lng,
+              address: activeMeta.address || gpsState.address
+            },
+            form: {
+              note: wmNote || activeMeta.note || '',
+              tanggal: new Date().toISOString().split('T')[0],
+              lat: activeMeta.lat || gpsState.lat,
+              lng: activeMeta.lng || gpsState.lng,
+              alamat: activeMeta.address || gpsState.address
+            },
+            updatedAt: Date.now()
+          }));
+        } catch (err2) {}
+      }
+    }
+
+    async function goToLaporanForm() {
+      // Pastikan seluruh foto 0%, 50%, 100% tersimpan di IDB & localStorage sebelum pindah halaman
+      for (const m of ['0', '50', '100']) {
+        if (capturedPhotos[m]) {
+          await savePhotoToIDB(m, capturedPhotos[m], capturedMeta[m] || {});
+        }
+      }
+      syncSessionStorageOnly();
+      window.location.href = 'laporan.html';
+    }
+
     // =========================================================
-    // 1. INISIALISASI SESI & HALAMAN (ANTI LOGOUT MENDADAK)
+    // 1. INISIALISASI SESI & HALAMAN
     // =========================================================
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.lucide) lucide.createIcons();
 
-      // Cek parameter mode dari URL (?mode=0 / 50 / 100)
       const params = new URLSearchParams(window.location.search);
       const urlMode = params.get('mode');
       if (urlMode === '0' || urlMode === '50' || urlMode === '100') {
         selectProgressMode(urlMode);
       }
 
-      // Ambil profil user tanpa me-logout paksa jika offline
       if (typeof refreshUserProfile === 'function') {
         try { userProfile = await refreshUserProfile(); } catch (e) {}
       }
@@ -713,7 +766,7 @@
     });
 
     // =========================================================
-    // 2. PENEMPATAN SUDUT WATERMARK PORTRAIT & LANDSCAPE
+    // 2. PENEMPATAN SUDUT WATERMARK PORTRAIT & LANDSCAPE (PRESISI)
     // =========================================================
     function applyWatermarkOrientation(angle) {
       const wm = document.getElementById('watermarkOverlay');
@@ -732,35 +785,35 @@
 
       if (angle === 90) {
         // HP dimiringkan ke KIRI (bagian atas HP di sebelah kiri)
-        // Pojok kiri bawah foto landscape = Pojok kiri atas layar portrait
+        // Pojok kiri bawah foto landscape = Pojok kiri atas layar portrait (di bawah toolbar atas)
         wm.style.top = '72px';
-        wm.style.left = '16px';
+        wm.style.left = '14px';
         wm.style.transformOrigin = 'top left';
-        wm.style.transform = 'translateX(100%) rotate(90deg)';
+        wm.style.transform = 'rotate(90deg) translateY(-100%)';
 
         // Pojok kanan atas foto landscape = Pojok kiri bawah layar portrait (di atas bar 0% 50% 100%)
-        logo.style.bottom = '164px';
-        logo.style.left = '16px';
+        logo.style.bottom = '166px';
+        logo.style.left = '14px';
         logo.style.transformOrigin = 'bottom left';
         logo.style.transform = 'rotate(90deg)';
 
       } else if (angle === -90) {
         // HP dimiringkan ke KANAN (bagian atas HP di sebelah kanan)
         // Pojok kiri bawah foto landscape = Pojok kanan bawah layar portrait (di atas bar 0% 50% 100%)
-        wm.style.bottom = '164px';
-        wm.style.right = '16px';
+        wm.style.bottom = '166px';
+        wm.style.right = '14px';
         wm.style.transformOrigin = 'bottom right';
-        wm.style.transform = 'translateX(-100%) rotate(-90deg)';
+        wm.style.transform = 'rotate(-90deg) translateY(100%)';
 
-        // Pojok kanan atas foto landscape = Pojok kanan atas layar portrait
+        // Pojok kanan atas foto landscape = Pojok kanan atas layar portrait (di bawah tombol ganti kamera)
         logo.style.top = '72px';
-        logo.style.right = '16px';
+        logo.style.right = '14px';
         logo.style.transformOrigin = 'top right';
         logo.style.transform = 'rotate(-90deg)';
 
       } else {
         // Posisi Tegak / Portrait (0°)
-        wm.style.bottom = '162px';
+        wm.style.bottom = '164px';
         wm.style.left = '16px';
         wm.style.transformOrigin = 'bottom left';
         wm.style.transform = 'rotate(0deg)';
@@ -772,13 +825,11 @@
       }
     }
 
-    // Sensor Kemiringan & Orientasi HP
     window.addEventListener('deviceorientation', (event) => {
-      const gamma = event.gamma; // Kemiringan kiri-kanan (-90 s/d 90)
-      const beta = event.beta;   // Kemiringan depan-belakang (-180 s/d 180)
+      const gamma = event.gamma;
+      const beta = event.beta;
       if (gamma === null || beta === null) return;
 
-      // Hitung kemiringan horizon untuk indikator waterpas tengah
       let tiltDeg = 0;
       if (currentUiAngle === 90) tiltDeg = beta;
       else if (currentUiAngle === -90) tiltDeg = -beta;
@@ -790,12 +841,11 @@
       if (levelBar) levelBar.style.transform = `rotate(${-clampedTilt}deg)`;
       if (levelText) levelText.textContent = `${Math.abs(clampedTilt).toFixed(1)}°`;
 
-      // Deteksi transisi Portrait <-> Landscape (histeresis agar tidak bergetar)
       let nextAngle = currentUiAngle;
       if (Math.abs(beta) < 135) {
-        if (gamma > 50) nextAngle = -90;       // Landscape miring kanan
-        else if (gamma < -50) nextAngle = 90;  // Landscape miring kiri
-        else if (Math.abs(gamma) < 32) nextAngle = 0; // Kembali tegak portrait
+        if (gamma > 50) nextAngle = -90;
+        else if (gamma < -50) nextAngle = 90;
+        else if (Math.abs(gamma) < 32) nextAngle = 0;
       }
 
       if (nextAngle !== currentUiAngle) {
@@ -871,7 +921,7 @@
       document.getElementById('btnTimerCycle').textContent = `${timerSeconds}s`;
     }
 
-    async function cycleZoom() {
+    function cycleZoom() {
       zoomLevel = zoomLevel === 1.0 ? 1.5 : (zoomLevel === 1.5 ? 2.0 : 1.0);
       document.getElementById('btnZoomCycle').textContent = `${zoomLevel.toFixed(1)}x`;
       const video = document.getElementById('cameraVideo');
@@ -941,7 +991,7 @@
     }
 
     // =========================================================
-    // 5. PENGAMBILAN FOTO & PENGGAMBARAN WATERMARK KE CANVAS
+    // 5. PENGAMBILAN FOTO & SIMPAN KE SESI FORM LAPORAN
     // =========================================================
     function triggerShutter() {
       if (timerSeconds === 0) {
@@ -983,7 +1033,6 @@
       const canvas = document.getElementById('captureCanvas');
       if (!video || !video.videoWidth) return;
 
-      // Efek kilat layar
       const flash = document.getElementById('flashScreen');
       flash.style.opacity = '0.85';
       setTimeout(() => { flash.style.opacity = '0'; }, 140);
@@ -998,7 +1047,6 @@
       canvas.height = outH;
       const ctx = canvas.getContext('2d');
 
-      // Gambar frame video dengan rotasi sesuai orientasi HP saat dijepret
       ctx.save();
       ctx.translate(outW / 2, outH / 2);
 
@@ -1023,14 +1071,14 @@
       ctx.drawImage(video, -sw / 2, -sh / 2, sw, sh);
       ctx.restore();
 
-      // Gradasi gelap tipis di sudut kiri bawah agar watermark terbaca tajam
+      // Gradasi gelap tipis di sudut kiri bawah
       const grad = ctx.createLinearGradient(0, outH - 220, 0, outH);
       grad.addColorStop(0, 'rgba(0,0,0,0)');
       grad.addColorStop(1, 'rgba(0,0,0,0.62)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, outH - 220, outW, 220);
 
-      // Gambar Logo PUPR di Pojok Kanan Atas
+      // Logo PUPR di Pojok Kanan Atas
       if (document.getElementById('chkShowLogo')?.checked) {
         const logoEl = document.getElementById('wmLogoImg');
         if (logoEl && logoEl.complete) {
@@ -1046,17 +1094,15 @@
         }
       }
 
-      // Gambar Blok Watermark Timemark di Pojok Kiri Bawah
+      // Watermark Timemark di Pojok Kiri Bawah
       const padX = 26;
       let cursorY = outH - 26;
 
-      // Baris Bawah: Verifikasi Keaslian
       ctx.font = '700 14px Inter, sans-serif';
       ctx.fillStyle = '#E2E8F0';
       ctx.fillText('✓ Timemark BBWS menjamin keaslian waktu & GPS', padX, cursorY);
       cursorY -= 24;
 
-      // Catatan opsional
       if (wmNote) {
         ctx.font = '700 15px Inter, sans-serif';
         ctx.fillStyle = '#FDE68A';
@@ -1064,31 +1110,26 @@
         cursorY -= 22;
       }
 
-      // Koordinat GPS
       const coordStr = formatCoordDMS(gpsState.lat, gpsState.lng);
       ctx.font = '700 16px "JetBrains Mono", monospace';
       ctx.fillStyle = '#FBBF24';
       ctx.fillText(coordStr, padX + 14, cursorY);
       cursorY -= 24;
 
-      // Alamat
       ctx.font = '600 17px Inter, sans-serif';
       ctx.fillStyle = '#F8FAFC';
       ctx.fillText(gpsState.address, padX + 14, cursorY);
       cursorY -= 26;
 
-      // Tanggal
       const dateStr = document.getElementById('wmDateLine').textContent;
       ctx.font = '800 19px Inter, sans-serif';
       ctx.fillStyle = '#FFFFFF';
       ctx.fillText(dateStr, padX + 14, cursorY);
 
-      // Garis kuning vertikal di sebelah kiri teks tanggal-alamat-GPS
       ctx.fillStyle = '#FBBF24';
       ctx.fillRect(padX, cursorY - 17, 4, wmNote ? 92 : 70);
       cursorY -= 46;
 
-      // Lencana Atas: [ID PETUGAS] [JAM] [PROGRES %]
       const idText = document.getElementById('wmIdBadge').textContent;
       const timeText = document.getElementById('wmTimeBadge').textContent;
       const progText = `${currentMode}%`;
@@ -1111,7 +1152,7 @@
       drawBadge(timeText, '#FFFFFF', '#0F172A');
       drawBadge(progText, '#1D4ED8', '#FFFFFF');
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.86);
       const metaObj = {
         mode: currentMode,
         time_label: timeText,
@@ -1126,21 +1167,15 @@
       capturedMeta[currentMode] = metaObj;
 
       await savePhotoToIDB(currentMode, dataUrl, metaObj);
-      try {
-        localStorage.setItem(SESSION_META_KEY, JSON.stringify({
-          meta: capturedMeta,
-          form: { note: wmNote }
-        }));
-      } catch (e) {}
+      syncSessionStorageOnly();
 
       updateSessionBadges();
-      showCamToast(`Foto progres ${currentMode}% berhasil direkam!`);
+      showCamToast(`Foto ${currentMode}% disimpan ke sesi form laporan!`);
 
       if (document.getElementById('chkAutoDownload')?.checked) {
         triggerFileDownload(dataUrl, `BBWS_${idText}_${currentMode}pct_${Date.now()}.jpg`);
       }
 
-      // Otomatis pindah tab ke tahap berikutnya (0% -> 50% -> 100%)
       if (currentMode === '0') selectProgressMode('50');
       else if (currentMode === '50') selectProgressMode('100');
     }
@@ -1149,10 +1184,27 @@
       const rows = await loadAllFromIDB();
       rows.forEach(r => {
         if (r && (r.mode === '0' || r.mode === '50' || r.mode === '100')) {
-          capturedPhotos[r.mode] = r.imageData;
-          capturedMeta[r.mode] = r.meta;
+          capturedPhotos[r.mode] = r.imageData || r.dataUrl;
+          capturedMeta[r.mode] = r.meta || null;
         }
       });
+
+      // Fallback baca dari localStorage bila belum ada di IDB
+      if (!capturedPhotos['0'] && !capturedPhotos['50'] && !capturedPhotos['100']) {
+        try {
+          const raw = localStorage.getItem(SESSION_META_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.photos) {
+              capturedPhotos['0'] = parsed.photos['0'] || null;
+              capturedPhotos['50'] = parsed.photos['50'] || null;
+              capturedPhotos['100'] = parsed.photos['100'] || null;
+            }
+            if (parsed?.meta) capturedMeta = parsed.meta;
+          }
+        } catch (e) {}
+      }
+
       updateSessionBadges();
     }
 
@@ -1238,6 +1290,7 @@
       } else {
         el.classList.add('hidden');
       }
+      syncSessionStorageOnly();
       closeModal('noteModal');
       showCamToast('Catatan watermark diperbarui.');
     }
