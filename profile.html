@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Profil & Kelengkapan Data Petugas — BBWS Brantas</title>
+  <meta name="theme-color" content="#1E3A8A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo-bbws.svg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brantas: {
+              blue: '#1E3A8A',
+              dark: '#172554',
+              light: '#EFF6FF',
+              gold: '#F59E0B',
+              goldLight: '#FEF3C7',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.06);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1E3A8A 0%, #172554 65%, #1E40AF 100%);
+    }
+  </style>
+</head>
+<body class="pb-28 lg:pb-10 lg:pl-64 min-h-screen">
+
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40">
+    <div class="p-5 flex items-center gap-3 border-b border-slate-100">
+      <img src="assets/img/logo-bbws.svg" alt="BBWS Brantas" class="w-10 h-10 object-contain" />
+      <div>
+        <h1 class="font-extrabold text-brantas-blue text-base leading-tight">BBWS BRANTAS</h1>
+        <p class="text-[11px] font-semibold text-slate-500">Sistem OP Irigasi 2026</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1.5 text-sm font-semibold">
+      <a href="home.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="home" class="w-5 h-5"></i> Beranda
+      </a>
+      <a href="tugas.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="clipboard-list" class="w-5 h-5"></i> Tugas & Verifikasi
+      </a>
+      <a href="kamera.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="camera" class="w-5 h-5"></i> Kamera Lapangan
+      </a>
+      <a href="laporan.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="file-plus-2" class="w-5 h-5"></i> Buat Laporan
+      </a>
+      <a href="raport.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Raport Kinerja
+      </a>
+      <a href="peta.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="map-pin" class="w-5 h-5"></i> Peta Sebaran D.I
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-slate-100">
+      <a href="profile.html" class="flex items-center gap-3 p-2.5 rounded-xl bg-blue-50 text-brantas-blue transition">
+        <img id="sidebarAvatar" src="assets/img/logo-bbws.svg" alt="Profil" class="w-9 h-9 rounded-full object-cover border border-blue-200 bg-white" />
+        <div class="overflow-hidden">
+          <p id="sidebarName" class="text-xs font-extrabold truncate">Memuat...</p>
+          <p id="sidebarRole" class="text-[11px] text-slate-500 truncate">-</p>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- HEADER -->
+  <header class="hero-gradient text-white pt-5 pb-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="home.html" class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-1">
+            <i data-lucide="user-check" class="w-3.5 h-3.5"></i> BIODATA & IDENTITAS DIGITAL
+          </span>
+          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight">Profil Petugas OP Irigasi</h1>
+        </div>
+      </div>
+
+      <button type="button" onclick="logoutUser()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-rose-100 text-xs font-extrabold flex items-center gap-1.5 transition">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 space-y-5">
+
+    <form id="profileForm" class="space-y-5">
+
+      <!-- BAGIAN 1: UNGGAH FOTO PEGAWAI & FOTO APPS (HERO POPOUT) -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">1</span>
+            Foto Pegawai & Foto Apps (Tampil di Hero Popout)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Foto disimpan otomatis ke Google Drive dan terhubung ke kartu identitas beranda Anda.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- FOTO PEGAWAI -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center text-center space-y-3">
+            <div class="relative">
+              <img id="previewFotoPegawai" src="assets/img/logo-bbws.svg" alt="Foto Pegawai"
+                class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md bg-white" />
+              <span id="badgeFotoPegawai" class="mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">
+                Belum Diunggah
+              </span>
+            </div>
+            <div>
+              <h3 class="text-xs font-extrabold text-slate-800">Foto Profil Pegawai</h3>
+              <p class="text-[11px] text-slate-500">Foto wajah / seragam resmi petugas (rasio 1:1).</p>
+            </div>
+            <label class="w-full py-2 px-3 rounded-xl bg-brantas-blue hover:bg-brantas-dark text-white text-xs font-extrabold cursor-pointer flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="upload" class="w-4 h-4 text-brantas-gold"></i>
+              <span>Pilih / Unggah Foto Pegawai</span>
+              <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event, 'foto_pegawai')" />
+            </label>
+          </div>
+
+          <!-- FOTO APPS (HERO BANNER POPOUT) -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center text-center space-y-3">
+            <div class="w-full">
+              <div class="aspect-[16/7] w-full rounded-xl overflow-hidden bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center">
+                <img id="previewFotoApps" src="" alt="Foto Apps" class="hidden w-full h-full object-cover" />
+                <div id="emptyFotoApps" class="text-slate-400 flex flex-col items-center">
+                  <i data-lucide="image" class="w-6 h-6 mb-0.5"></i>
+                  <span class="text-[10px] font-bold">Banner Hero Popout</span>
+                </div>
+              </div>
+              <span id="badgeFotoApps" class="mt-1.5 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">
+                Belum Diunggah
+              </span>
+            </div>
+            <div>
+              <h3 class="text-xs font-extrabold text-slate-800">Foto Apps (Lokasi Kerja / Pos)</h3>
+              <p class="text-[11px] text-slate-500">Tampil sebagai latar kartu Hero Popout di beranda.</p>
+            </div>
+            <label class="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold cursor-pointer flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="camera" class="w-4 h-4 text-amber-400"></i>
+              <span>Pilih / Unggah Foto Apps</span>
+              <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event, 'foto_apps')" />
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- BAGIAN 2: DATA KEPEGAWAIAN (OTOMATIS DARI SK / DATABASE) -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">2</span>
+            Identitas Resmi Kepegawaian
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Data dasar sesuai SK Penugasan OP BBWS Brantas 2026.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ID Petugas OP</label>
+            <input type="text" id="profIdPetugas" readonly
+              class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-xs font-extrabold text-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nama Lengkap</label>
+            <input type="text" id="profNama" readonly
+              class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-xs font-bold text-slate-800" />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Jabatan</label>
+            <input type="text" id="profJabatan" readonly
+              class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-xs font-bold text-slate-800" />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">PPK / OP & Daerah Irigasi</label>
+            <input type="text" id="profOpDi" readonly
+              class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-xs font-bold text-slate-800" />
+          </div>
+        </div>
+      </section>
+
+      <!-- BAGIAN 3: KELENGKAPAN WILAYAH KERJA & KONTAK (DAPAT DIISI / DIPERBARUI) -->
+      <section class="glass-surface rounded-2xl p-4 sm:p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-brantas-blue text-white text-xs flex items-center justify-center">3</span>
+            Kelengkapan Wilayah Tugas & Kontak
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Isian ini otomatis muncul pada form laporan harian dan filter evaluasi raport.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Wilayah / KorSDA <span class="text-rose-500">*</span></label>
+            <input type="text" id="profKorsda" required placeholder="Contoh: KorSDA Nganjuk / KorSDA Sidoarjo"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kejuron <span class="text-rose-500">*</span></label>
+            <input type="text" id="profKejuron" required placeholder="Contoh: Kejuron Bening / Kejuron Porong"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">No. HP / WhatsApp Aktif <span class="text-rose-500">*</span></label>
+            <input type="tel" id="profNoHp" required placeholder="Contoh: 081234567890"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-brantas-blue" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Ganti Password / PIN Login (Opsional)</label>
+            <input type="password" id="profNewPassword" placeholder="Kosongkan jika tidak ingin mengganti"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-brantas-blue" />
+          </div>
+        </div>
+      </section>
+
+      <!-- TOMBOL SIMPAN PROFIL -->
+      <div class="pb-6">
+        <button type="submit" id="saveProfileBtn"
+          class="w-full py-4 px-6 rounded-2xl bg-brantas-blue hover:bg-brantas-dark text-white font-extrabold text-sm shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 transition">
+          <i data-lucide="save" class="w-5 h-5 text-brantas-gold"></i>
+          <span>SIMPAN PERUBAHAN PROFIL</span>
+        </button>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- OVERLAY LOADING UPLOAD FOTO PROFIL -->
+  <div id="profileLoadingOverlay" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl space-y-3">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-brantas-blue mx-auto flex items-center justify-center animate-bounce">
+        <i data-lucide="cloud-upload" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-sm font-extrabold text-slate-800">Memproses Data...</h3>
+      <p id="profileLoadingText" class="text-xs text-slate-500">Mengunggah foto ke Google Drive...</p>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION MOBILE -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 px-2 py-1.5">
+    <div class="grid grid-cols-5 items-center text-[10px] font-bold text-slate-500">
+      <a href="home.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="tugas.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="clipboard-list" class="w-5 h-5 mb-0.5"></i>
+        <span>Tugas</span>
+      </a>
+      <a href="kamera.html" class="flex flex-col items-center -mt-5">
+        <div class="w-12 h-12 rounded-2xl bg-slate-800 text-white shadow-lg flex items-center justify-center border-2 border-white">
+          <i data-lucide="camera" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <span class="mt-1 text-slate-700">Kamera</span>
+      </a>
+      <a href="laporan.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="file-plus-2" class="w-5 h-5 mb-0.5"></i>
+        <span>Laporan</span>
+      </a>
+      <a href="raport.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5"></i>
+        <span>Raport</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // =========================================================================
+    // KONFIGURASI SUPABASE & GOOGLE APPS SCRIPT (GAS)
+    // =========================================================================
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await loadProfileData();
+    });
+
+    async function loadProfileData() {
+      const raw = localStorage.getItem('bbws_user') || localStorage.getItem('user_session');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = JSON.parse(raw);
+
+      try {
+        const { data } = await sb
+          .from('pegawai')
+          .select('*')
+          .eq('id_petugas', currentUser.id_petugas || currentUser.id)
+          .single();
+        if (data) {
+          currentUser = { ...currentUser, ...data };
+          localStorage.setItem('bbws_user', JSON.stringify(currentUser));
+        }
+      } catch (e) {}
+
+      const idPetugas = currentUser.id_petugas || currentUser.id || '-';
+      const nama = currentUser.nama || '-';
+      const jabatan = currentUser.jabatan || currentUser.role || '-';
+      const ppk = currentUser.ppk_op || currentUser.ppk || '-';
+      const di = currentUser.daerah_irigasi || '-';
+
+      document.getElementById('sidebarName').textContent = nama;
+      document.getElementById('sidebarRole').textContent = `${jabatan} • ${di}`;
+
+      document.getElementById('profIdPetugas').value = idPetugas;
+      document.getElementById('profNama').value = nama;
+      document.getElementById('profJabatan').value = jabatan;
+      document.getElementById('profOpDi').value = `${ppk} — ${di}`;
+
+      document.getElementById('profKorsda').value = currentUser.wilayah_korsda || '';
+      document.getElementById('profKejuron').value = currentUser.kejuron || '';
+      document.getElementById('profNoHp').value = currentUser.no_hp || '';
+
+      renderPhotoPreviews();
+    }
+
+    function renderPhotoPreviews() {
+      if (currentUser.foto_pegawai_id) {
+        const url = `https://lh3.googleusercontent.com/d/${currentUser.foto_pegawai_id}`;
+        document.getElementById('previewFotoPegawai').src = url;
+        document.getElementById('sidebarAvatar').src = url;
+        const badge = document.getElementById('badgeFotoPegawai');
+        badge.textContent = 'Tersimpan di Drive ✓';
+        badge.className = 'mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
+      }
+
+      if (currentUser.foto_apps_id) {
+        const urlApps = `https://lh3.googleusercontent.com/d/${currentUser.foto_apps_id}`;
+        const imgApps = document.getElementById('previewFotoApps');
+        imgApps.src = urlApps;
+        imgApps.classList.remove('hidden');
+        document.getElementById('emptyFotoApps').classList.add('hidden');
+        const badgeApps = document.getElementById('badgeFotoApps');
+        badgeApps.textContent = 'Tersimpan di Drive ✓';
+        badgeApps.className = 'mt-1.5 inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
+      }
+    }
+
+    // =========================================================================
+    // KOMPRESI & UPLOAD FOTO PEGAWAI / FOTO APPS KE DRIVE VIA GAS
+    // =========================================================================
+    function compressImageFile(file, maxWidth = 1000, quality = 0.82) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = ev.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function extractCleanDriveId(resObj) {
+      if (!resObj) return '';
+      if (resObj.fileId) return String(resObj.fileId).trim();
+      const url = resObj.fileUrl || resObj.url || '';
+      const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      return m ? m[1] : '';
+    }
+
+    async function handlePhotoUpload(event, photoType) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const overlay = document.getElementById('profileLoadingOverlay');
+      const loadText = document.getElementById('profileLoadingText');
+      overlay.classList.remove('hidden');
+      loadText.textContent = photoType === 'foto_pegawai'
+        ? 'Mengunggah Foto Pegawai ke Google Drive...'
+        : 'Mengunggah Foto Apps ke Google Drive...';
+
+      try {
+        const maxW = photoType === 'foto_pegawai' ? 800 : 1280;
+        const base64Data = await compressImageFile(file, maxW, 0.84);
+
+        const res = await fetch(GAS_WEBAPP_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'uploadProfilePhoto',
+            photo_type: photoType, // 'foto_pegawai' atau 'foto_apps'
+            id_petugas: currentUser.id_petugas || currentUser.id,
+            nama_petugas: currentUser.nama,
+            ppk_op: currentUser.ppk_op || currentUser.ppk || 'OP',
+            daerah_irigasi: currentUser.daerah_irigasi || 'Umum',
+            imageBase64: base64Data
+          })
+        });
+
+        const json = await res.json();
+        if (!json.success && json.status !== 'success') {
+          throw new Error(json.message || 'Gagal mengunggah foto ke Google Drive');
+        }
+
+        const cleanId = extractCleanDriveId(json);
+        if (!cleanId) throw new Error('File ID Drive tidak ditemukan pada respons server.');
+
+        const updateField = photoType === 'foto_pegawai'
+          ? { foto_pegawai_id: cleanId }
+          : { foto_apps_id: cleanId };
+
+        const { error: dbErr } = await sb
+          .from('pegawai')
+          .update(updateField)
+          .eq('id_petugas', currentUser.id_petugas || currentUser.id);
+
+        if (dbErr) throw dbErr;
+
+        currentUser = { ...currentUser, ...updateField };
+        localStorage.setItem('bbws_user', JSON.stringify(currentUser));
+        renderPhotoPreviews();
+
+        overlay.classList.add('hidden');
+        alert(photoType === 'foto_pegawai'
+          ? 'Foto Pegawai berhasil diperbarui!'
+          : 'Foto Apps berhasil diperbarui & siap tampil di Hero Popout!');
+      } catch (err) {
+        overlay.classList.add('hidden');
+        alert('Kendala unggah foto: ' + err.message);
+      }
+    }
+
+    // =========================================================================
+    // SIMPAN BIODATA WILAYAH & KONTAK KE SUPABASE
+    // =========================================================================
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const overlay = document.getElementById('profileLoadingOverlay');
+      const loadText = document.getElementById('profileLoadingText');
+      overlay.classList.remove('hidden');
+      loadText.textContent = 'Menyimpan pembaruan profil...';
+
+      try {
+        const updatePayload = {
+          wilayah_korsda: document.getElementById('profKorsda').value.trim(),
+          kejuron: document.getElementById('profKejuron').value.trim(),
+          no_hp: document.getElementById('profNoHp').value.trim()
+        };
+
+        const newPass = document.getElementById('profNewPassword').value.trim();
+        if (newPass) {
+          updatePayload.password = newPass;
+        }
+
+        const { error } = await sb
+          .from('pegawai')
+          .update(updatePayload)
+          .eq('id_petugas', currentUser.id_petugas || currentUser.id);
+
+        if (error) throw error;
+
+        delete updatePayload.password;
+        currentUser = { ...currentUser, ...updatePayload };
+        localStorage.setItem('bbws_user', JSON.stringify(currentUser));
+
+        overlay.classList.add('hidden');
+        alert('Profil & wilayah tugas berhasil diperbarui!');
+        window.location.href = 'home.html';
+      } catch (err) {
+        overlay.classList.add('hidden');
+        alert('Gagal menyimpan profil: ' + err.message);
+      }
+    });
+
+    function logoutUser() {
+      if (confirm('Keluar dari aplikasi BBWS Brantas?')) {
+        localStorage.removeItem('bbws_user');
+        localStorage.removeItem('user_session');
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+</html>
