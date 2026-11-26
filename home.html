@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Beranda — Sistem OP Irigasi BBWS Brantas</title>
+  <meta name="theme-color" content="#1E3A8A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo-bbws.svg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase SDK & Konfigurasi Terpusat -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brantas: {
+              blue: '#1E3A8A',
+              dark: '#172554',
+              light: '#EFF6FF',
+              gold: '#F59E0B',
+              goldLight: '#FEF3C7',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 8px 28px -4px rgba(15, 23, 42, 0.07);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1E3A8A 0%, #172554 60%, #1E40AF 100%);
+    }
+    .popout-card {
+      box-shadow: 0 20px 38px -10px rgba(23, 37, 84, 0.25), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+<body class="pb-28 lg:pb-10 lg:pl-64 min-h-screen">
+
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-40">
+    <div class="p-5 flex items-center gap-3 border-b border-slate-100">
+      <img src="assets/img/logo-bbws.svg" alt="BBWS Brantas" class="w-10 h-10 object-contain" />
+      <div>
+        <h1 class="font-extrabold text-brantas-blue text-base leading-tight">BBWS BRANTAS</h1>
+        <p class="text-[11px] font-semibold text-slate-500">Sistem OP Irigasi 2026</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1.5 text-sm font-semibold">
+      <a href="home.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brantas-blue text-white shadow-sm">
+        <i data-lucide="home" class="w-5 h-5 text-brantas-gold"></i> Beranda
+      </a>
+      <a href="tugas.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="clipboard-list" class="w-5 h-5"></i> Tugas & Verifikasi
+      </a>
+      <a href="kamera.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="camera" class="w-5 h-5"></i> Kamera Lapangan
+      </a>
+      <a href="laporan.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="file-plus-2" class="w-5 h-5"></i> Buat Laporan
+      </a>
+      <a href="raport.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Raport Kinerja
+      </a>
+      <a href="peta.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i data-lucide="map-pin" class="w-5 h-5"></i> Peta Sebaran D.I
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-slate-100">
+      <a href="profile.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition">
+        <img id="sidebarAvatar" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Profil"
+          class="w-9 h-9 rounded-full object-cover border border-slate-200 bg-slate-100" />
+        <div class="overflow-hidden">
+          <p id="sidebarName" class="text-xs font-bold text-slate-800 truncate">Memuat Petugas...</p>
+          <p id="sidebarRole" class="text-[11px] text-slate-500 truncate">-</p>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- HEADER ATAS -->
+  <header class="hero-gradient text-white pt-5 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="max-w-5xl mx-auto flex items-center justify-between relative z-10">
+      <div class="flex items-center gap-3">
+        <img src="assets/img/logo-bbws.svg" alt="Logo BBWS" class="w-9 h-9 object-contain bg-white rounded-xl p-1 lg:hidden" />
+        <div>
+          <p id="greetingDate" class="text-[11px] font-semibold text-blue-200">-</p>
+          <h1 class="text-base sm:text-xl font-extrabold tracking-tight">Dashboard Operasi & Pemeliharaan</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="profile.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-bold transition">
+          <i data-lucide="user-cog" class="w-4 h-4 text-amber-300"></i>
+          <span>Profil</span>
+        </a>
+        <button type="button" onclick="handleLogoutClick()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-rose-200 transition" title="Keluar Akun">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 space-y-5">
+
+    <!-- HERO SECTION POPOUT (DEFAULT KE assets/img/pegawai.png JIKA BELUM ADA FOTO) -->
+    <section class="popout-card rounded-3xl bg-white overflow-hidden border border-slate-200/90">
+      <!-- Banner Foto Apps (Fallback: assets/img/pegawai.png) -->
+      <div class="relative h-36 sm:h-44 bg-gradient-to-r from-brantas-blue via-blue-800 to-indigo-900 overflow-hidden">
+        <img id="heroAppsBanner" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Foto Apps Petugas"
+          class="w-full h-full object-cover object-center opacity-90" />
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent"></div>
+
+        <!-- Badge PPK / OP & Jabatan di Pojok Kanan Atas Banner -->
+        <div class="absolute top-3 right-3 flex items-center gap-1.5">
+          <span id="heroOpBadge" class="px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[11px] font-extrabold shadow">
+            OP -
+          </span>
+          <span id="heroJabatanBadge" class="px-3 py-1 rounded-full bg-slate-900/80 text-white border border-white/20 text-[11px] font-bold backdrop-blur-sm">
+            Petugas OP
+          </span>
+        </div>
+      </div>
+
+      <!-- Area Biodata & Foto Pegawai Popout -->
+      <div class="px-4 sm:px-6 pb-5 relative">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 -mt-11 sm:-mt-12">
+          <div class="flex items-end gap-3.5">
+            <!-- Avatar Foto Pegawai (Fallback: assets/img/pegawai.png) -->
+            <div class="relative shrink-0">
+              <img id="heroPegawaiAvatar" src="assets/img/pegawai.png" onerror="this.src='assets/img/pegawai.png'" alt="Foto Pegawai"
+                class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-4 border-white bg-slate-100 shadow-lg" />
+              <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center border-2 border-white" title="Akun Aktif">
+                <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+
+            <div class="pb-0.5">
+              <span id="heroIdPetugas" class="inline-block px-2 py-0.5 rounded-md bg-blue-50 text-brantas-blue text-[11px] font-extrabold tracking-wide mb-0.5">
+                ID: -
+              </span>
+              <h2 id="heroNamaPetugas" class="text-base sm:text-xl font-extrabold text-slate-900 leading-tight">
+                Memuat Nama Petugas...
+              </h2>
+              <p id="heroHierarchyText" class="text-xs font-semibold text-slate-600 mt-0.5">
+                Daerah Irigasi: -
+              </p>
+            </div>
+          </div>
+
+          <a href="profile.html" class="self-start sm:self-end inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-brantas-blue"></i>
+            <span>Lengkapi / Edit Profil</span>
+          </a>
+        </div>
+
+        <!-- Baris Detail KorSDA, Kejuron, & No HP -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-4 pt-3.5 border-t border-slate-100 text-xs">
+          <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl">
+            <i data-lucide="map" class="w-4 h-4 text-brantas-blue shrink-0"></i>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase">Wilayah / KorSDA</p>
+              <p id="heroKorsdaVal" class="font-bold text-slate-800 truncate">Belum diisi</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl">
+            <i data-lucide="git-branch" class="w-4 h-4 text-amber-600 shrink-0"></i>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase">Kejuron</p>
+              <p id="heroKejuronVal" class="font-bold text-slate-800 truncate">Belum diisi</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl">
+            <i data-lucide="phone" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase">No. HP / WhatsApp</p>
+              <p id="heroHpVal" class="font-bold text-slate-800 truncate">Belum diisi</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BANNER PERINGATAN JIKA BIODATA / FOTO PROFIL BELUM LENGKAP -->
+    <div id="incompleteProfileBanner" class="hidden glass-surface rounded-2xl p-4 border-l-4 border-amber-500 bg-amber-50/90 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-xs sm:text-sm font-extrabold text-amber-950">Profil & Foto Aplikasi Belum Lengkap</h3>
+          <p id="incompleteProfileDesc" class="text-[11px] text-amber-900 mt-0.5">
+            Mohon lengkapi Wilayah/KorSDA, Kejuron, No. HP, Foto Pegawai, dan Foto Apps Anda.
+          </p>
+        </div>
+      </div>
+      <a href="profile.html" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold transition">
+        Lengkapi Sekarang
+      </a>
+    </div>
+
+    <!-- STATUS KEPATUHAN HARI INI & AKSI CEPAT -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div id="todayStatusCard" class="glass-surface rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 border-l-4 border-brantas-blue">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Status Kepatuhan Hari Ini</span>
+            <h3 id="todayStatusTitle" class="text-sm sm:text-base font-extrabold text-slate-800 mt-0.5">Memeriksa Laporan Hari Ini...</h3>
+            <p id="todayStatusDesc" class="text-xs text-slate-600 mt-1 leading-relaxed">-</p>
+          </div>
+          <div id="todayStatusIcon" class="w-10 h-10 rounded-xl bg-blue-50 text-brantas-blue flex items-center justify-center shrink-0">
+            <i data-lucide="clock" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <a href="kamera.html" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold text-center flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="camera" class="w-4 h-4 text-amber-400"></i>
+            <span>Kamera (<span id="sessionPhotoCount">0</span>/3)</span>
+          </a>
+          <a href="laporan.html" class="flex-1 py-2.5 px-3 rounded-xl bg-brantas-blue hover:bg-brantas-dark text-white text-xs font-extrabold text-center flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="file-plus-2" class="w-4 h-4 text-brantas-gold"></i>
+            <span>Isi Laporan</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="glass-surface rounded-2xl p-4 sm:p-5 space-y-3">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Menu Utama Operasional</span>
+        <div class="grid grid-cols-2 gap-2.5">
+          <a href="tugas.html" class="p-3 rounded-2xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-100 flex items-center gap-3 transition">
+            <div class="w-9 h-9 rounded-xl bg-brantas-blue text-white flex items-center justify-center shrink-0">
+              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-extrabold text-slate-800">Tugas & Verifikasi</p>
+              <p id="quickTaskCount" class="text-[11px] font-bold text-brantas-blue">0 tugas aktif</p>
+            </div>
+          </a>
+
+          <a href="raport.html" class="p-3 rounded-2xl bg-amber-50/70 hover:bg-amber-100/80 border border-amber-100 flex items-center gap-3 transition">
+            <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0">
+              <i data-lucide="award" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-extrabold text-slate-800">Raport Kinerja</p>
+              <p class="text-[11px] font-bold text-amber-700">Evaluasi 5 Kriteria</p>
+            </div>
+          </a>
+
+          <a href="peta.html" class="p-3 rounded-2xl bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-100 flex items-center gap-3 transition">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-extrabold text-slate-800">Peta Sebaran</p>
+              <p class="text-[11px] font-bold text-emerald-700">Titik GPS Laporan</p>
+            </div>
+          </a>
+
+          <a href="profile.html" class="p-3 rounded-2xl bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200 flex items-center gap-3 transition">
+            <div class="w-9 h-9 rounded-xl bg-slate-700 text-white flex items-center justify-center shrink-0">
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-extrabold text-slate-800">Biodata & Foto</p>
+              <p class="text-[11px] font-bold text-slate-600">KorSDA & Kejuron</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATISTIK KINERJA BULAN INI -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="glass-surface rounded-2xl p-4">
+        <p class="text-[11px] font-bold text-slate-500">Laporan Bulan Ini</p>
+        <p id="statMonthReports" class="text-2xl font-extrabold text-brantas-blue mt-1">0</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">Mandiri & Kelompok</p>
+      </div>
+
+      <div class="glass-surface rounded-2xl p-4">
+        <p class="text-[11px] font-bold text-slate-500">Giat Kerja (Quick Resp.)</p>
+        <p id="statMonthGiat" class="text-2xl font-extrabold text-amber-600 mt-1">0</p>
+        <p class="text-[10px] text-amber-700 font-semibold mt-0.5">Target min. 1x / minggu</p>
+      </div>
+
+      <div class="glass-surface rounded-2xl p-4">
+        <p class="text-[11px] font-bold text-slate-500">Babat & Pembersihan</p>
+        <p id="statMonthLuas" class="text-2xl font-extrabold text-emerald-600 mt-1">0 m²</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">Akumulasi bulan ini</p>
+      </div>
+
+      <div class="glass-surface rounded-2xl p-4">
+        <p class="text-[11px] font-bold text-slate-500">Angkat Sedimen & Sampah</p>
+        <p id="statMonthSedimen" class="text-2xl font-extrabold text-indigo-600 mt-1">0 m³</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">Akumulasi bulan ini</p>
+      </div>
+    </section>
+
+    <!-- RIWAYAT LAPORAN TERBARU -->
+    <section class="glass-surface rounded-2xl p-4 sm:p-5 space-y-3.5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-extrabold text-slate-800">Aktivitas & Laporan Terbaru</h2>
+          <p class="text-xs text-slate-500">Menampilkan 5 riwayat kegiatan terakhir Anda (termasuk Giat Kerja).</p>
+        </div>
+        <a href="laporan.html" class="text-xs font-extrabold text-brantas-blue hover:underline">+ Buat Baru</a>
+      </div>
+
+      <div id="recentReportsList" class="space-y-2.5">
+        <div class="py-6 text-center text-xs text-slate-500">Memuat riwayat laporan...</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION MOBILE -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 px-2 py-1.5">
+    <div class="grid grid-cols-5 items-center text-[10px] font-bold text-slate-500">
+      <a href="home.html" class="flex flex-col items-center py-1 text-brantas-blue">
+        <i data-lucide="home" class="w-5 h-5 mb-0.5 text-brantas-gold"></i>
+        <span class="font-extrabold">Beranda</span>
+      </a>
+      <a href="tugas.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="clipboard-list" class="w-5 h-5 mb-0.5"></i>
+        <span>Tugas</span>
+      </a>
+      <a href="kamera.html" class="flex flex-col items-center -mt-5">
+        <div class="w-12 h-12 rounded-2xl bg-slate-800 text-white shadow-lg flex items-center justify-center border-2 border-white">
+          <i data-lucide="camera" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <span class="mt-1 text-slate-700">Kamera</span>
+      </a>
+      <a href="laporan.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="file-plus-2" class="w-5 h-5 mb-0.5"></i>
+        <span>Laporan</span>
+      </a>
+      <a href="raport.html" class="flex flex-col items-center py-1 hover:text-brantas-blue">
+        <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5"></i>
+        <span>Raport</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      renderTodayDate();
+
+      currentUser = await refreshUserProfile();
+      if (!currentUser) return;
+
+      renderUserProfileHero(currentUser);
+      await checkSessionCameraCount();
+      await loadDashboardMetricsAndHistory();
+    });
+
+    function renderTodayDate() {
+      const opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      document.getElementById('greetingDate').textContent = new Date().toLocaleDateString('id-ID', opts);
+    }
+
+    function renderUserProfileHero(profile) {
+      const idPetugas = profile.id_petugas || '-';
+      const nama = profile.nama || 'Petugas OP';
+      const jabatan = profile.jabatan || profile.role || 'Petugas OP';
+      const ppk = profile.ppk_op || profile.ppk || 'OP';
+      const di = profile.daerah_irigasi || '-';
+      const korsda = profile.wilayah_korsda || '';
+      const kejuron = profile.kejuron || '';
+      const noHp = profile.no_hp || '';
+
+      document.getElementById('sidebarName').textContent = nama;
+      document.getElementById('sidebarRole').textContent = `${jabatan} • ${di}`;
+
+      document.getElementById('heroIdPetugas').textContent = idPetugas;
+      document.getElementById('heroNamaPetugas').textContent = nama;
+      document.getElementById('heroOpBadge').textContent = ppk;
+      document.getElementById('heroJabatanBadge').textContent = jabatan;
+      document.getElementById('heroHierarchyText').textContent = `${ppk} — ${di}`;
+
+      document.getElementById('heroKorsdaVal').textContent = korsda || 'Belum dilengkapi';
+      document.getElementById('heroKejuronVal').textContent = kejuron || 'Belum dilengkapi';
+      document.getElementById('heroHpVal').textContent = noHp || 'Belum dilengkapi';
+
+      // Gunakan helper getDriveImageUrl() dari assets/js/supabase.js (fallback otomatis ke assets/img/pegawai.png)
+      const avatarUrl = getDriveImageUrl(profile.foto_pegawai_id, 'assets/img/pegawai.png');
+      const appsUrl = getDriveImageUrl(profile.foto_apps_id, 'assets/img/pegawai.png');
+
+      document.getElementById('heroPegawaiAvatar').src = avatarUrl;
+      document.getElementById('sidebarAvatar').src = avatarUrl;
+      document.getElementById('heroAppsBanner').src = appsUrl;
+
+      // Cek apakah ada data biodata/foto yang masih kosong
+      const missing = [];
+      if (!korsda) missing.push('Wilayah/KorSDA');
+      if (!kejuron) missing.push('Kejuron');
+      if (!noHp) missing.push('No. HP');
+      if (!profile.foto_pegawai_id) missing.push('Foto Pegawai');
+      if (!profile.foto_apps_id) missing.push('Foto Apps');
+
+      if (missing.length > 0) {
+        document.getElementById('incompleteProfileBanner').classList.remove('hidden');
+        document.getElementById('incompleteProfileDesc').textContent =
+          `Data belum lengkap: ${missing.join(', ')}. Klik tombol di samping untuk melengkapi biodata Anda.`;
+      }
+    }
+
+    async function checkSessionCameraCount() {
+      try {
+        const req = indexedDB.open('BBWS_Kamera_DB', 1);
+        req.onsuccess = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains('captured_photos')) return;
+          const tx = db.transaction('captured_photos', 'readonly');
+          const getAll = tx.objectStore('captured_photos').getAll();
+          getAll.onsuccess = () => {
+            const count = (getAll.result || []).filter(x => x && x.imageData).length;
+            document.getElementById('sessionPhotoCount').textContent = count;
+          };
+        };
+      } catch (e) {}
+    }
+
+    async function loadDashboardMetricsAndHistory() {
+      const sb = initSupabase();
+      if (!sb || !currentUser) return;
+
+      const myId = currentUser.id_petugas;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const monthPrefix = todayStr.slice(0, 7);
+
+      try {
+        // 1. Cek tugas aktif
+        const { data: activeTasks } = await sb
+          .from('tugas_penerima')
+          .select('id')
+          .eq('id_penerima', myId)
+          .neq('status_pengerjaan', 'selesai');
+        document.getElementById('quickTaskCount').textContent = `${(activeTasks || []).length} tugas aktif`;
+
+        // 2. Ambil laporan mandiri bulan ini
+        const { data: ownReports } = await sb
+          .from('laporan')
+          .select('*')
+          .eq('id_petugas', myId)
+          .gte('tanggal', `${monthPrefix}-01`)
+          .order('created_at', { ascending: false });
+
+        // 3. Ambil keikutsertaan Giat Kerja / Kelompok bulan ini
+        const { data: teamParticipations } = await sb
+          .from('laporan_peserta')
+          .select('id, laporan!inner(*)')
+          .eq('id_pegawai', myId)
+          .gte('laporan.tanggal', `${monthPrefix}-01`);
+
+        const ownList = ownReports || [];
+        const teamList = (teamParticipations || []).map(p => p.laporan).filter(Boolean);
+
+        const combinedMap = new Map();
+        ownList.forEach(r => combinedMap.set(r.id, r));
+        teamList.forEach(r => combinedMap.set(r.id, r));
+        const allActivities = Array.from(combinedMap.values()).sort((a, b) =>
+          (b.tanggal || '').localeCompare(a.tanggal || '')
+        );
+
+        // Status hari ini
+        const todayActivities = allActivities.filter(r => r.tanggal === todayStr);
+        const statusCard = document.getElementById('todayStatusCard');
+        const statusTitle = document.getElementById('todayStatusTitle');
+        const statusDesc = document.getElementById('todayStatusDesc');
+        const statusIcon = document.getElementById('todayStatusIcon');
+
+        if (todayActivities.length > 0) {
+          const first = todayActivities[0];
+          statusCard.classList.remove('border-brantas-blue');
+          statusCard.classList.add('border-emerald-500');
+          statusIcon.className = 'w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0';
+          statusIcon.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i>';
+
+          if (first.metode_kerja === 'Giat Kerja' && first.id_petugas !== myId) {
+            statusTitle.textContent = 'Hadir via Giat Kerja (Quick Response) ✓';
+            statusDesc.textContent = `Anda sudah tercatat hadir dalam Giat Kerja yang dikirim oleh ${first.nama_petugas} di ${first.nama_saluran || first.kejuron}.`;
+          } else {
+            statusTitle.textContent = 'Laporan Harian Terkirim ✓';
+            statusDesc.textContent = `Kegiatan hari ini di ${first.nama_saluran || first.kejuron} (${first.metode_kerja}) sudah tercatat.`;
+          }
+        } else {
+          statusTitle.textContent = 'Belum Ada Laporan Hari Ini';
+          statusDesc.textContent = 'Ambil foto progres 0%, 50%, dan 100% di lapangan atau ikuti Giat Kerja tim.';
+        }
+
+        // Statistik Bulanan
+        const giatCount = allActivities.filter(r => r.metode_kerja === 'Giat Kerja').length;
+        const sumLuas = ownList.reduce((s, r) => s + (Number(r.luas_area_m2) || 0), 0);
+        const sumSedimenSampah = ownList.reduce((s, r) =>
+          s + (Number(r.angkat_sedimen_m3) || 0) + (Number(r.pembersihan_sampah_m3) || 0), 0
+        );
+
+        document.getElementById('statMonthReports').textContent = allActivities.length;
+        document.getElementById('statMonthGiat').textContent = giatCount;
+        document.getElementById('statMonthLuas').textContent = `${sumLuas.toFixed(1)} m²`;
+        document.getElementById('statMonthSedimen').textContent = `${sumSedimenSampah.toFixed(1)} m³`;
+
+        renderRecentHistory(allActivities.slice(0, 5), myId);
+        lucide.createIcons();
+      } catch (err) {
+        console.error('Gagal memuat data beranda:', err);
+      }
+    }
+
+    function renderRecentHistory(items, myId) {
+      const container = document.getElementById('recentReportsList');
+      if (!items || items.length === 0) {
+        container.innerHTML = `<div class="py-6 text-center text-xs text-slate-500">Belum ada riwayat laporan pada bulan ini.</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(lap => {
+        const thumbUrl = getDriveImageUrl(lap.foto_100_drive_id, 'assets/img/pegawai.png');
+        const isGiatMember = lap.metode_kerja === 'Giat Kerja' && lap.id_petugas !== myId;
+        const badge = isGiatMember
+          ? '<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold">Anggota Giat Kerja</span>'
+          : `<span class="px-2 py-0.5 rounded bg-blue-50 text-brantas-blue text-[10px] font-bold">${lap.metode_kerja || 'Individu'}</span>`;
+
+        const verifBadge = lap.status_verifikasi === 'diverifikasi'
+          ? '<span class="text-[10px] font-extrabold text-emerald-600">Diverifikasi ✓</span>'
+          : lap.status_verifikasi === 'ditolak'
+            ? '<span class="text-[10px] font-extrabold text-rose-600">Perlu Revisi</span>'
+            : '<span class="text-[10px] font-bold text-amber-600">Menunggu Verifikasi</span>';
+
+        return `
+          <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70">
+            <img src="${thumbUrl}" onerror="this.src='assets/img/pegawai.png'" alt="Foto 100%"
+              class="w-14 h-14 rounded-xl object-cover bg-slate-200 shrink-0 border border-slate-200" loading="lazy" />
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                ${badge}
+                <span class="text-[11px] font-bold text-slate-500">${lap.tanggal}</span>
+              </div>
+              <p class="text-xs font-extrabold text-slate-800 truncate">${lap.nama_saluran || lap.kejuron || 'Kegiatan OP Irigasi'}</p>
+              <p class="text-[11px] text-slate-500 truncate">${lap.desa_kelurahan || '-'}, ${lap.kecamatan || '-'}</p>
+            </div>
+            <div class="text-right shrink-0">
+              ${verifBadge}
+              <p class="text-[10px] text-slate-400 mt-0.5">${lap.durasi_kerja_menit || 0} mnt</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleLogoutClick() {
+      if (confirm('Keluar dari aplikasi BBWS Brantas?')) {
+        await logout();
+      }
+    }
+  </script>
+</body>
+</html>
