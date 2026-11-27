@@ -284,7 +284,7 @@
                     </button>
 
                     <!-- TOMBOL SHUTTER -->
-                    <button id="shutterBtn" type="button" onclick="triggerCapture()" aria-label="Ambil Foto" class="w-20 h-20 rounded-full border-4 border-white p-1.5 flex items-center justify-center bg-transparent active:scale-90 transition shadow-[0_0_28px_rgba(255,255,255,0.25)] cursor-pointer"><div class="w-full h-full bg-white hover:bg-slate-100 rounded-full transition pointer-events-none"></div></button>
+                    <button id="shutterBtn" type="button" onclick="triggerCapture()" aria-label="Ambil Foto" class="w-20 h-20 rounded-full border-4 border-white p-1.5 flex items-center justify-center bg-transparent active:scale-90 transition shadow-[0_0_28px_rgba(255,255,255,0.25)] cursor-pointer touch-manipulation"><div class="w-full h-full bg-white hover:bg-slate-100 rounded-full transition pointer-events-none"></div></button>
 
                     <button type="button" onclick="openSheet('templateSheet')" class="flex flex-col items-center gap-1 group">
                         <div class="w-12 h-12 rounded-2xl bg-white/15 group-hover:bg-white/25 border border-white/25 backdrop-blur-md flex items-center justify-center text-white transition"><svg class="w-5 h-5 text-sky-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg></div>
@@ -501,6 +501,7 @@
     <!-- MODAL GALERI ADMIN -->
     <div id="adminGalleryModal" class="hidden fixed inset-0 z-[60] bg-slate-950/75 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this) closeAdminGalleryModal()">
         <div class="bg-white text-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100"><div class="flex items-start justify-between mb-3"><div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><button type="button" onclick="closeAdminGalleryModal()" class="text-slate-400 hover:text-slate-600 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><h3 class="text-base font-extrabold text-slate-900">Unggah Galeri Dibatasi</h3><p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Untuk mencegah manipulasi absensi & progres, pegawai wajib mengambil foto langsung dari kamera. Masukkan PIN Admin jika ada kondisi darurat.</p><div class="mt-4 pt-4 border-t border-slate-100"><label for="adminPinInput" class="block text-[11px] font-bold text-slate-700 mb-1.5">PIN Otorisasi Admin</label><div class="flex gap-2"><input type="password" id="adminPinInput" placeholder="Masukkan PIN" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-pupr-blue"><button type="button" onclick="verifyAdminGalleryUnlock()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">Izinkan</button></div><p id="adminPinError" class="hidden text-[11px] text-red-600 font-semibold mt-1.5"></p></div><input type="file" id="adminGalleryFileInput" accept="image/*" class="hidden" onchange="handleAdminGalleryUpload(event)"></div>
+    </div>
 
     <!-- MODAL PRATINJAU HASIL FOTO + KARTU DOKUMENTASI SESI 0/50/100 -->
     <div id="previewModal" class="hidden fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-md flex-col justify-between p-4 sm:p-6">
@@ -545,7 +546,24 @@
     <canvas id="photoCanvas" class="hidden"></canvas>
 
     <script>
-        if (typeof initSupabase === 'function') initSupabase();
+        // Polyfill roundRect untuk kompatibilitas WebView / browser lama
+        if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                const radius = Array.isArray(r) ? (r[0] || 0) : (r || 0);
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.arcTo(x + w, y, x + w, y + h, radius);
+                this.arcTo(x + w, y + h, x, y + h, radius);
+                this.arcTo(x, y + h, x, y, radius);
+                this.arcTo(x, y, x + w, y, radius);
+                this.closePath();
+                return this;
+            };
+        }
+
+        if (typeof initSupabase === 'function') {
+            try { initSupabase(); } catch (e) { console.warn('initSupabase warning:', e); }
+        }
 
         // URL WEB APP GOOGLE APPS SCRIPT (GOOGLE DRIVE)
         const GAS_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
@@ -562,15 +580,36 @@
         function openCameraIDB() {
             return new Promise((resolve, reject) => {
                 if (!window.indexedDB) return reject(new Error('IndexedDB tidak didukung'));
-                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(IDB_STORE)) {
-                        db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
-                    }
+                let settled = false;
+                const done = (fn, val) => {
+                    if (!settled) { settled = true; fn(val); }
                 };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
+                const guardTimer = setTimeout(() => done(reject, new Error('Timeout IndexedDB')), 2500);
+
+                try {
+                    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(IDB_STORE)) {
+                            db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
+                        }
+                    };
+                    req.onblocked = () => {
+                        clearTimeout(guardTimer);
+                        done(reject, new Error('IndexedDB terblokir tab lain'));
+                    };
+                    req.onsuccess = (e) => {
+                        clearTimeout(guardTimer);
+                        done(resolve, e.target.result);
+                    };
+                    req.onerror = (e) => {
+                        clearTimeout(guardTimer);
+                        done(reject, e.target?.error || new Error('Gagal membuka IndexedDB'));
+                    };
+                } catch (err) {
+                    clearTimeout(guardTimer);
+                    done(reject, err);
+                }
             });
         }
 
@@ -578,11 +617,12 @@
             try {
                 const db = await openCameraIDB();
                 if (!db.objectStoreNames.contains(IDB_STORE)) return false;
-                return new Promise((resolve) => {
+                return await new Promise((resolve) => {
                     const tx = db.transaction(IDB_STORE, 'readwrite');
                     tx.objectStore(IDB_STORE).put({ mode: String(mode), imageData, meta, updatedAt: Date.now() });
                     tx.oncomplete = () => resolve(true);
                     tx.onerror = () => resolve(false);
+                    tx.onabort = () => resolve(false);
                 });
             } catch (e) {
                 return false;
@@ -593,7 +633,7 @@
             try {
                 const db = await openCameraIDB();
                 if (!db.objectStoreNames.contains(IDB_STORE)) return [];
-                return new Promise((resolve) => {
+                return await new Promise((resolve) => {
                     const tx = db.transaction(IDB_STORE, 'readonly');
                     const req = tx.objectStore(IDB_STORE).getAll();
                     req.onsuccess = () => resolve(req.result || []);
@@ -608,7 +648,7 @@
             try {
                 const db = await openCameraIDB();
                 if (!db.objectStoreNames.contains(IDB_STORE)) return false;
-                return new Promise((resolve) => {
+                return await new Promise((resolve) => {
                     const tx = db.transaction(IDB_STORE, 'readwrite');
                     tx.objectStore(IDB_STORE).clear();
                     tx.oncomplete = () => resolve(true);
@@ -631,6 +671,7 @@
         let gridEnabled = true;
         let waterpasEnabled = true;
         let countdownTimer = null;
+        let isCapturingBusy = false;
         let latestCapturedBase64 = '';
         let latestCaptureMeta = null;
         let isViewingExistingSlot = false;
@@ -658,6 +699,7 @@
         const DEFAULT_PU_LOGO_SVG = "assets/img/logo-bbws.svg";
         const logoState = { visible: true, src: DEFAULT_PU_LOGO_SVG, position: 'top-right', size: 64, opacity: 100, stroke: true, rounded: true };
         const logoImageObj = new Image();
+        logoImageObj.crossOrigin = 'anonymous';
         logoImageObj.src = logoState.src;
 
         // 4. Inisialisasi Awal
@@ -943,15 +985,20 @@
                 return;
             }
             try {
+                if (videoStream) {
+                    videoStream.getTracks().forEach(t => t.stop());
+                    videoStream = null;
+                }
                 const constraints = { video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false };
                 videoStream = await navigator.mediaDevices.getUserMedia(constraints);
                 videoEl.srcObject = videoStream;
+                try { await videoEl.play(); } catch (playErr) {}
                 videoEl.classList.toggle('mirror', facingMode === 'user');
                 fallbackEl.classList.add('hidden');
                 await applyFlashConstraint(flashMode === 'on');
             } catch (err) {
                 fallbackEl.classList.remove('hidden');
-                document.getElementById('cameraErrorMsg').innerText = 'Gagal akses kamera: ' + err.message;
+                document.getElementById('cameraErrorMsg').innerText = 'Gagal akses kamera: ' + (err && err.message ? err.message : 'Izin ditolak');
             }
         }
 
@@ -1281,37 +1328,62 @@
             return lines.slice(0, 3);
         }
 
-        // 11. Capture & Render Canvas
-        function triggerCapture() {
-            if (countdownTimer) return;
-            if (timerSeconds === 0) {
-                captureFromVideo();
-                return;
-            }
-            const overlay = document.getElementById('countdownOverlay');
-            const text = document.getElementById('countdownText');
-            let count = timerSeconds;
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            text.innerText = count;
-            countdownTimer = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    text.innerText = count;
-                } else {
+        // 11. Capture & Render Canvas (Aman dari error kanvas & WebView lama)
+        async function triggerCapture() {
+            if (countdownTimer || isCapturingBusy) return;
+            isCapturingBusy = true;
+
+            try {
+                if (timerSeconds === 0) {
+                    await captureFromVideo();
+                    return;
+                }
+                const overlay = document.getElementById('countdownOverlay');
+                const text = document.getElementById('countdownText');
+                let count = timerSeconds;
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                text.innerText = count;
+
+                await new Promise((resolve) => {
+                    countdownTimer = setInterval(async () => {
+                        count--;
+                        if (count > 0) {
+                            text.innerText = count;
+                        } else {
+                            clearInterval(countdownTimer);
+                            countdownTimer = null;
+                            overlay.classList.add('hidden');
+                            overlay.classList.remove('flex');
+                            try {
+                                await captureFromVideo();
+                            } finally {
+                                resolve();
+                            }
+                        }
+                    }, 1000);
+                });
+            } catch (err) {
+                if (countdownTimer) {
                     clearInterval(countdownTimer);
                     countdownTimer = null;
+                }
+                const overlay = document.getElementById('countdownOverlay');
+                if (overlay) {
                     overlay.classList.add('hidden');
                     overlay.classList.remove('flex');
-                    captureFromVideo();
                 }
-            }, 1000);
+                console.error('Shutter error:', err);
+                showToast('Gagal memotret: ' + (err && err.message ? err.message : 'Terjadi kesalahan'));
+            } finally {
+                isCapturingBusy = false;
+            }
         }
 
         async function captureFromVideo() {
             const video = document.getElementById('cameraStream');
             if (!video || !video.srcObject || video.videoWidth === 0 || video.readyState < 2) {
-                showToast('Kamera belum siap — menggunakan mode pratinjau...');
+                showToast('Kamera belum siap — mengambil foto pratinjau...');
                 simulateCameraCapture();
                 return;
             }
@@ -1322,7 +1394,7 @@
                 void flash.offsetWidth;
                 flash.classList.add('flash-animate');
             }
-            renderWatermarkedImage(video, video.videoWidth, video.videoHeight, facingMode === 'user');
+            renderWatermarkedImage(video, video.videoWidth, video.videoHeight, facingMode === 'user', true);
             if (flashMode === 'auto') setTimeout(() => applyFlashConstraint(false), 350);
         }
 
@@ -1347,10 +1419,10 @@
                 void flash.offsetWidth;
                 flash.classList.add('flash-animate');
             }
-            renderWatermarkedImage(off, off.width, off.height, false);
+            renderWatermarkedImage(off, off.width, off.height, false, true);
         }
 
-        function renderWatermarkedImage(source, rawW, rawH, mirror) {
+        function renderWatermarkedImage(source, rawW, rawH, mirror, allowLogoFallback = true) {
             const canvas = document.getElementById('photoCanvas');
             const ctx = canvas.getContext('2d');
 
@@ -1393,29 +1465,35 @@
             const base = Math.max(24, Math.round(shortSide * 0.042));
             const pad = Math.round(shortSide * 0.036);
 
+            let logoDrawFailed = false;
             if (logoState.visible && logoImageObj.complete && logoImageObj.naturalWidth > 0) {
-                const logoScale = logoState.size / 64;
-                const sz = Math.round(shortSide * 0.135 * logoScale);
-                let lx = w - sz - pad;
-                let ly = pad;
-                if (logoState.position === 'top-left') { lx = pad; ly = pad; }
-                else if (logoState.position === 'bottom-left') { lx = pad; ly = h - sz - pad; }
-                else if (logoState.position === 'bottom-right') { lx = w - sz - pad; ly = h - sz - pad; }
+                try {
+                    const logoScale = logoState.size / 64;
+                    const sz = Math.round(shortSide * 0.135 * logoScale);
+                    let lx = w - sz - pad;
+                    let ly = pad;
+                    if (logoState.position === 'top-left') { lx = pad; ly = pad; }
+                    else if (logoState.position === 'bottom-left') { lx = pad; ly = h - sz - pad; }
+                    else if (logoState.position === 'bottom-right') { lx = w - sz - pad; ly = h - sz - pad; }
 
-                ctx.save();
-                ctx.globalAlpha = logoState.opacity / 100;
-                ctx.beginPath();
-                ctx.roundRect(lx, ly, sz, sz, logoState.rounded ? Math.round(sz * 0.16) : 0);
-                ctx.save();
-                ctx.clip();
-                ctx.drawImage(logoImageObj, lx, ly, sz, sz);
-                ctx.restore();
-                if (logoState.stroke) {
-                    ctx.lineWidth = Math.max(2, Math.round(sz * 0.032));
-                    ctx.strokeStyle = '#FFFFFF';
-                    ctx.stroke();
+                    ctx.save();
+                    ctx.globalAlpha = logoState.opacity / 100;
+                    ctx.beginPath();
+                    ctx.roundRect(lx, ly, sz, sz, logoState.rounded ? Math.round(sz * 0.16) : 0);
+                    ctx.save();
+                    ctx.clip();
+                    ctx.drawImage(logoImageObj, lx, ly, sz, sz);
+                    ctx.restore();
+                    if (logoState.stroke) {
+                        ctx.lineWidth = Math.max(2, Math.round(sz * 0.032));
+                        ctx.strokeStyle = '#FFFFFF';
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                } catch (logoErr) {
+                    logoDrawFailed = true;
+                    console.warn('Logo dilewati saat render kanvas:', logoErr);
                 }
-                ctx.restore();
             }
 
             const isLandscapePhoto = w > h;
@@ -1578,7 +1656,20 @@
             ctx.fillText('✔ Timemark BBWS menjamin keaslian waktu & GPS', curX, curY);
             ctx.restore();
 
-            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+            try {
+                latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+            } catch (exportErr) {
+                if (allowLogoFallback && !logoDrawFailed) {
+                    const prevVis = logoState.visible;
+                    logoState.visible = false;
+                    renderWatermarkedImage(source, rawW, rawH, mirror, false);
+                    logoState.visible = prevVis;
+                    showToast('Logo dilewati karena pembatasan keamanan gambar.');
+                    return;
+                }
+                throw exportErr;
+            }
+
             latestCaptureMeta = {
                 captured_at: new Date().toISOString(),
                 time_label: document.getElementById('wmTime').innerText,
