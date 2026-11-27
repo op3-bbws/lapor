@@ -48,8 +48,8 @@
         }
         #cameraStream.mirror { transform: translate3d(0, 0, 0) scaleX(-1); }
         .camera-grid {
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
             background-size: 33.333% 33.333%;
         }
 
@@ -162,10 +162,10 @@
     <!-- 1. VIEWFINDER KAMERA -->
     <div id="viewfinderStage" class="absolute inset-0 overflow-hidden bg-slate-950">
         <video id="cameraStream" autoplay playsinline muted></video>
-        <div id="gridOverlay" class="camera-grid absolute inset-0 z-[5] pointer-events-none"></div>
+        <div id="gridOverlay" class="hidden camera-grid absolute inset-0 z-[5] pointer-events-none"></div>
 
-        <!-- WATERPAS DIGITAL -->
-        <div id="waterpasWrapper" class="absolute inset-0 z-[7] pointer-events-none flex items-center justify-center">
+        <!-- WATERPAS DIGITAL (DEFAULT NONAKTIF) -->
+        <div id="waterpasWrapper" class="hidden absolute inset-0 z-[7] pointer-events-none flex items-center justify-center">
             <div class="relative flex flex-col items-center">
                 <div class="w-44 h-[1.5px] bg-white/30 relative flex items-center justify-center">
                     <div class="w-8 h-3 border-x-2 border-amber-400/80"></div>
@@ -210,12 +210,6 @@
                     <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     <span id="flashBadgeText" class="hidden absolute -bottom-1 right-0.5 px-1 rounded bg-amber-400 text-slate-950 text-[8px] font-black leading-tight">ON</span>
                 </button>
-                <button type="button" onclick="toggleGrid()" id="btnQuickGrid" title="Garis Bantu Grid" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-amber-300 transition active:scale-95">
-                    <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 9h16M4 15h16M9 4v16M15 4v16"/></svg>
-                </button>
-                <button type="button" onclick="toggleWaterpas()" id="btnQuickWaterpas" title="Waterpas Kemiringan" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-emerald-300 transition active:scale-95">
-                    <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M9 9v6m6-6v6"/></svg>
-                </button>
             </div>
 
             <!-- Pintasan langsung menuju halaman laporan.html -->
@@ -225,9 +219,12 @@
                 <span id="photoProgressCountBadge" class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black leading-none">0/3</span>
             </button>
 
+            <!-- Tombol Rotasi Kamera Depan / Belakang -->
             <div class="flex items-center gap-2">
-                <button type="button" onclick="switchCamera()" title="Putar Kamera" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white transition active:scale-95">
-                    <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <button type="button" onclick="switchCamera()" id="btnSwitchCamera" title="Ganti Kamera Depan / Belakang" class="w-10 h-10 bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition active:scale-95">
+                    <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
                 </button>
             </div>
         </header>
@@ -360,14 +357,35 @@
         </div>
     </div>
 
-    <!-- BOTTOM SHEET 2: PENGATURAN SISTEM & SENSOR -->
+    <!-- BOTTOM SHEET 2: PENGATURAN SISTEM, GRID (#), WATERPAS & SENSOR -->
     <div id="settingsSheet" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('settingsSheet')">
         <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kamera & Sistem</h3><p class="text-[11px] text-slate-500">Kontrol orientasi sensor, backup Drive & keamanan galeri</p></div>
+                <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kamera & Sistem</h3><p class="text-[11px] text-slate-500">Bantuan grid (#), waterpas, orientasi sensor & keamanan galeri</p></div>
                 <button type="button" onclick="closeSheet('settingsSheet')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div class="space-y-4 mt-4 text-xs">
+                <!-- Kontrol Garis Bantu Grid (#) & Waterpas -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                    <p class="font-bold text-slate-900">Bantuan Komposisi & Kemiringan (Default: Mati)</p>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" onclick="toggleGrid()" id="btnSettingGrid" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold transition">
+                            <span class="flex items-center gap-2">
+                                <span class="font-mono font-black text-sm text-pupr-blue">#</span>
+                                <span>Grid Bantu</span>
+                            </span>
+                            <span id="gridStatusLabel" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-extrabold">MATI</span>
+                        </button>
+                        <button type="button" onclick="toggleWaterpas()" id="btnSettingWaterpas" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold transition">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M9 9v6m6-6v6"/></svg>
+                                <span>Waterpas</span>
+                            </span>
+                            <span id="waterpasStatusLabel" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-extrabold">MATI</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
                     <div class="flex items-center justify-between">
                         <div>
@@ -519,12 +537,10 @@
             <button type="button" onclick="closePreviewModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
 
-        <!-- Gambar Utama Hasil Jepretan -->
         <div class="flex-1 flex items-center justify-center my-3 overflow-hidden min-h-0">
             <img id="previewImageResult" src="" alt="Hasil Foto" class="max-h-full max-w-full rounded-2xl border border-white/15 shadow-2xl object-contain">
         </div>
 
-        <!-- Strip Dokumentasi Sesi (0% • 50% • 100%) -->
         <div class="max-w-xl w-full mx-auto mb-3 p-2.5 rounded-2xl bg-slate-900/90 border border-white/15">
             <div class="flex items-center justify-between px-1 mb-2">
                 <span class="text-[11px] font-extrabold text-slate-200">Target Slot Dokumentasi Sesi (Klik untuk pindah tahap):</span>
@@ -546,7 +562,6 @@
     <canvas id="photoCanvas" class="hidden"></canvas>
 
     <script>
-        // Polyfill roundRect untuk kompatibilitas WebView / browser lama
         if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                 const radius = Array.isArray(r) ? (r[0] || 0) : (r || 0);
@@ -565,10 +580,8 @@
             try { initSupabase(); } catch (e) { console.warn('initSupabase warning:', e); }
         }
 
-        // URL WEB APP GOOGLE APPS SCRIPT (GOOGLE DRIVE)
         const GAS_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
 
-        // 1. Safe Storage & IndexedDB Helpers
         function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
         function safeSetStorage(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
         function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
@@ -659,7 +672,6 @@
             }
         }
 
-        // 2. User Context & State Aplikasi
         let user = { id_pegawai: 'OPI-SP-1', nama: 'Petugas Lapangan', jabatan: 'PPA / Pekarya', daerah_irigasi: 'D.I Bening' };
         let videoStream = null;
         let facingMode = 'environment';
@@ -668,8 +680,11 @@
         let currentTheme = 1;
         let timerSeconds = 0;
         let zoomLevel = 1.0;
-        let gridEnabled = true;
-        let waterpasEnabled = true;
+
+        // Default tampilan tanpa grid (#) dan tanpa waterpas
+        let gridEnabled = false;
+        let waterpasEnabled = false;
+
         let countdownTimer = null;
         let isCapturingBusy = false;
         let latestCapturedBase64 = '';
@@ -702,7 +717,6 @@
         logoImageObj.crossOrigin = 'anonymous';
         logoImageObj.src = logoState.src;
 
-        // 4. Inisialisasi Awal
         document.addEventListener('DOMContentLoaded', async () => {
             let sessionResult = null;
             if (typeof checkSession === 'function') {
@@ -740,6 +754,7 @@
                 safeSetStorage('bbws_last_valid_profile_v1', JSON.stringify(sessionResult.profile));
             }
 
+            syncGridAndWaterpasUI();
             updateWatermarkInfo();
             updateFlashUI();
             initCamera();
@@ -777,7 +792,6 @@
             window.location.href = 'laporan.html';
         }
 
-        // 5. Toast & Modal Helpers
         let toastTimer = null;
         function showToast(msg) {
             document.getElementById('toastText').innerText = msg;
@@ -793,7 +807,6 @@
         function closeAdminGalleryModal() { closeSheet('adminGalleryModal'); }
         function closeOverwriteWarnModal() { closeSheet('overwriteWarnModal'); }
 
-        // 6. Sensor Low-Pass Filter & Deteksi Orientasi
         function debounce(fn, delay) {
             let timer = null;
             return function (...args) {
@@ -975,7 +988,6 @@
             }
         }
 
-        // 7. Kamera, Flash, Zoom, Grid, Waterpas & GPS
         async function initCamera() {
             const fallbackEl = document.getElementById('cameraFallback');
             const videoEl = document.getElementById('cameraStream');
@@ -1050,25 +1062,63 @@
             }
         }
 
-        function switchCamera() {
+        async function switchCamera() {
             facingMode = facingMode === 'environment' ? 'user' : 'environment';
-            if (videoStream) videoStream.getTracks().forEach(t => t.stop());
-            initCamera();
+            if (videoStream) {
+                videoStream.getTracks().forEach(t => t.stop());
+                videoStream = null;
+            }
+            const videoEl = document.getElementById('cameraStream');
+            const mirrorPrefix = facingMode === 'user' ? 'scaleX(-1) ' : '';
+            videoEl.style.transform = `translate3d(0, 0, 0) ${mirrorPrefix}scale(${zoomLevel})`;
+            await initCamera();
+            showToast(facingMode === 'user' ? 'Kamera depan aktif' : 'Kamera belakang aktif');
+        }
+
+        function syncGridAndWaterpasUI() {
+            const gridOverlay = document.getElementById('gridOverlay');
+            const btnGrid = document.getElementById('btnSettingGrid');
+            const lblGrid = document.getElementById('gridStatusLabel');
+            if (gridOverlay) gridOverlay.classList.toggle('hidden', !gridEnabled);
+            if (lblGrid) {
+                lblGrid.innerText = gridEnabled ? 'AKTIF' : 'MATI';
+                lblGrid.className = gridEnabled
+                    ? 'text-[10px] px-2 py-0.5 rounded-md bg-blue-600 text-white font-extrabold'
+                    : 'text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-extrabold';
+            }
+            if (btnGrid) {
+                btnGrid.className = gridEnabled
+                    ? 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-pupr-blue bg-blue-50/70 text-slate-900 font-bold transition'
+                    : 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold transition';
+            }
+
+            const wpWrapper = document.getElementById('waterpasWrapper');
+            const btnWp = document.getElementById('btnSettingWaterpas');
+            const lblWp = document.getElementById('waterpasStatusLabel');
+            if (wpWrapper) wpWrapper.classList.toggle('hidden', !waterpasEnabled);
+            if (lblWp) {
+                lblWp.innerText = waterpasEnabled ? 'AKTIF' : 'MATI';
+                lblWp.className = waterpasEnabled
+                    ? 'text-[10px] px-2 py-0.5 rounded-md bg-emerald-600 text-white font-extrabold'
+                    : 'text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-extrabold';
+            }
+            if (btnWp) {
+                btnWp.className = waterpasEnabled
+                    ? 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50/70 text-slate-900 font-bold transition'
+                    : 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold transition';
+            }
         }
 
         function toggleGrid() {
             gridEnabled = !gridEnabled;
-            document.getElementById('gridOverlay').classList.toggle('hidden', !gridEnabled);
-            document.getElementById('btnQuickGrid').classList.toggle('text-amber-300', gridEnabled);
-            document.getElementById('btnQuickGrid').classList.toggle('text-white/50', !gridEnabled);
+            syncGridAndWaterpasUI();
+            showToast(gridEnabled ? 'Grid bantu (#) diaktifkan' : 'Grid bantu (#) dimatikan');
         }
 
         function toggleWaterpas() {
             waterpasEnabled = !waterpasEnabled;
-            document.getElementById('waterpasWrapper').classList.toggle('hidden', !waterpasEnabled);
-            document.getElementById('btnQuickWaterpas').classList.toggle('text-emerald-300', waterpasEnabled);
-            document.getElementById('btnQuickWaterpas').classList.toggle('text-white/50', !waterpasEnabled);
-            showToast(waterpasEnabled ? 'Waterpas diaktifkan' : 'Waterpas disembunyikan');
+            syncGridAndWaterpasUI();
+            showToast(waterpasEnabled ? 'Waterpas diaktifkan' : 'Waterpas dimatikan');
         }
 
         function cycleZoom() {
@@ -1130,7 +1180,6 @@
             );
         }
 
-        // 8. Mode Progres & Watermark
         function setMode(mode) {
             currentMode = mode;
             ['0', '50', '100'].forEach(m => {
@@ -1152,7 +1201,6 @@
             document.getElementById('wmId').innerText = user.id_pegawai || 'OPI-SP-1';
         }
 
-        // 9. Pengaturan Logo Lengkap
         function setLogoPosition(pos) {
             logoState.position = pos;
             ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach(p => {
@@ -1287,7 +1335,6 @@
             img.style.border = logoState.stroke ? '2px solid #FFFFFF' : 'none';
         }
 
-        // 10. Templat Watermark
         function selectTemplate(id) {
             currentTheme = id;
             [1, 2, 3, 4].forEach(t => {
@@ -1328,7 +1375,6 @@
             return lines.slice(0, 3);
         }
 
-        // 11. Capture & Render Canvas (Aman dari error kanvas & WebView lama)
         async function triggerCapture() {
             if (countdownTimer || isCapturingBusy) return;
             isCapturingBusy = true;
@@ -1686,7 +1732,6 @@
             openPreviewModal(latestCapturedBase64, currentMode);
         }
 
-        // 12. PREVIEW SESI (0/50/100) + PROTEKSI ANTI-TINDIH + UPLOAD GOOGLE DRIVE
         function renderPreviewSessionStrip(selectedMode) {
             const stripEl = document.getElementById('previewSessionStrip');
             const countEl = document.getElementById('previewSessionProgressText');
@@ -1910,7 +1955,6 @@
             showToast(`Mode kamera siap untuk Foto ${mode}%`);
         }
 
-        // 13. Penyimpanan Metadata Sesi & Sinkronisasi ke laporan.html
         function saveSessionMetadata() {
             const existingRaw = safeGetStorage(SESSION_META_KEY);
             let existingObj = {};
@@ -2046,7 +2090,6 @@
             showToast('Sesi foto lokal dikosongkan.');
         }
 
-        // 14. Otorisasi Galeri Admin
         function handleGalleryButtonClick() {
             if (isGalleryAllowedByAdmin) {
                 document.getElementById('adminGalleryFileInput').click();
