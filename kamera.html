@@ -86,7 +86,7 @@
 
         /* Rotasi +90° (landscape-ccw / arah jam 3): menempel di sudut kiri atas tanpa terdorong ke tengah */
         body[data-phys-orient="landscape-ccw"] .watermark {
-            top: 60px;
+            top: 40px;
             left: 14px;
             bottom: auto;
             right: auto;
@@ -102,7 +102,7 @@
             top: auto;
             right: auto;
             max-width: min(320px, calc(100dvh - 240px));
-            transform-origin: bottom left;
+            transform-origin: top left;
             transform: translate3d(0, 0, 0) rotate(-90deg) translateY(100%);
         }
 
