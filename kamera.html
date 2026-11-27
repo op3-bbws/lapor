@@ -84,25 +84,25 @@
             transform-origin: bottom left;
         }
 
-        /* Rotasi +90° (landscape-ccw / arah jam 3): watermark bergeser ke bawah area viewfinder */
+        /* Rotasi +90° (landscape-ccw / arah jam 3): menempel di sudut kiri atas tanpa terdorong ke tengah */
         body[data-phys-orient="landscape-ccw"] .watermark {
-            bottom: 132px;
+            top: 76px;
             left: 14px;
-            top: auto;
+            bottom: auto;
             right: auto;
-            max-width: min(300px, calc(100vw - 110px));
-            transform-origin: bottom left;
-            transform: translate3d(0, 0, 0) rotate(90deg) translateY(100%);
+            max-width: min(320px, calc(100dvh - 220px));
+            transform-origin: top left;
+            transform: translate3d(0, 0, 0) rotate(90deg) translateY(-100%);
         }
 
-        /* Rotasi -90° (landscape-cw / arah jam 9): watermark di kanan bawah area viewfinder */
+        /* Rotasi -90° (landscape-cw / arah jam 9): ayunan -90deg dari bottom-left agar tidak terpotong ke atas */
         body[data-phys-orient="landscape-cw"] .watermark {
             bottom: 132px;
-            right: 54px;
+            left: 52px;
             top: auto;
-            left: auto;
-            max-width: min(300px, calc(100vw - 110px));
-            transform-origin: bottom right;
+            right: auto;
+            max-width: min(320px, calc(100dvh - 240px));
+            transform-origin: bottom left;
             transform: translate3d(0, 0, 0) rotate(-90deg) translateY(100%);
         }
 
