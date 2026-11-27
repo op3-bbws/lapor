@@ -59,11 +59,17 @@
             will-change: transform;
             backface-visibility: hidden;
         }
-        body[data-phys-orient="landscape-ccw"] .orient-icon { transform: translate3d(0, 0, 0) rotate(90deg); }
-        body[data-phys-orient="landscape-cw"] .orient-icon { transform: translate3d(0, 0, 0) rotate(-90deg); }
-        body[data-phys-orient="upside-down"] .orient-icon { transform: translate3d(0, 0, 0) rotate(180deg); }
+        body[data-phys-orient="landscape-ccw"] .orient-icon {
+            transform: translate3d(0, 0, 0) rotate(90deg);
+        }
+        body[data-phys-orient="landscape-cw"] .orient-icon {
+            transform: translate3d(0, 0, 0) rotate(-90deg);
+        }
+        body[data-phys-orient="upside-down"] .orient-icon {
+            transform: translate3d(0, 0, 0) rotate(180deg);
+        }
 
-        /* Watermark */
+        /* Layer 2: Watermark mepet sudut tepi di bawah layer tombol (z-30) */
         .watermark {
             position: fixed;
             left: 12px;
@@ -77,24 +83,40 @@
             transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), top 0.3s ease, bottom 0.3s ease, left 0.3s ease, right 0.3s ease;
             transform-origin: bottom left;
         }
+
+        /* Rotasi +90° (landscape-ccw / arah jam 3): menempel di sudut kiri atas tanpa terdorong ke tengah */
         body[data-phys-orient="landscape-ccw"] .watermark {
-            top: 68px; left: 12px; bottom: auto; right: auto;
-            max-width: min(330px, calc(100dvh - 180px));
+            top: 76px;
+            left: 14px;
+            bottom: auto;
+            right: auto;
+            max-width: min(320px, calc(100dvh - 220px));
             transform-origin: top left;
-            transform: translate3d(0, 0, 0) rotate(90deg);
+            transform: translate3d(0, 0, 0) rotate(90deg) translateY(-100%);
         }
+
+        /* Rotasi -90° (landscape-cw / arah jam 9): ayunan -90deg dari bottom-left agar tidak terpotong ke atas */
         body[data-phys-orient="landscape-cw"] .watermark {
-            top: 68px; left: 12px; bottom: auto; right: auto;
-            max-width: min(330px, calc(100dvh - 180px));
-            transform-origin: top left;
-            transform: translate3d(0, 0, 0) rotate(-90deg) translateX(-100%);
+            bottom: 132px;
+            left: 52px;
+            top: auto;
+            right: auto;
+            max-width: min(320px, calc(100dvh - 240px));
+            transform-origin: bottom left;
+            transform: translate3d(0, 0, 0) rotate(-90deg) translateY(100%);
         }
+
+        /* Rotasi 180° (upside-down): menempel di tepi kanan atas */
         body[data-phys-orient="upside-down"] .watermark {
-            top: 68px; right: 12px; bottom: auto; left: auto;
-            max-width: min(330px, calc(100vw - 24px));
+            top: 76px;
+            right: 14px;
+            bottom: auto;
+            left: auto;
+            max-width: min(320px, calc(100vw - 28px));
             transform-origin: top right;
             transform: translate3d(0, 0, 0) rotate(180deg) translateY(-100%);
         }
+
         @media (orientation: landscape) {
             .orient-icon { transform: translate3d(0, 0, 0) !important; }
             .watermark {
@@ -109,6 +131,10 @@
                 transform-origin: bottom left !important;
             }
             #watermarkOverlay { font-size: 0.88em; }
+        }
+
+        .wm-text-shadow {
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.85);
         }
 
         #waterpasTrack, #waterpasBubble {
@@ -139,14 +165,14 @@
     <video id="cameraStream" autoplay playsinline muted></video>
     <div id="gridOverlay" class="hidden camera-grid absolute inset-0 z-[5] pointer-events-none"></div>
 
-    <!-- WATERPAS DIGITAL -->
+    <!-- WATERPAS DIGITAL (DEFAULT NONAKTIF) -->
     <div id="waterpasWrapper" class="hidden absolute inset-0 z-[7] pointer-events-none flex items-center justify-center">
         <div class="relative flex flex-col items-center">
             <div class="w-44 h-[1.5px] bg-white/30 relative flex items-center justify-center">
                 <div class="w-8 h-3 border-x-2 border-amber-400/80"></div>
                 <div id="waterpasBar" class="absolute w-32 h-[2px] bg-amber-400 rounded-full transition-colors duration-150"></div>
             </div>
-            <div id="waterpasTrack" class="mt-2.5 w-32 h-3.5 rounded-full bg-black/55 border border-white/25 backdrop-blur-xs relative flex items-center justify-center overflow-hidden">
+            <div id="waterpasTrack" class="mt-2.5 w-32 h-3.5 rounded-full bg-black/55 border border-white/25 backdrop-blur-sm relative flex items-center justify-center overflow-hidden">
                 <div class="w-4 h-full border-x border-white/40 z-10"></div>
                 <div id="waterpasBubble" class="w-3.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]"></div>
             </div>
@@ -168,12 +194,12 @@
     </div>
 </div>
 
-<!-- LOGO LIVE OVERLAY -->
+<!-- LAYER 2: LOGO LIVE OVERLAY -->
 <div id="liveLogoWrapper" class="fixed z-[20] top-20 right-4 pointer-events-none transition-all duration-300" style="transform: translate3d(0,0,0); backface-visibility: hidden;">
     <img id="liveLogoImg" src="assets/img/logo-bbws.svg" onerror="this.src='assets/img/logo.png'" alt="Logo Instansi" class="orient-icon w-16 h-16 object-contain rounded-xl border-2 border-white shadow-lg bg-white/10">
 </div>
 
-<!-- WATERMARK -->
+<!-- LAYER 2: WATERMARK MEPET SUDUT TEPI -->
 <div id="watermarkContainer" class="watermark pointer-events-none">
     <div id="watermarkOverlay" class="w-fit max-w-full rounded-2xl transition-all duration-300 font-sans">
         <div id="wmHeaderBanner" class="hidden items-center gap-2 bg-pupr-blue text-white px-3.5 py-1.5 rounded-t-xl text-[11px] sm:text-xs font-extrabold tracking-wide uppercase">
@@ -199,41 +225,48 @@
     </div>
 </div>
 
-<!-- TOMBOL & PANEL IKON UTAMA -->
+<!-- LAYER 3: TOMBOL & PANEL IKON UTAMA -->
 <div class="relative z-30 h-full w-full flex flex-col justify-between pointer-events-none">
+    <!-- HEADER -->
     <header id="cameraHeader" class="relative z-30 pointer-events-auto flex items-center justify-between gap-2 px-3.5 sm:px-5 pt-3.5 pb-4 bg-gradient-to-b from-black/85 via-black/45 to-transparent">
         <div class="flex items-center gap-1.5 sm:gap-2">
             <button type="button" onclick="window.location.href='home.html'" title="Kembali ke Beranda" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white transition active:scale-95">
                 <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             </button>
-            <button type="button" onclick="cycleFlashMode()" id="btnQuickFlash" title="Mode Flash" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white/70 transition active:scale-95 relative">
+            <button type="button" onclick="cycleFlashMode()" id="btnQuickFlash" title="Mode Flash (Mati / Aktif / Auto)" class="w-10 h-10 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/15 rounded-full flex items-center justify-center text-white/70 transition active:scale-95 relative">
                 <svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 <span id="flashBadgeText" class="hidden absolute -bottom-1 right-0.5 px-1 rounded bg-amber-400 text-slate-950 text-[8px] font-black leading-tight">ON</span>
             </button>
         </div>
 
+        <!-- Pintasan langsung menuju halaman laporan.html -->
         <button type="button" onclick="goToLaporanPage()" class="flex items-center gap-2 bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-white/25 px-3.5 py-2 rounded-full text-white transition active:scale-95 shadow-lg whitespace-nowrap">
             <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             <span class="text-xs font-bold tracking-wide">Buat Laporan</span>
             <span id="photoProgressCountBadge" class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black leading-none">0/3</span>
         </button>
 
+        <!-- Tombol Rotasi Kamera Depan / Belakang -->
         <div class="flex items-center gap-2">
-            <button type="button" onclick="switchCamera()" id="btnSwitchCamera" title="Ganti Kamera" class="w-10 h-10 bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition active:scale-95">
-                <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <button type="button" onclick="switchCamera()" id="btnSwitchCamera" title="Ganti Kamera Depan / Belakang" class="w-10 h-10 bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition active:scale-95">
+                <svg class="w-5 h-5 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
             </button>
         </div>
     </header>
 
+    <!-- PANEL IKON SISI KANAN -->
     <div class="flex-1 relative flex items-end justify-end px-3.5 sm:px-6 pb-2.5 max-w-5xl w-full mx-auto min-h-0">
         <div class="relative z-30 pointer-events-auto flex flex-col items-center gap-2 mb-1.5 shrink-0">
             <button type="button" onclick="cycleTimer()" title="Timer Jepret" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="timerLabel" class="orient-icon">0s</span></button>
             <button type="button" onclick="cycleZoom()" title="Zoom Lensa" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-[11px] font-extrabold text-white transition active:scale-95"><span id="zoomLabel" class="orient-icon">1.0x</span></button>
-            <button type="button" onclick="openSheet('templateSheet')" title="Tambah Catatan" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button type="button" onclick="openSheet('templateSheet'); setTimeout(() => document.getElementById('customNoteInput').focus(), 200)" title="Tambah Catatan Watermark" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
             <button type="button" onclick="updateLocationInfo(true)" title="Perbarui GPS" class="w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-md border border-white/20 flex items-center justify-center text-emerald-300 transition active:scale-95"><svg class="w-4 h-4 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
         </div>
     </div>
 
+    <!-- FOOTER (SHUTTER & KONTROL) -->
     <footer id="cameraFooter" class="relative z-30 pointer-events-auto pt-2.5 pb-5 sm:pb-6 px-4 bg-gradient-to-t from-black via-black/85 to-transparent">
         <div class="max-w-md mx-auto">
             <div id="modeSelectorRow" class="flex items-center justify-center gap-2 mb-4">
@@ -243,11 +276,13 @@
             </div>
 
             <div class="flex items-center justify-between px-4 sm:px-8">
+                <!-- Galeri Sesi Foto -->
                 <button type="button" onclick="openSheet('sessionPhotosSheet')" class="flex flex-col items-center gap-1 group">
                     <div id="sessionThumbBox" class="w-12 h-12 rounded-2xl bg-white/15 group-hover:bg-white/25 border border-white/25 backdrop-blur-md flex items-center justify-center overflow-hidden transition"><svg class="w-5 h-5 text-slate-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
                     <span class="text-[10px] font-semibold text-slate-300">Sesi Foto</span>
                 </button>
 
+                <!-- TOMBOL SHUTTER -->
                 <button id="shutterBtn" type="button" onclick="triggerCapture()" aria-label="Ambil Foto" class="w-20 h-20 rounded-full border-4 border-white p-1.5 flex items-center justify-center bg-transparent active:scale-90 transition shadow-[0_0_28px_rgba(255,255,255,0.25)] cursor-pointer touch-manipulation"><div class="w-full h-full bg-white hover:bg-slate-100 rounded-full transition pointer-events-none"></div></button>
 
                 <button type="button" onclick="openSheet('templateSheet')" class="flex flex-col items-center gap-1 group">
@@ -266,8 +301,7 @@
     </footer>
 </div>
 
-<!-- (Seluruh elemen Modal/Sheet seperti sessionPhotosSheet, settingsSheet, templateSheet, dll tetap sama persis seperti kode Anda) -->
-<!-- BOTTOM SHEET 1: RINGKASAN SESI FOTO -->
+<!-- BOTTOM SHEET 1: RINGKASAN SESI FOTO & STATUS DRIVE -->
 <div id="sessionPhotosSheet" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex-col justify-end" onclick="if(event.target===this) closeSheet('sessionPhotosSheet')">
     <div class="bg-white text-slate-900 rounded-t-[28px] max-w-xl w-full mx-auto shadow-2xl border-t border-slate-200 p-5 sm:p-6">
         <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
@@ -325,8 +359,8 @@
     </div>
 </div>
 
-<!-- BOTTOM SHEET 2: PENGATURAN SISTEM -->
-<div id="settingsSheet" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('settingsSheet')">
+<!-- BOTTOM SHEET 2: PENGATURAN SISTEM, GRID (#), WATERPAS & SENSOR -->
+<div id="settingsSheet" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex-col justify-end" onclick="if(event.target===this) closeSheet('settingsSheet')">
     <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
             <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kamera & Sistem</h3><p class="text-[11px] text-slate-500">Bantuan grid (#), waterpas, orientasi sensor & keamanan galeri</p></div>
@@ -356,7 +390,7 @@
             <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="font-bold text-slate-900">Orientasi Kamera & Waterpas</p>
+                        <p class="font-bold text-slate-900">Orientasi Kamera & Waterpas (LPF α=0.15)</p>
                         <p class="text-[11px] text-slate-500">Mendukung mode Potret, Lanskap & Terbalik 180°</p>
                     </div>
                     <span id="sensorStatusBadge" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">Sensor Siap</span>
@@ -381,7 +415,7 @@
 </div>
 
 <!-- BOTTOM SHEET 3: TEMPLAT, KETERANGAN & PENGATURAN LOGO -->
-<div id="templateSheet" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex-col justify-end" onclick="if(event.target===this) closeSheet('templateSheet')">
+<div id="templateSheet" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex-col justify-end" onclick="if(event.target===this) closeSheet('templateSheet')">
     <div class="bg-white text-slate-900 rounded-t-[28px] p-5 sm:p-6 max-w-xl w-full mx-auto shadow-2xl max-h-[88vh] overflow-y-auto hide-scrollbar">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div><h3 class="text-base sm:text-lg font-extrabold text-slate-900">Templat, Logo & Catatan</h3><p class="text-[11px] text-slate-500">Kustomisasi tampilan watermark & logo instansi</p></div>
@@ -488,7 +522,7 @@
     <div class="bg-white text-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100"><div class="flex items-start justify-between mb-3"><div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><button type="button" onclick="closeAdminGalleryModal()" class="text-slate-400 hover:text-slate-600 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><h3 class="text-base font-extrabold text-slate-900">Unggah Galeri Dibatasi</h3><p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Untuk mencegah manipulasi absensi & progres, pegawai wajib mengambil foto langsung dari kamera. Masukkan PIN Admin jika ada kondisi darurat.</p><div class="mt-4 pt-4 border-t border-slate-100"><label for="adminPinInput" class="block text-[11px] font-bold text-slate-700 mb-1.5">PIN Otorisasi Admin</label><div class="flex gap-2"><input type="password" id="adminPinInput" placeholder="Masukkan PIN" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-pupr-blue"><button type="button" onclick="verifyAdminGalleryUnlock()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">Izinkan</button></div><p id="adminPinError" class="hidden text-[11px] text-red-600 font-semibold mt-1.5"></p></div><input type="file" id="adminGalleryFileInput" accept="image/*" class="hidden" onchange="handleAdminGalleryUpload(event)"></div>
 </div>
 
-<!-- MODAL PRATINJAU HASIL FOTO -->
+<!-- MODAL PRATINJAU HASIL FOTO + KARTU DOKUMENTASI SESI 0/50/100 -->
 <div id="previewModal" class="hidden fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-md flex-col justify-between p-4 sm:p-6">
     <div class="flex items-center justify-between max-w-3xl w-full mx-auto">
         <div>
@@ -529,53 +563,116 @@
 <canvas id="photoCanvas" class="hidden"></canvas>
 
 <script>
-    // =====================================================================
-    // 1. FUNGSI UTILITAS & CORE YANG HILANG DARI KODE SEBELUMNYA
-    // =====================================================================
-    function showToast(msg) {
-        const box = document.getElementById('toastBox');
-        const text = document.getElementById('toastText');
-        if (!box || !text) return;
-        text.textContent = msg;
-        box.classList.remove('hidden');
-        setTimeout(() => box.classList.add('hidden'), 3000);
+    if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            const radius = Array.isArray(r) ? (r[0] || 0) : (r || 0);
+            this.beginPath();
+            this.moveTo(x + radius, y);
+            this.arcTo(x + w, y, x + w, y + h, radius);
+            this.arcTo(x + w, y + h, x, y + h, radius);
+            this.arcTo(x, y + h, x, y, radius);
+            this.arcTo(x, y, x + w, y, radius);
+            this.closePath();
+            return this;
+        };
     }
 
-    function openSheet(id) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.remove('hidden');
-            el.classList.add('flex');
+    if (typeof initSupabase === 'function') {
+        try { initSupabase(); } catch (e) { console.warn('initSupabase warning:', e); }
+    }
+
+    const GAS_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
+
+    function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+    function safeSetStorage(key, val) { try { localStorage.setItem(key, val); return true; } catch (e) { return false; } }
+    function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+    const IDB_NAME = 'BBWS_Kamera_DB';
+    const IDB_VERSION = 2;
+    const IDB_STORE = 'captured_photos';
+
+    function openCameraIDB() {
+        return new Promise((resolve, reject) => {
+            if (!window.indexedDB) return reject(new Error('IndexedDB tidak didukung'));
+            let settled = false;
+            const done = (fn, val) => {
+                if (!settled) { settled = true; fn(val); }
+            };
+            const guardTimer = setTimeout(() => done(reject, new Error('Timeout IndexedDB')), 2500);
+
+            try {
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(IDB_STORE)) {
+                        db.createObjectStore(IDB_STORE, { keyPath: 'mode' });
+                    }
+                };
+                req.onblocked = () => {
+                    clearTimeout(guardTimer);
+                    done(reject, new Error('IndexedDB terblokir tab lain'));
+                };
+                req.onsuccess = (e) => {
+                    clearTimeout(guardTimer);
+                    done(resolve, e.target.result);
+                };
+                req.onerror = (e) => {
+                    clearTimeout(guardTimer);
+                    done(reject, e.target?.error || new Error('Gagal membuka IndexedDB'));
+                };
+            } catch (err) {
+                clearTimeout(guardTimer);
+                done(reject, err);
+            }
+        });
+    }
+
+    async function savePhotoToIDB(mode, imageData, meta) {
+        try {
+            const db = await openCameraIDB();
+            if (!db.objectStoreNames.contains(IDB_STORE)) return false;
+            return await new Promise((resolve) => {
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).put({ mode: String(mode), imageData, meta, updatedAt: Date.now() });
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+                tx.onabort = () => resolve(false);
+            });
+        } catch (e) {
+            return false;
         }
     }
 
-    function closeSheet(id) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.add('hidden');
-            el.classList.remove('flex');
+    async function loadAllPhotosFromIDB() {
+        try {
+            const db = await openCameraIDB();
+            if (!db.objectStoreNames.contains(IDB_STORE)) return [];
+            return await new Promise((resolve) => {
+                const tx = db.transaction(IDB_STORE, 'readonly');
+                const req = tx.objectStore(IDB_STORE).getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => resolve([]);
+            });
+        } catch (e) {
+            return [];
         }
     }
 
-    function openConfirmResetModal() { openSheet('confirmResetModal'); }
-    function closeConfirmResetModal() { closeSheet('confirmResetModal'); }
-    function closeOverwriteWarnModal() { closeSheet('overwriteWarnModal'); }
-    function closeAdminGalleryModal() { closeSheet('adminGalleryModal'); }
-
-    function getNextEmptySlot() {
-        if (!capturedPhotosByMode['0']) return '0';
-        if (!capturedPhotosByMode['50']) return '50';
-        if (!capturedPhotosByMode['100']) return '100';
-        return '100'; // Jika penuh, default ke 100
+    async function clearAllPhotosIDB() {
+        try {
+            const db = await openCameraIDB();
+            if (!db.objectStoreNames.contains(IDB_STORE)) return false;
+            return await new Promise((resolve) => {
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).clear();
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+            });
+        } catch (e) {
+            return false;
+        }
     }
 
-    function goToLaporanPage() {
-        window.location.href = 'laporan.html';
-    }
-
-    // =====================================================================
-    // 2. STATE GLOBAL
-    // =====================================================================
     let user = { id_pegawai: 'OPI-SP-1', nama: 'Petugas Lapangan', jabatan: 'PPA / Pekarya', daerah_irigasi: 'D.I Bening' };
     let videoStream = null;
     let facingMode = 'environment';
@@ -599,24 +696,295 @@
 
     let orientationMode = 'auto';
     let physicalOrientation = 'portrait';
-    let sensorState = { rawGx: 0, rawGy: 9.8, filteredGx: 0, filteredGy: 9.8, tiltAngleDeg: 0, isLoopRunning: false };
+
+    const LPF_ALPHA = 0.15;
+    let sensorState = {
+        rawGx: 0, rawGy: 9.8,
+        filteredGx: 0, filteredGy: 9.8,
+        rawGamma: 0, rawBeta: 90,
+        filteredGamma: 0, filteredBeta: 90,
+        tiltAngleDeg: 0,
+        isLoopRunning: false
+    };
 
     let capturedPhotosByMode = { '0': null, '50': null, '100': null };
     let photoMetaByMode = { '0': null, '50': null, '100': null };
     const SESSION_META_KEY = 'bbws_session_photos_v2';
 
     const DEFAULT_PU_LOGO_SVG = "assets/img/logo-bbws.svg";
-    const logoState = { visible: true, src: DEFAULT_PU_LOGO_SVG, position: 'top-right', size: 64, opacity: 100, stroke: true, rounded: true };
+    const logoState = {
+        visible: true,
+        src: DEFAULT_PU_LOGO_SVG,
+        position: 'top-right',
+        size: 64,
+        opacity: 100,
+        stroke: true,
+        rounded: true
+    };
     const logoImageObj = new Image();
     logoImageObj.crossOrigin = 'anonymous';
     logoImageObj.src = logoState.src;
 
-    // GANTI DENGAN URL GAS ANDA
-    const GAS_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbwtrtqcocpYEFq1IK0arNzj0WHw5w8jSf7XJqMyAPHVt6c5XJ4uJaVF-yNrh3ekMfiwgQ/exec';
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (typeof checkSession === 'function') {
+            try {
+                const session = await checkSession();
+                if (session && session.profile) {
+                    user = {
+                        id_pegawai: session.profile.id_petugas || 'OPI-SP-1',
+                        nama: session.profile.nama || 'Petugas Lapangan',
+                        jabatan: session.profile.jabatan || session.profile.role || 'PPA / Pekarya',
+                        daerah_irigasi: session.profile.daerah_irigasi || 'D.I Bening'
+                    };
+                }
+            } catch (e) {}
+        }
 
-    // =====================================================================
-    // 3. INISIALISASI KAMERA & SENSOR
-    // =====================================================================
+        const params = new URLSearchParams(window.location.search);
+        const reqMode = params.get('mode');
+        if (reqMode === '0' || reqMode === '50' || reqMode === '100') {
+            setMode(reqMode);
+        }
+
+        syncAssistButtonsUI();
+        updateWatermarkInfo();
+        updateFlashUI();
+        initCamera();
+        updateLocationInfo(false);
+        updateLogoSettings();
+        await loadSessionData();
+
+        bindOrientationFix();
+        startSensor();
+
+        setInterval(updateWatermarkInfo, 30000);
+    });
+
+    function goToLaporanPage() {
+        saveSessionMetadata();
+        window.location.href = 'laporan.html';
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+        const textEl = document.getElementById('toastText');
+        const box = document.getElementById('toastBox');
+        if (!textEl || !box) return;
+        textEl.innerText = msg;
+        box.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+
+    function openSheet(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+    }
+
+    function closeSheet(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+    }
+
+    function openConfirmResetModal() { openSheet('confirmResetModal'); }
+    function closeConfirmResetModal() { closeSheet('confirmResetModal'); }
+    function closeAdminGalleryModal() { closeSheet('adminGalleryModal'); }
+    function closeOverwriteWarnModal() { closeSheet('overwriteWarnModal'); }
+
+    function getNextEmptySlot() {
+        for (const m of ['0', '50', '100']) {
+            if (!capturedPhotosByMode[m]) return m;
+        }
+        return currentMode;
+    }
+
+    function debounce(fn, delay) {
+        let timer = null;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    function bindOrientationFix() {
+        const handleResizeDebounced = debounce(() => {
+            detectWindowOrientationFallback();
+            updateLogoSettings();
+        }, 150);
+
+        window.addEventListener('resize', handleResizeDebounced);
+        window.addEventListener('orientationchange', handleResizeDebounced);
+        if (screen.orientation && screen.orientation.addEventListener) {
+            screen.orientation.addEventListener('change', handleResizeDebounced);
+        }
+        detectWindowOrientationFallback();
+    }
+
+    function startSensor() {
+        window.removeEventListener('devicemotion', handleDeviceMotion);
+        window.removeEventListener('deviceorientation', handleDeviceOrientation);
+        window.addEventListener('devicemotion', handleDeviceMotion, { passive: true });
+        window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true });
+
+        if (!sensorState.isLoopRunning) {
+            sensorState.isLoopRunning = true;
+            requestAnimationFrame(loop);
+        }
+    }
+
+    function handleDeviceMotion(e) {
+        const g = e.accelerationIncludingGravity;
+        if (!g || g.x === null || g.y === null) return;
+        sensorState.rawGx = g.x;
+        sensorState.rawGy = g.y;
+    }
+
+    function handleDeviceOrientation(e) {
+        if (typeof e.gamma === 'number') sensorState.rawGamma = e.gamma;
+        if (typeof e.beta === 'number') sensorState.rawBeta = e.beta;
+    }
+
+    function getScreenAngle() {
+        if (screen.orientation && typeof screen.orientation.angle === 'number') {
+            return screen.orientation.angle;
+        }
+        if (typeof window.orientation === 'number') {
+            return window.orientation;
+        }
+        return window.innerWidth > window.innerHeight ? 90 : 0;
+    }
+
+    function loop() {
+        sensorState.filteredGx = LPF_ALPHA * sensorState.rawGx + (1 - LPF_ALPHA) * sensorState.filteredGx;
+        sensorState.filteredGy = LPF_ALPHA * sensorState.rawGy + (1 - LPF_ALPHA) * sensorState.filteredGy;
+        sensorState.filteredGamma = LPF_ALPHA * sensorState.rawGamma + (1 - LPF_ALPHA) * sensorState.filteredGamma;
+        sensorState.filteredBeta = LPF_ALPHA * sensorState.rawBeta + (1 - LPF_ALPHA) * sensorState.filteredBeta;
+
+        const gx = sensorState.filteredGx;
+        const gy = sensorState.filteredGy;
+        const isViewportLandscape = window.innerWidth > window.innerHeight;
+
+        if (orientationMode === 'auto') {
+            if (isViewportLandscape) {
+                const angle = getScreenAngle();
+                const targetOrient = (angle === 270 || angle === -90) ? 'landscape-cw' : 'landscape-ccw';
+                if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
+            } else {
+                if (Math.abs(gx) > Math.abs(gy) * 1.35 && Math.abs(gx) > 4.5) {
+                    const targetOrient = gx > 0 ? 'landscape-ccw' : 'landscape-cw';
+                    if (physicalOrientation !== targetOrient) applyPhysicalOrientation(targetOrient);
+                } else if (gy < -7.5 && Math.abs(gy) > Math.abs(gx) * 1.4) {
+                    if (physicalOrientation !== 'upside-down') applyPhysicalOrientation('upside-down');
+                } else if (gy > 4.5 && Math.abs(gy) > Math.abs(gx) * 1.35) {
+                    if (physicalOrientation !== 'portrait') applyPhysicalOrientation('portrait');
+                }
+            }
+        }
+
+        if (waterpasEnabled) {
+            let angleRad = Math.atan2(gx, gy);
+            let deg = (angleRad * 180) / Math.PI;
+
+            if (isViewportLandscape) {
+                const scrAngle = getScreenAngle();
+                deg = (scrAngle === 270 || scrAngle === -90) ? deg + 90 : deg - 90;
+            } else if (Math.abs(gx) > Math.abs(gy)) {
+                deg = gx > 0 ? deg - 90 : deg + 90;
+            }
+
+            if (deg > 180) deg -= 360;
+            if (deg < -180) deg += 360;
+
+            const clampedDeg = Math.max(-45, Math.min(45, deg));
+            sensorState.tiltAngleDeg = clampedDeg;
+
+            const bubbleEl = document.getElementById('waterpasBubble');
+            const barEl = document.getElementById('waterpasBar');
+            const degTextEl = document.getElementById('waterpasDegText');
+
+            if (bubbleEl && barEl && degTextEl) {
+                const offsetPx = (clampedDeg / 45) * 48;
+                const isLevel = Math.abs(clampedDeg) <= 1.5;
+
+                bubbleEl.style.transform = `translate3d(${offsetPx.toFixed(1)}px, 0, 0)`;
+                barEl.style.transform = `translate3d(0, 0, 0) rotate(${(-clampedDeg).toFixed(1)}deg)`;
+
+                if (isLevel) {
+                    bubbleEl.className = 'w-3.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)]';
+                    barEl.className = 'absolute w-32 h-[2px] bg-emerald-400 rounded-full transition-colors duration-150';
+                    degTextEl.className = 'mt-1 px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 font-mono text-[10px] font-bold text-emerald-300 tabular-nums';
+                } else {
+                    bubbleEl.className = 'w-3.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]';
+                    barEl.className = 'absolute w-32 h-[2px] bg-amber-400 rounded-full transition-colors duration-150';
+                    degTextEl.className = 'mt-1 px-1.5 py-0.5 rounded bg-black/55 font-mono text-[10px] font-bold text-amber-300 tabular-nums';
+                }
+                degTextEl.innerText = `${Math.abs(clampedDeg).toFixed(1)}°`;
+            }
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    function applyPhysicalOrientation(orient) {
+        physicalOrientation = orient;
+        const viewportIsPortrait = window.innerHeight >= window.innerWidth;
+        const cssOrient = viewportIsPortrait ? orient : 'portrait';
+        document.body.setAttribute('data-phys-orient', cssOrient);
+        updateLogoSettings();
+    }
+
+    function setOrientationMode(mode) {
+        orientationMode = mode;
+        ['auto', 'portrait', 'landscape'].forEach(m => {
+            const btn = document.getElementById('oriMode-' + m);
+            if (btn) {
+                btn.className = (m === mode)
+                    ? 'py-2 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold'
+                    : 'py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold';
+            }
+        });
+        if (mode === 'portrait') applyPhysicalOrientation('portrait');
+        else if (mode === 'landscape') applyPhysicalOrientation('landscape-ccw');
+        else detectWindowOrientationFallback();
+        showToast('Mode orientasi: ' + (mode === 'auto' ? 'Otomatis Sensor' : mode === 'portrait' ? 'Potret' : 'Lanskap'));
+    }
+
+    function detectWindowOrientationFallback() {
+        if (orientationMode !== 'auto') {
+            applyPhysicalOrientation(orientationMode === 'landscape' ? 'landscape-ccw' : 'portrait');
+            return;
+        }
+        const isViewportLandscape = window.innerWidth > window.innerHeight;
+        if (isViewportLandscape) {
+            const angle = getScreenAngle();
+            applyPhysicalOrientation((angle === 270 || angle === -90) ? 'landscape-cw' : 'landscape-ccw');
+        } else {
+            applyPhysicalOrientation(physicalOrientation);
+        }
+    }
+
+    async function requestMotionPermission() {
+        try {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                const res = await DeviceMotionEvent.requestPermission();
+                if (res !== 'granted') return showToast('Izin sensor ditolak oleh perangkat.');
+            }
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                await DeviceOrientationEvent.requestPermission();
+            }
+            startSensor();
+            document.getElementById('sensorStatusBadge').innerText = 'Sensor Aktif';
+            showToast('Sensor auto-orientasi & waterpas aktif!');
+        } catch (err) {
+            startSensor();
+            showToast('Sensor otomatis aktif di browser ini.');
+        }
+    }
+
     async function initCamera() {
         const fallbackEl = document.getElementById('cameraFallback');
         const videoEl = document.getElementById('cameraStream');
@@ -626,55 +994,124 @@
             return;
         }
         try {
-            if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+            if (videoStream) {
+                videoStream.getTracks().forEach(t => t.stop());
+            }
             const constraints = { video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false };
             videoStream = await navigator.mediaDevices.getUserMedia(constraints);
             videoEl.srcObject = videoStream;
             videoEl.classList.toggle('mirror', facingMode === 'user');
+            const mirrorPrefix = facingMode === 'user' ? 'scaleX(-1) ' : '';
+            videoEl.style.transform = `translate3d(0, 0, 0) ${mirrorPrefix}scale(${zoomLevel})`;
             fallbackEl.classList.add('hidden');
+            await applyFlashConstraint(flashMode === 'on');
         } catch (err) {
             fallbackEl.classList.remove('hidden');
             document.getElementById('cameraErrorMsg').innerText = 'Gagal akses kamera: ' + err.message;
         }
     }
 
-    function switchCamera() {
-        facingMode = facingMode === 'environment' ? 'user' : 'environment';
-        if (videoStream) videoStream.getTracks().forEach(t => t.stop());
-        initCamera();
-    }
-
-    function cycleFlashMode() {
-        flashMode = flashMode === 'off' ? 'on' : (flashMode === 'on' ? 'auto' : 'off');
+    function updateFlashUI() {
+        const btn = document.getElementById('btnQuickFlash');
         const badge = document.getElementById('flashBadgeText');
-        if (flashMode === 'off') {
-            badge.classList.add('hidden');
-        } else {
+        if (!btn || !badge) return;
+
+        btn.classList.remove('text-amber-300', 'text-sky-300', 'text-white/70');
+        if (flashMode === 'on') {
+            btn.classList.add('text-amber-300');
+            badge.innerText = 'ON';
             badge.classList.remove('hidden');
-            badge.innerText = flashMode === 'on' ? 'ON' : 'AUTO';
+        } else if (flashMode === 'auto') {
+            btn.classList.add('text-sky-300');
+            badge.innerText = 'A';
+            badge.classList.remove('hidden');
+        } else {
+            btn.classList.add('text-white/70');
+            badge.classList.add('hidden');
         }
     }
 
-    // =====================================================================
-    // 4. HANDLER TOMBOL UI (MODE, TIMER, ZOOM, GRID)
-    // =====================================================================
-    function setMode(mode) {
-        currentMode = mode;
-        ['0', '50', '100'].forEach(m => {
-            const btn = document.getElementById('btnMode' + m);
-            if (m === mode) {
-                btn.className = 'px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5';
-            } else {
-                btn.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/10 transition flex items-center gap-1.5';
-            }
-        });
-        document.getElementById('wmProgressBadge').innerText = mode + '%';
-        document.getElementById('wmProgressBadge').innerText = mode + '%';
+    async function applyFlashConstraint(enableTorch) {
+        if (!videoStream) return false;
+        const track = videoStream.getVideoTracks()[0];
+        if (!track || typeof track.getCapabilities !== 'function') return false;
+
+        const caps = track.getCapabilities();
+        if (!caps || !caps.torch) return false;
+
+        try {
+            await track.applyConstraints({ advanced: [{ torch: Boolean(enableTorch) }] });
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
-    function cycleTimer() {
-        timerSeconds = timerSeconds === 0 ? 3 : (timerSeconds === 3 ? 5 : 0);
-        document.getElementById('timerLabel').innerText = timerSeconds + 's';
+    async function cycleFlashMode() {
+        flashMode = flashMode === 'off' ? 'on' : (flashMode === 'on' ? 'auto' : 'off');
+        updateFlashUI();
+
+        if (flashMode === 'on') {
+            const ok = await applyFlashConstraint(true);
+            showToast(ok ? 'Flash / Lampu aktif' : 'Flash aktif (perangkat tidak mendukung torch langsung)');
+        } else if (flashMode === 'auto') {
+            await applyFlashConstraint(false);
+            showToast('Flash otomatis saat jepret');
+        } else {
+            await applyFlashConstraint(false);
+            showToast('Flash dimatikan');
+        }
+    }
+
+    function switchCamera() {
+        facingMode = facingMode === 'environment' ? 'user' : 'environment';
+        initCamera();
+    }
+
+    function syncAssistButtonsUI() {
+        const gridOverlay = document.getElementById('gridOverlay');
+        const btnGrid = document.getElementById('btnSettingGrid');
+        const lblGrid = document.getElementById('gridStatusLabel');
+        if (gridOverlay) gridOverlay.classList.toggle('hidden', !gridEnabled);
+        if (btnGrid) {
+            btnGrid.className = gridEnabled
+                ? 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-pupr-blue bg-blue-50 text-pupr-blue font-bold transition'
+                : 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold transition';
+        }
+        if (lblGrid) {
+            lblGrid.innerText = gridEnabled ? 'AKTIF' : 'MATI';
+            lblGrid.className = gridEnabled
+                ? 'text-[10px] px-2 py-0.5 rounded-md bg-pupr-blue text-white font-extrabold'
+                : 'text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-extrabold';
+        }
+
+        const wpWrapper = document.getElementById('waterpasWrapper');
+        const btnWp = document.getElementById('btnSettingWaterpas');
+        const lblWp = document.getElementById('waterpasStatusLabel');
+        if (wpWrapper) wpWrapper.classList.toggle('hidden', !waterpasEnabled);
+        if (btnWp) {
+            btnWp.className = waterpasEnabled
+                ? 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold transition'
+                : 'flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold transition';
+        }
+        if (lblWp) {
+            lblWp.innerText = waterpasEnabled ? 'AKTIF' : 'MATI';
+            lblWp.className = waterpasEnabled
+                ? 'text-[10px] px-2 py-0.5 rounded-md bg-emerald-600 text-white font-extrabold'
+                : 'text-[10px] px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-extrabold';
+        }
+    }
+
+    function toggleGrid() {
+        gridEnabled = !gridEnabled;
+        syncAssistButtonsUI();
+        showToast(gridEnabled ? 'Grid bantu (#) diaktifkan' : 'Grid bantu (#) dimatikan');
+    }
+
+    function toggleWaterpas() {
+        waterpasEnabled = !waterpasEnabled;
+        syncAssistButtonsUI();
+        showToast(waterpasEnabled ? 'Waterpas diaktifkan' : 'Waterpas dimatikan');
     }
 
     function cycleZoom() {
@@ -682,47 +1119,90 @@
         document.getElementById('zoomLabel').innerText = zoomLevel.toFixed(1) + 'x';
         const videoEl = document.getElementById('cameraStream');
         const mirrorPrefix = facingMode === 'user' ? 'scaleX(-1) ' : '';
-        videoEl.style.transform = `${mirrorPrefix}scale(${zoomLevel})`;
+        videoEl.style.transform = `translate3d(0, 0, 0) ${mirrorPrefix}scale(${zoomLevel})`;
     }
 
-    function toggleGrid() {
-        gridEnabled = !gridEnabled;
-        document.getElementById('gridOverlay').classList.toggle('hidden', !gridEnabled);
-        document.getElementById('gridStatusLabel').innerText = gridEnabled ? 'AKTIF' : 'MATI';
-        document.getElementById('btnSettingGrid').classList.toggle('border-pupr-blue', gridEnabled);
-        document.getElementById('btnSettingGrid').classList.toggle('bg-blue-50', gridEnabled);
+    function cycleTimer() {
+        timerSeconds = timerSeconds === 0 ? 3 : (timerSeconds === 3 ? 5 : 0);
+        document.getElementById('timerLabel').innerText = timerSeconds + 's';
     }
 
-    function toggleWaterpas() {
-        waterpasEnabled = !waterpasEnabled;
-        document.getElementById('waterpasWrapper').classList.toggle('hidden', !waterpasEnabled);
-        document.getElementById('waterpasStatusLabel').innerText = waterpasEnabled ? 'AKTIF' : 'MATI';
-        document.getElementById('btnSettingWaterpas').classList.toggle('border-pupr-blue', waterpasEnabled);
-        document.getElementById('btnSettingWaterpas').classList.toggle('bg-blue-50', waterpasEnabled);
-        if (waterpasEnabled && !sensorState.isLoopRunning) {
-            runSensorLoop();
+    function updateLocationInfo(manualTrigger) {
+        const coordsEl = document.getElementById('wmCoords');
+        const addressEl = document.getElementById('wmAddress');
+        if (!navigator.geolocation) {
+            coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°S, ${Math.abs(currentLng).toFixed(6)}°E`;
+            addressEl.innerText = 'Sembulung, Banyuwangi, East Java';
+            return;
         }
+        if (manualTrigger) showToast('Memperbarui koordinat GPS...');
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                currentLat = pos.coords.latitude;
+                currentLng = pos.coords.longitude;
+                const latDir = currentLat < 0 ? 'S' : 'N';
+                const lngDir = currentLng < 0 ? 'W' : 'E';
+                coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°${latDir}, ${Math.abs(currentLng).toFixed(6)}°${lngDir}`;
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentLat}&lon=${currentLng}`);
+                    if (res.ok) {
+                        const geo = await res.json();
+                        const addr = geo.address || {};
+                        const parts = [
+                            addr.road,
+                            addr.village || addr.suburb || addr.hamlet,
+                            addr.city_district || addr.county,
+                            addr.state,
+                            addr.postcode
+                        ].filter(Boolean);
+                        let finalAddr = parts.length ? parts.join(', ') : (geo.display_name || 'Titik Terverifikasi');
+                        if (finalAddr.length > 95) finalAddr = finalAddr.substring(0, 92) + '...';
+                        addressEl.innerText = finalAddr;
+                    } else {
+                        addressEl.innerText = (user.daerah_irigasi || 'Wilayah Kerja') + ' • GPS Terkunci';
+                    }
+                } catch (e) {
+                    addressEl.innerText = (user.daerah_irigasi || 'Wilayah Kerja') + ' • GPS Terkunci';
+                }
+            },
+            () => {
+                coordsEl.innerText = `${Math.abs(currentLat).toFixed(6)}°S, ${Math.abs(currentLng).toFixed(6)}°E`;
+                addressEl.innerText = 'Sembulung, Kec. Cluring, Kabupaten Banyuwangi, Jawa Timur';
+            },
+            { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+        );
     }
 
-    // =====================================================================
-    // 5. LOGIKA PENGAMBILAN FOTO (CAPTURE)
-    // =====================================================================
+    function setMode(mode) {
+        currentMode = mode;
+        ['0', '50', '100'].forEach(m => {
+            const btn = document.getElementById('btnMode' + m);
+            if (btn) {
+                btn.className = (m === mode)
+                    ? 'px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25 transition flex items-center gap-1.5'
+                    : 'px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/10 transition flex items-center gap-1.5';
+            }
+        });
+        document.getElementById('wmProgressBadge').innerText = mode + '%';
+    }
+
+    function updateWatermarkInfo() {
+        const now = new Date();
+        document.getElementById('wmTime').innerText = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        document.getElementById('wmDate').innerText = `${days[now.getDay()]}, ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+        document.getElementById('wmId').innerText = user.id_pegawai || 'OPI-SP-1';
+    }
+
     function triggerCapture() {
-        if (isCapturingBusy || countdownTimer) return;
-        isCapturingBusy = true;
-
-        if (timerSeconds === 0) {
-            return captureFromVideo();
-        }
-
+        if (countdownTimer || isCapturingBusy) return;
+        if (timerSeconds === 0) return captureFromVideo();
         const overlay = document.getElementById('countdownOverlay');
         const text = document.getElementById('countdownText');
         let count = timerSeconds;
-        
         overlay.classList.remove('hidden');
         overlay.classList.add('flex');
         text.innerText = count;
-
         countdownTimer = setInterval(() => {
             count--;
             if (count > 0) {
@@ -737,33 +1217,46 @@
         }, 1000);
     }
 
-    function captureFromVideo() {
-        const video = document.getElementById('cameraStream');
-        if (!video.videoWidth) {
+    async function captureFromVideo() {
+        if (isCapturingBusy) return;
+        isCapturingBusy = true;
+        try {
+            const video = document.getElementById('cameraStream');
+            if (!video || !video.videoWidth) {
+                simulateCameraCapture();
+                return;
+            }
+            if (flashMode === 'auto') {
+                await applyFlashConstraint(true);
+            }
+            const flash = document.getElementById('flashEffect');
+            flash.classList.remove('flash-animate');
+            void flash.offsetWidth;
+            flash.classList.add('flash-animate');
+            renderWatermarkedImage(video, video.videoWidth, video.videoHeight, facingMode === 'user');
+            if (flashMode === 'auto') {
+                setTimeout(() => applyFlashConstraint(false), 350);
+            }
+        } finally {
             isCapturingBusy = false;
-            return simulateCameraCapture();
         }
-        const flash = document.getElementById('flashEffect');
-        flash.classList.remove('flash-animate');
-        void flash.offsetWidth;
-        flash.classList.add('flash-animate');
-        renderWatermarkedImage(video, video.videoWidth, video.videoHeight, facingMode === 'user');
     }
 
     function simulateCameraCapture() {
+        const isLandscape = (physicalOrientation === 'landscape-ccw' || physicalOrientation === 'landscape-cw') || (window.innerWidth > window.innerHeight);
         const off = document.createElement('canvas');
-        off.width = 1280;
-        off.height = 720;
+        off.width = isLandscape ? 1920 : 1080;
+        off.height = isLandscape ? 1080 : 1920;
         const octx = off.getContext('2d');
-        const grad = octx.createLinearGradient(0, 0, 1280, 720);
+        const grad = octx.createLinearGradient(0, 0, off.width, off.height);
         grad.addColorStop(0, '#0F172A');
         grad.addColorStop(0.5, '#1E3A8A');
         grad.addColorStop(1, '#0B1120');
         octx.fillStyle = grad;
-        octx.fillRect(0, 0, 1280, 720);
+        octx.fillRect(0, 0, off.width, off.height);
         octx.fillStyle = 'rgba(255,255,255,0.08)';
         octx.font = 'bold 34px Inter, sans-serif';
-        octx.fillText('PRATINJAU KAMERA LAPANGAN • BBWS BRANTAS', 80, 340);
+        octx.fillText('PRATINJAU KAMERA LAPANGAN • BBWS BRANTAS', 80, Math.round(off.height * 0.42));
         const flash = document.getElementById('flashEffect');
         flash.classList.remove('flash-animate');
         void flash.offsetWidth;
@@ -771,9 +1264,162 @@
         renderWatermarkedImage(off, off.width, off.height, false);
     }
 
-    // =====================================================================
-    // 6. RENDER WATERMARK KE KANVAS (DESAIN BARU)
-    // =====================================================================
+    function setLogoPosition(pos) {
+        logoState.position = pos;
+        ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach(p => {
+            const btn = document.getElementById('pos-' + p);
+            if (btn) {
+                btn.className = (p === pos)
+                    ? 'py-2 px-1.5 rounded-xl border-2 border-pupr-blue bg-blue-50 text-[11px] font-bold text-pupr-blue'
+                    : 'py-2 px-1.5 rounded-xl border border-slate-200 text-[11px] font-semibold text-slate-600 hover:bg-slate-50';
+            }
+        });
+        updateLogoSettings();
+    }
+
+    function toggleLogoOption(opt) {
+        if (opt === 'stroke') logoState.stroke = !logoState.stroke;
+        if (opt === 'rounded') logoState.rounded = !logoState.rounded;
+        const btnStroke = document.getElementById('btnLogoStroke');
+        if (btnStroke) {
+            btnStroke.className = logoState.stroke
+                ? 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue transition'
+                : 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border border-slate-200 text-slate-500 transition';
+        }
+        const btnRound = document.getElementById('btnLogoRounded');
+        if (btnRound) {
+            btnRound.className = logoState.rounded
+                ? 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border-2 border-pupr-blue bg-blue-50/70 text-pupr-blue transition'
+                : 'flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border border-slate-200 text-slate-500 transition';
+        }
+        updateLogoSettings();
+    }
+
+    function handleLogoUpload(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            logoState.src = ev.target.result;
+            logoImageObj.src = logoState.src;
+            document.getElementById('liveLogoImg').src = logoState.src;
+            showToast('Logo berhasil diperbarui!');
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    }
+
+    function resetDefaultLogo() {
+        logoState.src = DEFAULT_PU_LOGO_SVG;
+        logoImageObj.src = logoState.src;
+        document.getElementById('liveLogoImg').src = logoState.src;
+        showToast('Logo dikembalikan ke default BBWS');
+    }
+
+    function removeLogoBackground() {
+        if (!logoImageObj.complete || !logoImageObj.naturalWidth) return showToast('Logo belum siap diproses.');
+        const c = document.createElement('canvas');
+        const w = logoImageObj.naturalWidth || 200;
+        const h = logoImageObj.naturalHeight || 200;
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(logoImageObj, 0, 0, w, h);
+
+        try {
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const d = imgData.data;
+            const bgR = d[0], bgG = d[1], bgB = d[2];
+            const tolerance = 48;
+
+            for (let i = 0; i < d.length; i += 4) {
+                const r = d[i], g = d[i + 1], b = d[i + 2];
+                const diffBg = Math.abs(r - bgR) + Math.abs(g - bgG) + Math.abs(b - bgB);
+                const isNearWhite = (r > 235 && g > 235 && b > 235);
+                if (diffBg < tolerance || isNearWhite) d[i + 3] = 0;
+            }
+            ctx.putImageData(imgData, 0, 0);
+            const transparentDataUrl = c.toDataURL('image/png');
+            logoState.src = transparentDataUrl;
+            logoImageObj.src = transparentDataUrl;
+            document.getElementById('liveLogoImg').src = transparentDataUrl;
+            showToast('Latar belakang logo dihapus!');
+        } catch (err) {
+            showToast('Tidak dapat memproses latar logo ini.');
+        }
+    }
+
+    function updateLogoSettings() {
+        const wrapper = document.getElementById('liveLogoWrapper');
+        const img = document.getElementById('liveLogoImg');
+        if (!img.getAttribute('src')) img.src = logoState.src;
+
+        const chkShow = document.getElementById('toggleShowLogo');
+        const sizeRange = document.getElementById('logoSizeRange');
+        const opacityRange = document.getElementById('logoOpacityRange');
+
+        logoState.visible = chkShow ? chkShow.checked : true;
+        logoState.size = sizeRange ? parseInt(sizeRange.value, 10) : 64;
+        logoState.opacity = opacityRange ? parseInt(opacityRange.value, 10) : 100;
+
+        if (document.getElementById('logoSizeVal')) document.getElementById('logoSizeVal').innerText = logoState.size + 'px';
+        if (document.getElementById('logoOpacityVal')) document.getElementById('logoOpacityVal').innerText = logoState.opacity + '%';
+
+        const isLandscapeViewport = window.innerWidth > window.innerHeight;
+        wrapper.style.display = logoState.visible ? 'block' : 'none';
+        wrapper.className = 'fixed z-[20] pointer-events-none transition-all duration-300';
+
+        if (!isLandscapeViewport && physicalOrientation === 'landscape-ccw') {
+            if (logoState.position === 'top-right') wrapper.classList.add('bottom-36', 'left-4');
+            else if (logoState.position === 'top-left') wrapper.classList.add('bottom-36', 'right-4');
+            else if (logoState.position === 'bottom-left') wrapper.classList.add('top-20', 'left-4');
+            else wrapper.classList.add('top-20', 'right-4');
+        } else if (!isLandscapeViewport && physicalOrientation === 'landscape-cw') {
+            if (logoState.position === 'top-right') wrapper.classList.add('top-20', 'right-4');
+            else if (logoState.position === 'top-left') wrapper.classList.add('top-20', 'left-4');
+            else if (logoState.position === 'bottom-left') wrapper.classList.add('bottom-36', 'left-4');
+            else wrapper.classList.add('bottom-36', 'right-4');
+        } else if (!isLandscapeViewport && physicalOrientation === 'upside-down') {
+            if (logoState.position === 'top-right') wrapper.classList.add('bottom-36', 'left-4');
+            else if (logoState.position === 'top-left') wrapper.classList.add('bottom-36', 'right-4');
+            else if (logoState.position === 'bottom-left') wrapper.classList.add('top-20', 'right-4');
+            else wrapper.classList.add('top-20', 'left-4');
+        } else {
+            if (logoState.position === 'top-left') wrapper.classList.add(isLandscapeViewport ? 'top-14' : 'top-20', 'left-4');
+            else if (logoState.position === 'top-right') wrapper.classList.add(isLandscapeViewport ? 'top-14' : 'top-20', 'right-4');
+            else if (logoState.position === 'bottom-left') wrapper.classList.add(isLandscapeViewport ? 'bottom-28' : 'bottom-36', 'left-4');
+            else wrapper.classList.add(isLandscapeViewport ? 'bottom-28' : 'bottom-36', 'right-14');
+        }
+
+        img.style.width = logoState.size + 'px';
+        img.style.height = logoState.size + 'px';
+        img.style.opacity = (logoState.opacity / 100).toString();
+        img.style.borderRadius = logoState.rounded ? '14px' : '2px';
+        img.style.border = logoState.stroke ? '2px solid #FFFFFF' : 'none';
+    }
+
+    function selectTemplate(id) {
+        currentTheme = id;
+        [1, 2, 3, 4].forEach(t => {
+            const el = document.getElementById('tplCard' + t);
+            if (el) el.className = (t === id) ? 'text-left p-3 rounded-2xl border-2 border-pupr-blue bg-blue-50/60 transition' : 'text-left p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition';
+        });
+        const banner = document.getElementById('wmHeaderBanner');
+        const inner = document.getElementById('wmInnerWrap');
+        banner.classList.toggle('hidden', id !== 2);
+        banner.classList.toggle('flex', id === 2);
+        if (id === 3) inner.className = 'p-3 rounded-2xl bg-slate-900/75 backdrop-blur-md border border-white/15';
+        else if (id === 2) inner.className = 'p-3 rounded-b-2xl bg-slate-900/80 backdrop-blur-md';
+        else inner.className = 'p-0.5 rounded-2xl';
+    }
+
+    function updateCustomNote() {
+        const val = document.getElementById('customNoteInput').value.trim();
+        const el = document.getElementById('wmNoteDisplay');
+        if (val) { el.innerText = 'Ket: ' + val; el.classList.remove('hidden'); }
+        else { el.innerText = ''; el.classList.add('hidden'); }
+    }
+
     function wrapCanvasText(ctx, text, maxWidth) {
         const words = String(text || '').split(/\s+/);
         const lines = [];
@@ -807,12 +1453,21 @@
 
         ctx.save();
         if (needRotateFrame) {
-            if (physicalOrientation === 'landscape-ccw') { ctx.translate(0, h); ctx.rotate(-Math.PI / 2); }
-            else if (physicalOrientation === 'landscape-cw') { ctx.translate(w, 0); ctx.rotate(Math.PI / 2); }
-            else if (physicalOrientation === 'upside-down') { ctx.translate(w, h); ctx.rotate(Math.PI); }
+            if (physicalOrientation === 'landscape-ccw') {
+                ctx.translate(0, h);
+                ctx.rotate(-Math.PI / 2);
+            } else if (physicalOrientation === 'landscape-cw') {
+                ctx.translate(w, 0);
+                ctx.rotate(Math.PI / 2);
+            } else if (physicalOrientation === 'upside-down') {
+                ctx.translate(w, h);
+                ctx.rotate(Math.PI);
+            }
         }
-        if (mirror) { ctx.translate(rawW, 0); ctx.scale(-1, 1); }
-
+        if (mirror) {
+            ctx.translate(rawW, 0);
+            ctx.scale(-1, 1);
+        }
         if (zoomLevel > 1.0) {
             const zw = rawW / zoomLevel;
             const zh = rawH / zoomLevel;
@@ -822,17 +1477,17 @@
         }
         ctx.restore();
 
-        // Skala Font berdasarkan lebar/tinggi gambar
         const shortSide = Math.min(w, h);
         const base = Math.max(24, Math.round(shortSide * 0.042));
         const pad = Math.round(shortSide * 0.036);
 
-        // Gambar Logo
+        let logoDrawFailed = false;
         if (logoState.visible && logoImageObj.complete && logoImageObj.naturalWidth > 0) {
             try {
                 const logoScale = logoState.size / 64;
                 const sz = Math.round(shortSide * 0.135 * logoScale);
-                let lx = w - sz - pad, ly = pad;
+                let lx = w - sz - pad;
+                let ly = pad;
                 if (logoState.position === 'top-left') { lx = pad; ly = pad; }
                 else if (logoState.position === 'bottom-left') { lx = pad; ly = h - sz - pad; }
                 else if (logoState.position === 'bottom-right') { lx = w - sz - pad; ly = h - sz - pad; }
@@ -841,13 +1496,22 @@
                 ctx.globalAlpha = logoState.opacity / 100;
                 ctx.beginPath();
                 ctx.roundRect(lx, ly, sz, sz, logoState.rounded ? Math.round(sz * 0.16) : 0);
-                ctx.save(); ctx.clip(); ctx.drawImage(logoImageObj, lx, ly, sz, sz); ctx.restore();
-                if (logoState.stroke) { ctx.lineWidth = Math.max(2, Math.round(sz * 0.032)); ctx.strokeStyle = '#FFFFFF'; ctx.stroke(); }
+                ctx.save();
+                ctx.clip();
+                ctx.drawImage(logoImageObj, lx, ly, sz, sz);
                 ctx.restore();
-            } catch (err) { console.warn('Logo gagal digambar:', err); }
+                if (logoState.stroke) {
+                    ctx.lineWidth = Math.max(2, Math.round(sz * 0.032));
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.stroke();
+                }
+                ctx.restore();
+            } catch (logoErr) {
+                logoDrawFailed = true;
+                console.warn('Logo dilewati saat render kanvas:', logoErr);
+            }
         }
 
-        // Siapkan Data Teks
         const isLandscapePhoto = w > h;
         const maxWmWidth = isLandscapePhoto ? Math.round(w * 0.54) : Math.round(w * 0.84);
         const innerPad = (currentTheme === 2 || currentTheme === 3) ? Math.round(base * 0.55) : 0;
@@ -882,13 +1546,17 @@
         const noteLineH = Math.round(base * 0.72);
         const footerLineH = Math.round(base * 0.74);
 
-        const detailBlockH = dateLineH + (addrLines.length * addrLineH) + coordsLineH + (noteLines.length * noteLineH) + Math.round(base * 0.15);
+        const detailBlockH = dateLineH
+            + (addrLines.length * addrLineH)
+            + coordsLineH
+            + (noteLines.length * noteLineH)
+            + Math.round(base * 0.15);
+
         const totalContentH = badgeRowH + Math.round(base * 0.35) + detailBlockH + Math.round(base * 0.25) + footerLineH;
         const wmTotalH = headerBannerH + (innerPad * 2) + totalContentH;
         const wmY = h - wmTotalH - pad;
         const wmX = pad;
 
-        // Background Kotak
         if (currentTheme === 2 || currentTheme === 3) {
             ctx.save();
             ctx.fillStyle = currentTheme === 3 ? 'rgba(15, 23, 42, 0.76)' : 'rgba(15, 23, 42, 0.84)';
@@ -898,7 +1566,6 @@
             ctx.restore();
         }
 
-        // Header Banner
         if (currentTheme === 2) {
             ctx.save();
             ctx.fillStyle = '#1D4ED8';
@@ -915,7 +1582,6 @@
         let curX = wmX + innerPad;
         let curY = wmY + headerBannerH + innerPad;
 
-        // Badges (ID, Waktu, Progress)
         ctx.save();
         ctx.textBaseline = 'middle';
         const badgePadX = Math.round(base * 0.42);
@@ -926,57 +1592,103 @@
         const idTextW = ctx.measureText(idStr).width;
         const idBoxW = idTextW + (badgePadX * 2);
         ctx.fillStyle = '#F59E0B';
-        ctx.beginPath(); ctx.roundRect(curX, curY, idBoxW, badgeRowH, badgeRadius); ctx.fill();
-        ctx.fillStyle = '#0F172A'; ctx.fillText(idStr, curX + badgePadX, curY + badgeRowH / 2 + 1);
+        ctx.beginPath();
+        ctx.roundRect(curX, curY, idBoxW, badgeRowH, badgeRadius);
+        ctx.fill();
+        ctx.fillStyle = '#0F172A';
+        ctx.fillText(idStr, curX + badgePadX, curY + badgeRowH / 2 + 1);
 
         const timeX = curX + idBoxW + badgeGap;
         const timeTextW = ctx.measureText(timeStr).width;
         const timeBoxW = timeTextW + (badgePadX * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
-        ctx.beginPath(); ctx.roundRect(timeX, curY, timeBoxW, badgeRowH, badgeRadius); ctx.fill();
-        ctx.fillStyle = '#0F172A'; ctx.fillText(timeStr, timeX + badgePadX, curY + badgeRowH / 2 + 1);
+        ctx.beginPath();
+        ctx.roundRect(timeX, curY, timeBoxW, badgeRowH, badgeRadius);
+        ctx.fill();
+        ctx.fillStyle = '#0F172A';
+        ctx.fillText(timeStr, timeX + badgePadX, curY + badgeRowH / 2 + 1);
 
         const progX = timeX + timeBoxW + badgeGap;
         ctx.font = fontProg;
         const progTextW = ctx.measureText(progStr).width;
         const progBoxW = progTextW + Math.round(badgePadX * 1.6);
         ctx.fillStyle = '#1D4ED8';
-        ctx.beginPath(); ctx.roundRect(progX, curY, progBoxW, badgeRowH, badgeRadius); ctx.fill();
-        ctx.fillStyle = '#FFFFFF'; ctx.fillText(progStr, progX + Math.round(badgePadX * 0.8), curY + badgeRowH / 2 + 1);
+        ctx.beginPath();
+        ctx.roundRect(progX, curY, progBoxW, badgeRowH, badgeRadius);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(progStr, progX + Math.round(badgePadX * 0.8), curY + badgeRowH / 2 + 1);
         ctx.restore();
 
         curY += badgeRowH + Math.round(base * 0.38);
         const lineStartY = curY;
 
-        // Detail Teks (Tanggal, Alamat, Koordinat)
         ctx.save();
         ctx.shadowColor = 'rgba(0, 0, 0, 0.92)';
         ctx.shadowBlur = Math.max(4, Math.round(base * 0.22));
+        ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 2;
 
-        ctx.strokeStyle = '#F59E0B'; ctx.lineWidth = Math.max(4, Math.round(base * 0.14)); ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(curX + 2, lineStartY + 2); ctx.lineTo(curX + 2, lineStartY + detailBlockH - 4); ctx.stroke();
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = Math.max(4, Math.round(base * 0.14));
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(curX + 2, lineStartY + 2);
+        ctx.lineTo(curX + 2, lineStartY + detailBlockH - 4);
+        ctx.stroke();
 
         const textX = curX + Math.round(base * 0.52);
         ctx.textBaseline = 'top';
 
-        ctx.fillStyle = '#FFFFFF'; ctx.font = fontDate; ctx.fillText(dateStr, textX, curY); curY += dateLineH;
-        ctx.fillStyle = '#F8FAFC'; ctx.font = fontAddr; addrLines.forEach(line => { ctx.fillText(line, textX, curY); curY += addrLineH; });
-        ctx.fillStyle = '#FDE047'; ctx.font = fontCoords; ctx.fillText(coordsStr, textX, curY + 2); curY += coordsLineH;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = fontDate;
+        ctx.fillText(dateStr, textX, curY);
+        curY += dateLineH;
+
+        ctx.fillStyle = '#F8FAFC';
+        ctx.font = fontAddr;
+        addrLines.forEach(line => {
+            ctx.fillText(line, textX, curY);
+            curY += addrLineH;
+        });
+
+        ctx.fillStyle = '#FDE047';
+        ctx.font = fontCoords;
+        ctx.fillText(coordsStr, textX, curY + 2);
+        curY += coordsLineH;
 
         if (noteLines.length > 0) {
-            ctx.fillStyle = '#BAE6FD'; ctx.font = fontNote;
-            noteLines.forEach(line => { ctx.fillText(line, textX, curY + 2); curY += noteLineH; });
+            ctx.fillStyle = '#BAE6FD';
+            ctx.font = fontNote;
+            noteLines.forEach(line => {
+                ctx.fillText(line, textX, curY + 2);
+                curY += noteLineH;
+            });
         }
 
         curY += Math.round(base * 0.18);
-        ctx.fillStyle = '#E2E8F0'; ctx.font = fontFooter; ctx.fillText('✔ Timemark BBWS menjamin keaslian waktu & GPS', curX, curY);
+        ctx.fillStyle = '#E2E8F0';
+        ctx.font = fontFooter;
+        ctx.fillText('✔ Timemark BBWS menjamin keaslian waktu & GPS', curX, curY);
         ctx.restore();
 
-        latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+        try {
+            latestCapturedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+        } catch (exportErr) {
+            if (allowLogoFallback && !logoDrawFailed) {
+                const prevVis = logoState.visible;
+                logoState.visible = false;
+                renderWatermarkedImage(source, rawW, rawH, mirror, false);
+                logoState.visible = prevVis;
+                showToast('Logo dilewati karena pembatasan keamanan gambar.');
+                return;
+            }
+            throw exportErr;
+        }
+
         latestCaptureMeta = {
             captured_at: new Date().toISOString(),
-            time_label: timeStr,
+            time_label: document.getElementById('wmTime').innerText,
             date_label: dateStr,
             address: addrStr,
             lat: currentLat,
@@ -987,29 +1699,14 @@
             drive_url: null
         };
         isViewingExistingSlot = false;
-        isCapturingBusy = false;
         openPreviewModal(latestCapturedBase64, currentMode);
     }
-
-    // =====================================================================
-    // 7. FUNGSI PENDUKUNG LAINNYA (Preview, Save, IDB, Upload, dll)
-    // =====================================================================
-    function openPreviewModal(base64, mode) {
-        document.getElementById('previewImageResult').src = base64;
-        document.getElementById('previewBadge').innerText = 'Progres ' + mode + '%';
-        const driveChip = document.getElementById('previewDriveChip');
-        driveChip.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>Auto-Upload Drive saat Simpan</span>`;
-        driveChip.className = 'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30';
-        renderPreviewSessionStrip(mode);
-        openSheet('previewModal');
-    }
-
-    function closePreviewModal() { closeSheet('previewModal'); isCapturingBusy = false; }
 
     function renderPreviewSessionStrip(selectedMode) {
         const stripEl = document.getElementById('previewSessionStrip');
         const countEl = document.getElementById('previewSessionProgressText');
         if (!stripEl) return;
+
         let filledCount = 0;
         ['0', '50', '100'].forEach(m => { if (capturedPhotosByMode[m]) filledCount++; });
         if (countEl) countEl.innerText = `Terisi: ${filledCount}/3`;
@@ -1017,9 +1714,34 @@
         stripEl.innerHTML = ['0', '50', '100'].map(m => {
             const isTarget = m === selectedMode;
             const existingImg = capturedPhotosByMode[m];
+            const existingMeta = photoMetaByMode[m];
             const label = m === '0' ? '0% Awal' : (m === '50' ? '50% Proses' : '100% Selesai');
-            const thumbHtml = isTarget ? `<img src="${latestCapturedBase64}" class="w-full h-14 object-cover rounded-lg ring-2 ring-amber-400">` : (existingImg ? `<img src="${existingImg}" class="w-full h-14 object-cover rounded-lg opacity-85">` : `<div class="w-full h-14 rounded-lg bg-slate-800 border border-dashed border-slate-600 flex items-center justify-center text-[10px] text-slate-400">Kosong</div>`);
-            return `<button type="button" onclick="selectPreviewTargetSlot('${m}')" class="p-1.5 rounded-xl border text-left transition ${isTarget ? 'bg-amber-500/15 border-amber-400' : 'bg-slate-800/70 border-slate-700 hover:border-slate-500'}"><div class="flex items-center justify-between mb-1"><span class="text-[10px] font-extrabold ${isTarget ? 'text-amber-300' : 'text-white'}">${label}</span></div>${thumbHtml}</button>`;
+            const driveDone = existingMeta && existingMeta.drive_status === 'uploaded';
+
+            const thumbHtml = isTarget
+                ? `<img src="${latestCapturedBase64}" class="w-full h-14 object-cover rounded-lg ring-2 ring-amber-400">`
+                : (existingImg
+                    ? `<img src="${existingImg}" class="w-full h-14 object-cover rounded-lg opacity-85">`
+                    : `<div class="w-full h-14 rounded-lg bg-slate-800 border border-dashed border-slate-600 flex items-center justify-center text-[10px] text-slate-400">Kosong</div>`);
+
+            const statusBadge = isTarget
+                ? `<span class="text-[9px] font-black text-amber-300">${existingImg ? 'Timpa Slot' : 'Target Simpan'}</span>`
+                : (existingImg
+                    ? `<span class="text-[9px] font-bold text-emerald-400">${driveDone ? '✓ Drive' : '✓ Tersimpan'}</span>`
+                    : `<span class="text-[9px] text-slate-500">Belum ada</span>`);
+
+            return `
+                <button type="button" onclick="selectPreviewTargetSlot('${m}')" class="p-1.5 rounded-xl border text-left transition ${isTarget ? 'bg-amber-500/15 border-amber-400' : 'bg-slate-800/70 border-slate-700 hover:border-slate-500'}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-extrabold ${isTarget ? 'text-amber-300' : 'text-white'}">${label}</span>
+                        <span class="text-[9px] font-mono text-slate-400">${isTarget ? (latestCaptureMeta?.time_label || '') : (existingMeta?.time_label || '')}</span>
+                    </div>
+                    ${thumbHtml}
+                    <div class="mt-1 flex items-center justify-between">
+                        ${statusBadge}
+                    </div>
+                </button>
+            `;
         }).join('');
     }
 
@@ -1029,22 +1751,64 @@
         renderPreviewSessionStrip(targetMode);
     }
 
+    function openPreviewModal(base64, mode) {
+        document.getElementById('previewImageResult').src = base64;
+        document.getElementById('previewBadge').innerText = 'Progres ' + mode + '%';
+
+        const driveChip = document.getElementById('previewDriveChip');
+        const existingMeta = photoMetaByMode[mode];
+        if (isViewingExistingSlot && existingMeta && existingMeta.drive_status === 'uploaded') {
+            driveChip.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Tersimpan di Drive</span>`;
+            driveChip.className = 'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
+        } else {
+            driveChip.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>Auto-Upload Drive saat Simpan</span>`;
+            driveChip.className = 'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30';
+        }
+
+        renderPreviewSessionStrip(mode);
+        openSheet('previewModal');
+    }
+    function closePreviewModal() { closeSheet('previewModal'); }
+
+    function downloadCapturedPhoto() {
+        if (!latestCapturedBase64) return;
+        const a = document.createElement('a');
+        a.href = latestCapturedBase64;
+        a.download = `Inspeksi_BBWS_${user.id_pegawai}_${currentMode}pct_${Date.now()}.jpg`;
+        a.click();
+    }
+
     async function confirmUsePhoto() {
         if (!latestCapturedBase64) return;
+
         if (!isViewingExistingSlot && capturedPhotosByMode[currentMode]) {
+            const oldTime = photoMetaByMode[currentMode]?.time_label || 'sebelumnya';
+            const nextEmpty = getNextEmptySlot();
             document.getElementById('owSlotLabel').innerText = currentMode + '%';
-            document.getElementById('owDetailText').innerText = `Slot ${currentMode}% sudah berisi foto. Pilih "Pindahkan" agar tidak tertindih, atau "Timpa".`;
+            document.getElementById('owDetailText').innerText =
+                `Slot ${currentMode}% sudah berisi foto pukul ${oldTime}. Pilih "Pindahkan ke Slot Kosong" agar foto lama tidak tertindih, atau "Timpa Foto Ini" jika ingin mengganti.`;
+
+            const switchBtn = document.getElementById('owSwitchNextBtn');
+            if (nextEmpty !== currentMode && !capturedPhotosByMode[nextEmpty]) {
+                switchBtn.classList.remove('hidden');
+                switchBtn.innerText = `Simpan ke Slot Kosong (${nextEmpty}%)`;
+                switchBtn.dataset.target = nextEmpty;
+            } else {
+                switchBtn.classList.add('hidden');
+            }
             openSheet('overwriteWarnModal');
             return;
         }
+
         await executeSavePhotoToSession(currentMode);
     }
 
     async function switchToNextEmptyAndSave() {
+        const btn = document.getElementById('owSwitchNextBtn');
+        const target = btn?.dataset?.target || getNextEmptySlot();
         closeOverwriteWarnModal();
-        const nextEmpty = getNextEmptySlot();
-        setMode(nextEmpty);
-        await executeSavePhotoToSession(nextEmpty);
+        setMode(target);
+        await executeSavePhotoToSession(target);
     }
 
     async function forceSaveCurrentSlot() {
@@ -1052,80 +1816,281 @@
         await executeSavePhotoToSession(currentMode);
     }
 
+    async function uploadPhotoToGoogleDrive(mode, base64Data, metaObj) {
+        const petugasId = (user.id_pegawai || 'OPI-SP-1').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const dateCompact = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const timeCompact = (metaObj?.time_label || '0000').replace(':', '');
+        const fileName = `${petugasId}_${dateCompact}_${mode}pct_${timeCompact}_${Date.now().toString().slice(-4)}.jpg`;
+
+        if (photoMetaByMode[mode]) {
+            photoMetaByMode[mode].drive_status = 'uploading';
+            photoMetaByMode[mode].drive_filename = fileName;
+            updatePhotoSlotsUI();
+        }
+
+        try {
+            if (!GAS_DRIVE_UPLOAD_URL || GAS_DRIVE_UPLOAD_URL.includes('YOUR_GAS')) {
+                if (photoMetaByMode[mode]) {
+                    photoMetaByMode[mode].drive_status = 'queued_local';
+                    saveSessionMetadata();
+                    updatePhotoSlotsUI();
+                }
+                return;
+            }
+
+            const base64Clean = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+            const payload = {
+                action: 'upload_foto_sesi',
+                filename: fileName,
+                mimeType: 'image/jpeg',
+                base64: base64Clean,
+                id_petugas: user.id_pegawai || 'OPI-SP-1',
+                nama_petugas: user.nama || 'Petugas Lapangan',
+                daerah_irigasi: user.daerah_irigasi || '',
+                progres: mode,
+                lat: metaObj?.lat || currentLat,
+                lng: metaObj?.lng || currentLng,
+                address: metaObj?.address || '',
+                captured_at: metaObj?.captured_at || new Date().toISOString()
+            };
+
+            const res = await fetch(GAS_DRIVE_UPLOAD_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json().catch(() => ({ status: 'ok' }));
+            if (photoMetaByMode[mode]) {
+                photoMetaByMode[mode].drive_status = 'uploaded';
+                photoMetaByMode[mode].drive_url = result.fileUrl || result.url || null;
+                photoMetaByMode[mode].drive_file_id = result.fileId || null;
+                await savePhotoToIDB(mode, capturedPhotosByMode[mode], photoMetaByMode[mode]);
+                saveSessionMetadata();
+                updatePhotoSlotsUI();
+            }
+            showToast(`Foto ${mode}% berhasil ter-backup ke Google Drive!`);
+        } catch (err) {
+            console.warn('Upload Drive tertunda (offline/jaringan):', err);
+            if (photoMetaByMode[mode]) {
+                photoMetaByMode[mode].drive_status = 'retry_pending';
+                saveSessionMetadata();
+                updatePhotoSlotsUI();
+            }
+        }
+    }
+
     async function executeSavePhotoToSession(targetMode) {
+        const metaToSave = {
+            ...(latestCaptureMeta || {}),
+            mode: targetMode,
+            drive_status: 'uploading'
+        };
+
         capturedPhotosByMode[targetMode] = latestCapturedBase64;
-        photoMetaByMode[targetMode] = { ...latestCaptureMeta, mode: targetMode, drive_status: 'uploading' };
+        photoMetaByMode[targetMode] = metaToSave;
+
+        await savePhotoToIDB(targetMode, latestCapturedBase64, metaToSave);
         saveSessionMetadata();
         updatePhotoSlotsUI();
         closePreviewModal();
-        showToast(`Foto ${targetMode}% tersimpan!`);
-        uploadPhotoToGoogleDrive(targetMode, latestCapturedBase64, photoMetaByMode[targetMode]);
+        showToast(`Foto ${targetMode}% tersimpan & mengunggah ke Drive...`);
+
+        uploadPhotoToGoogleDrive(targetMode, latestCapturedBase64, metaToSave);
+
+        if (targetMode === '0' && !capturedPhotosByMode['50']) {
+            setMode('50');
+        } else if (targetMode === '50' && !capturedPhotosByMode['100']) {
+            setMode('100');
+        } else if (targetMode === '100') {
+            setTimeout(() => {
+                showToast('Foto sesi lengkap! Membuka form Laporan...');
+                window.location.href = 'laporan.html';
+            }, 900);
+        }
+    }
+
+    function previewSlotPhoto(mode) {
+        if (capturedPhotosByMode[mode]) {
+            latestCapturedBase64 = capturedPhotosByMode[mode];
+            latestCaptureMeta = photoMetaByMode[mode];
+            isViewingExistingSlot = true;
+            setMode(mode);
+            openPreviewModal(latestCapturedBase64, mode);
+        }
+    }
+
+    function jumpToCameraMode(mode) {
+        setMode(mode);
+        closeSheet('sessionPhotosSheet');
+        showToast(`Mode kamera siap untuk Foto ${mode}%`);
+    }
+
+    function saveSessionMetadata() {
+        const existingRaw = safeGetStorage(SESSION_META_KEY);
+        let existingObj = {};
+        try { existingObj = existingRaw ? JSON.parse(existingRaw) : {}; } catch (e) {}
+
+        const sessionData = {
+            ...existingObj,
+            meta: photoMetaByMode,
+            form: {
+                ...(existingObj.form || {}),
+                note: document.getElementById('customNoteInput').value
+            }
+        };
+        safeSetStorage(SESSION_META_KEY, JSON.stringify(sessionData));
+    }
+
+    async function loadSessionData() {
+        const idbRows = await loadAllPhotosFromIDB();
+        idbRows.forEach(row => {
+            if (row && (row.mode === '0' || row.mode === '50' || row.mode === '100')) {
+                capturedPhotosByMode[row.mode] = row.imageData;
+                if (row.meta) photoMetaByMode[row.mode] = row.meta;
+            }
+        });
+
+        const saved = safeGetStorage(SESSION_META_KEY);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.meta) photoMetaByMode = { ...photoMetaByMode, ...data.meta };
+                if (data.photos) {
+                    ['0', '50', '100'].forEach(m => {
+                        if (!capturedPhotosByMode[m] && data.photos[m]) {
+                            capturedPhotosByMode[m] = data.photos[m];
+                        }
+                    });
+                }
+                if (data.form && data.form.note) {
+                    document.getElementById('customNoteInput').value = data.form.note;
+                    updateCustomNote();
+                }
+            } catch (e) {}
+        }
+
+        updatePhotoSlotsUI();
     }
 
     function updatePhotoSlotsUI() {
         let count = 0;
+        let latestThumb = null;
         ['0', '50', '100'].forEach(mode => {
             const slot = document.getElementById('slotImg' + mode);
-            const metaEl = document.getElementById('metaTime' + mode);
             const chk = document.getElementById('chkMode' + mode);
+            const metaEl = document.getElementById('metaTime' + mode);
+            const driveEl = document.getElementById('driveBadge' + mode);
+
             if (capturedPhotosByMode[mode]) {
-                if (slot) { slot.innerHTML = `<img src="${capturedPhotosByMode[mode]}" class="w-full h-full object-cover rounded-xl">`; slot.classList.remove('bg-slate-200/70', 'text-slate-400'); }
+                const meta = photoMetaByMode[mode] || {};
+                if (slot) {
+                    slot.innerHTML = `<img src="${capturedPhotosByMode[mode]}" class="w-full h-full object-cover rounded-xl">`;
+                    slot.classList.remove('bg-slate-200/70', 'text-slate-400');
+                }
                 if (chk) chk.classList.remove('hidden');
-                if (metaEl && photoMetaByMode[mode]?.time_label) { metaEl.innerText = 'Jam ' + photoMetaByMode[mode].time_label; metaEl.className = 'text-[9px] font-bold text-emerald-600 mb-1'; }
+                if (metaEl && meta.time_label) {
+                    metaEl.innerText = 'Jam ' + meta.time_label;
+                    metaEl.className = 'text-[9px] font-bold text-emerald-600 mb-1';
+                }
+                if (driveEl) {
+                    if (meta.drive_status === 'uploaded') {
+                        driveEl.innerText = '☁ Drive Terbackup';
+                        driveEl.className = 'text-[9px] font-bold text-sky-600 mb-1.5';
+                    } else if (meta.drive_status === 'uploading') {
+                        driveEl.innerText = '⏳ Mengunggah Drive...';
+                        driveEl.className = 'text-[9px] font-bold text-amber-600 mb-1.5';
+                    } else {
+                        driveEl.innerText = '✓ Tersimpan Lokal';
+                        driveEl.className = 'text-[9px] font-semibold text-emerald-600 mb-1.5';
+                    }
+                }
+                latestThumb = capturedPhotosByMode[mode];
                 count++;
             } else {
-                if (slot) { slot.innerHTML = 'Belum'; slot.classList.add('bg-slate-200/70', 'text-slate-400'); }
+                if (slot) {
+                    slot.innerHTML = 'Belum';
+                    slot.classList.add('bg-slate-200/70', 'text-slate-400');
+                }
                 if (chk) chk.classList.add('hidden');
-                if (metaEl) { metaEl.innerText = mode === '0' ? 'Absen Masuk' : (mode === '50' ? 'Progres Kerja' : 'Absen Pulang'); metaEl.className = 'text-[9px] text-slate-400 mb-1'; }
+                if (metaEl) {
+                    metaEl.innerText = mode === '0' ? 'Absen Masuk' : (mode === '50' ? 'Progres Kerja' : 'Absen Pulang');
+                    metaEl.className = 'text-[9px] text-slate-400 mb-1';
+                }
+                if (driveEl) {
+                    driveEl.innerText = 'Menunggu foto';
+                    driveEl.className = 'text-[9px] font-semibold text-slate-400 mb-1.5';
+                }
             }
         });
+
         document.getElementById('photoProgressCountBadge').innerText = count + '/3';
-    }
-
-    function saveSessionMetadata() {
-        safeSetStorage(SESSION_META_KEY, JSON.stringify({ meta: photoMetaByMode }));
-    }
-
-    async function uploadPhotoToGoogleDrive(mode, base64Data, metaObj) {
-        try {
-            const base64Clean = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
-            await fetch(GAS_DRIVE_UPLOAD_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'upload_foto_sesi', base64: base64Clean, filename: `foto_${mode}_${Date.now()}.jpg`,
-                    id_petugas: user.id_pegawai, daerah_irigasi: user.daerah_irigasi, progres: mode
-                })
-            });
-            if (photoMetaByMode[mode]) { photoMetaByMode[mode].drive_status = 'uploaded'; saveSessionMetadata(); }
-            showToast(`Foto ${mode}% ter-backup ke Drive!`);
-        } catch (err) {
-            console.warn('Upload Drive tertunda:', err);
-            if (photoMetaByMode[mode]) { photoMetaByMode[mode].drive_status = 'retry_pending'; }
+        const thumbBox = document.getElementById('sessionThumbBox');
+        if (latestThumb) {
+            thumbBox.innerHTML = `<img src="${latestThumb}" alt="Foto Terakhir" class="w-full h-full object-cover">`;
+        } else {
+            thumbBox.innerHTML = `<svg class="w-5 h-5 text-slate-300 orient-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
         }
-    }
 
-    // =====================================================================
-    // 8. INISIALISASI SAAT HALAMAN DIMUAT
-    // =====================================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-        if (typeof initSupabase === 'function') initSupabase();
-        if (typeof checkSession === 'function') {
-            const session = await checkSession();
-            if (session && session.profile) {
-                user = { ...user, ...session.profile };
-                document.getElementById('wmId').innerText = user.id_pegawai || 'MEMUAT...';
+        const attBadge = document.getElementById('attendanceSummaryBadge');
+        if (attBadge) {
+            if (photoMetaByMode['0'] && photoMetaByMode['100']) {
+                attBadge.innerText = `Masuk ${photoMetaByMode['0'].time_label} • Selesai ${photoMetaByMode['100'].time_label}`;
+                attBadge.className = 'inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200';
+            } else if (photoMetaByMode['0']) {
+                attBadge.innerText = `Absen Masuk: ${photoMetaByMode['0'].time_label}`;
+                attBadge.className = 'inline-block text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200';
+            } else {
+                attBadge.innerText = 'Belum Absen Masuk';
+                attBadge.className = 'inline-block text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md';
             }
         }
-        initCamera();
-        setMode('0');
+    }
+
+    async function executeResetSessionData() {
+        await clearAllPhotosIDB();
+        safeRemoveStorage(SESSION_META_KEY);
+        capturedPhotosByMode = { '0': null, '50': null, '100': null };
+        photoMetaByMode = { '0': null, '50': null, '100': null };
+        document.getElementById('customNoteInput').value = '';
+        updateCustomNote();
         updatePhotoSlotsUI();
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('wmTime').innerText = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            document.getElementById('wmDate').innerText = `${days[now.getDay()]}, ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-        }, 1000);
-    });
+        setMode('0');
+        closeConfirmResetModal();
+        closeSheet('sessionPhotosSheet');
+        showToast('Sesi foto lokal dikosongkan.');
+    }
+
+    function handleGalleryButtonClick() {
+        if (isGalleryAllowedByAdmin) {
+            document.getElementById('adminGalleryFileInput').click();
+        } else {
+            openSheet('adminGalleryModal');
+        }
+    }
+    function verifyAdminGalleryUnlock() {
+        const pin = document.getElementById('adminPinInput').value;
+        if (pin === '1234') {
+            isGalleryAllowedByAdmin = true;
+            closeAdminGalleryModal();
+            showToast('Akses galeri diizinkan sementara (Admin).');
+            document.getElementById('adminGalleryFileInput').click();
+        } else {
+            document.getElementById('adminPinError').innerText = 'PIN Admin salah!';
+            document.getElementById('adminPinError').classList.remove('hidden');
+        }
+    }
+    function handleAdminGalleryUpload(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => renderWatermarkedImage(img, img.width, img.height, false);
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    }
 </script>
 </body>
 </html>
